@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import './screens/host.dart';
+import 'package:sudokumania/theme/theme.dart';
+import 'package:sudokumania/utlis/router/router.dart';
 
 void main() {
   runApp(const SudukoSolver());
@@ -10,9 +11,11 @@ class SudukoSolver extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
+      routerConfig: router,
       debugShowCheckedModeBanner: false,
-      home: HostPage(),
+      theme: TAppTheme.defaultTheme,
+      themeMode: ThemeMode.system,
     );
   }
 }

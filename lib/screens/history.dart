@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
 
 class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
@@ -12,7 +13,10 @@ class _HistoryPageState extends State<HistoryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Text("History"),
+        child: Text(
+          "History",
+          style: TTextThemes.lightTextTheme.headlineLarge!,
+        ),
       ),
     );
   }

@@ -1,0 +1,62 @@
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:sudokumania/screens/leaderboard.dart';
+import '../../screens/history.dart';
+import '../../screens/selection_page.dart';
+import '../../screens/settings.dart';
+import '../../screens/statistics.dart';
+import '../../screens/layout/layout.dart';
+import '../router/routes.dart';
+
+final _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
+
+final router = GoRouter(
+  navigatorKey: _rootNavigatorKey,
+  initialLocation: Routes.homePage,
+  routes: [
+    StatefulShellRoute.indexedStack(
+      builder: (context, state, navigationShell) => LayoutScaffold(
+        navigationShell: navigationShell,
+      ),
+      branches: [
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: Routes.homePage,
+              builder: (context, state) => SelectionPage(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: Routes.leaderboardPage,
+              builder: (context, state) => LeaderboardPage(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: Routes.dailyChallengesPage,
+              builder: (context, state) => const HistoryPage(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: Routes.statsPage,
+              builder: (context, state) => const StatisticsPage(),
+            ),
+          ],
+        ),
+      ],
+    ),
+    GoRoute(
+      path: Routes.settingsPage,
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => SettingsPage(),
+    ),
+  ],
+);

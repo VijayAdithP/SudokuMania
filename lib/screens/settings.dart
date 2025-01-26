@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
 
-class StatisticsPage extends StatefulWidget {
-  const StatisticsPage({super.key});
+class SettingsPage extends StatefulWidget {
+  const SettingsPage({super.key});
 
   @override
-  State<StatisticsPage> createState() => _StatisticsPageState();
+  State<SettingsPage> createState() => _SettingsPageState();
 }
 
-class _StatisticsPageState extends State<StatisticsPage> {
+class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
         child: Text(
-          "Statistics",
+          "settings",
           style: TTextThemes.lightTextTheme.headlineLarge!,
         ),
       ),
