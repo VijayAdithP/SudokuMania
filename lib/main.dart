@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:sudokumania/theme/theme.dart';
-import 'package:sudokumania/utlis/router/router.dart';
+import 'package:hive_flutter/adapters.dart';
+import '../theme/theme.dart';
+import '../utlis/router/router.dart';
 
-void main() {
+void main() async {
+  await Hive.initFlutter();
   runApp(const SudukoSolver());
 }
 
