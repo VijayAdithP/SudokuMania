@@ -2,9 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
 import '../theme/theme.dart';
 import '../utlis/router/router.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
 void main() async {
   await Hive.initFlutter();
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const SudukoSolver());
 }
 

@@ -5,4 +5,5 @@ class Routes {
   static const String leaderboardPage = '/leaderboard';
   static const String statsPage = '/stats';
   static const String settingsPage = '/settings';
+  static const String constTestPage = '/constTest';
 }

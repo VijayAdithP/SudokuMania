@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sudokumania/screens/leaderboard.dart';
+import '../../screens/const_test.dart';
+import '../../screens/leaderboard.dart';
 import '../../screens/history.dart';
 import '../../screens/selection_page.dart';
 import '../../screens/settings.dart';
@@ -12,8 +13,13 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
 final router = GoRouter(
   navigatorKey: _rootNavigatorKey,
-  initialLocation: Routes.homePage,
+  initialLocation: Routes.constTestPage,
   routes: [
+    GoRoute(
+      path: Routes.constTestPage,
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => Consttest(),
+    ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) => LayoutScaffold(
         navigationShell: navigationShell,

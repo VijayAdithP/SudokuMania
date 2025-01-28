@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "893158041520",
+    "project_id": "sudoku-mania-ac224",
+    "storage_bucket": "sudoku-mania-ac224.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:893158041520:android:08b6e7c321be48bfb55875",
+        "android_client_info": {
+          "package_name": "com.example.sudokumania"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyByZUU0_D5VNzZwFJSK-PSbi6GrDdOp-z8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
