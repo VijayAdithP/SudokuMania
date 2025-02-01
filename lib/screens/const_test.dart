@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:sudokumania/constants/colors.dart';
+import 'package:sudokumania/service/auth_services.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
+import 'package:sudokumania/utlis/router/routes.dart';
 
 class Consttest extends StatefulWidget {
   const Consttest({super.key});
@@ -53,13 +56,19 @@ class _ConsttestState extends State<Consttest> {
                 );
               }).toList(),
             ),
-            Column(
-              children: colors.map((colors) {
-                return Container(
-                  height: 30,
-                  color: colors,
-                );
-              }).toList(),
+            GestureDetector(
+              onTap: () {
+                context.push(Routes.homePage);
+                // AuthServices().signInwithGoogle();
+              },
+              child: Column(
+                children: colors.map((colors) {
+                  return Container(
+                    height: 30,
+                    color: colors,
+                  );
+                }).toList(),
+              ),
             ),
           ],
         ),

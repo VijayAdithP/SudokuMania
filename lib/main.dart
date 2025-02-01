@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/adapters.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
+import 'package:sudokumania/hive_registrar.g.dart';
 import '../theme/theme.dart';
 import '../utlis/router/router.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'dart:io';
 
 void main() async {
-  await Hive.initFlutter();
+  Hive
+    ..init(Directory.current.path)
+    ..registerAdapters();
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,

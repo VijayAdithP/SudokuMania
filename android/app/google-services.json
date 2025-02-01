@@ -12,7 +12,20 @@
           "package_name": "com.example.sudokumania"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "893158041520-f6lu8p142ee0bhbbkerr9r4beq86d6bg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.sudokumania",
+            "certificate_hash": "7dfcc33ace4b3987a28cd25257a72b62682ec93f"
+          }
+        },
+        {
+          "client_id": "893158041520-h29ea16joqnro14ec8tcpudcktpathvv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyByZUU0_D5VNzZwFJSK-PSbi6GrDdOp-z8"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "893158041520-h29ea16joqnro14ec8tcpudcktpathvv.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "893158041520-9k869h3cfh966b407eqkra4j8fep27pe.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.sudokumania"
+              }
+            }
+          ]
         }
       }
     }
