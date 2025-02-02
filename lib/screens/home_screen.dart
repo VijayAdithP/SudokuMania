@@ -3,14 +3,14 @@ import 'package:go_router/go_router.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
 import 'package:sudokumania/utlis/router/routes.dart';
 
-class SelectionPage extends StatefulWidget {
-  const SelectionPage({super.key});
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
   @override
-  State<SelectionPage> createState() => _SelectionPageState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _SelectionPageState extends State<SelectionPage> {
+class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

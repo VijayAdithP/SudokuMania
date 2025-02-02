@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../screens/const_test.dart';
 import '../../screens/leaderboard.dart';
 import '../../screens/history.dart';
-import '../../screens/selection_page.dart';
+import '../../screens/home_screen.dart';
 import '../../screens/settings.dart';
 import '../../screens/statistics.dart';
 import '../../screens/layout/layout.dart';
@@ -29,7 +29,7 @@ final router = GoRouter(
           routes: [
             GoRoute(
               path: Routes.homePage,
-              builder: (context, state) => SelectionPage(),
+              builder: (context, state) => HomeScreen(),
             ),
           ],
         ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:sudokumania/hive_registrar.g.dart';
 import '../theme/theme.dart';
@@ -23,11 +24,13 @@ class SudukoSolver extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      routerConfig: router,
-      debugShowCheckedModeBanner: false,
-      theme: TAppTheme.defaultTheme,
-      themeMode: ThemeMode.system,
+    return ProviderScope(
+      child: MaterialApp.router(
+        routerConfig: router,
+        debugShowCheckedModeBanner: false,
+        theme: TAppTheme.defaultTheme,
+        themeMode: ThemeMode.system,
+      ),
     );
   }
 }
