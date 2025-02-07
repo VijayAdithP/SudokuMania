@@ -13,7 +13,7 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
 final router = GoRouter(
   navigatorKey: _rootNavigatorKey,
-  initialLocation: Routes.constTestPage,
+  initialLocation: Routes.homePage,
   routes: [
     GoRoute(
       path: Routes.constTestPage,

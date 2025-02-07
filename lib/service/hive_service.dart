@@ -1,13 +1,15 @@
 import 'dart:developer';
-
 import 'package:hive_ce/hive.dart';
 import 'package:intl/intl.dart';
-
+import 'package:sudokumania/models/user_stats.dart';
 import '../models/game_progress.dart';
 
 class HiveService {
   static const String _gameBox = 'sudokuGame';
   static const String _historyBox = 'gameHistory';
+  static const String _statsBox = 'userStats';
+  static const String _userBox = 'userData';
+  static const String _offlineSyncBox = 'offlineSync';
 
   /// Save the current game state (for "Continue" button)
   static Future<void> saveGame(GameProgress game) async {
@@ -20,6 +22,55 @@ class HiveService {
   static Future<GameProgress?> loadGame() async {
     var box = await Hive.openBox<GameProgress>(_gameBox);
     return box.get('currentGame');
+  }
+
+  /// Save user statistics to Hive
+  static Future<void> saveUserStats(UserStats stats) async {
+    log("✅ User stats saved to Hive");
+    var box = await Hive.openBox<UserStats>(_statsBox);
+    await box.put('stats', stats);
+  }
+
+  /// 🔹 Save user ID to Hive (for Firebase syncing)
+  static Future<void> saveUserId(String userId) async {
+    var box = await Hive.openBox<String>(_userBox);
+    await box.put('userId', userId);
+    log("✅ User ID saved: $userId");
+  }
+
+  /// 🔹 Retrieve user ID from Hive
+  static Future<String?> getUserId() async {
+    log("🗑️ Getting Offline UserId");
+    var box = await Hive.openBox<String>(_userBox);
+    return box.get('userId');
+  }
+
+  /// 🔹 Clear offline sync queue
+  static Future<void> clearOfflineSyncQueue() async {
+    log("🗑️ Offline sync queue cleared");
+    var box = await Hive.openBox<UserStats>(_offlineSyncBox);
+    await box.delete('pendingSync');
+  }
+
+  /// 🔹 Retrieve queued stats for sync
+  static Future<UserStats?> getOfflineSyncData() async {
+    var box = await Hive.openBox<UserStats>(_offlineSyncBox);
+    return box.get('pendingSync');
+  }
+
+  /// 🔹 Save stats for offline sync
+  static Future<void> queueOfflineSync(UserStats stats) async {
+    log("📂 queueOfflineSync() called"); // ✅ Debug log
+
+    var box = await Hive.openBox<UserStats>(_offlineSyncBox);
+    await box.put('pendingSync', stats);
+    log("📂 User stats queued for sync when online");
+  }
+
+  /// Load user statistics from Hive
+  static Future<UserStats?> loadUserStats() async {
+    var box = await Hive.openBox<UserStats>(_statsBox);
+    return box.get('stats');
   }
 
   /// Save completed games to history
@@ -69,5 +120,15 @@ class HiveService {
     return DateFormat('MMM dd, yyyy').format(date);
   }
 
-  
+  static Future<void> saveUsername(String username) async {
+    var box = await Hive.openBox<String>(_userBox);
+    await box.put('username', username);
+    log("✅ Username saved: $username");
+  }
+
+  /// 🔹 Retrieve username from Hive
+  static Future<String?> getUsername() async {
+    var box = await Hive.openBox<String>(_userBox);
+    return box.get('username');
+  }
 }

@@ -64,6 +64,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '893158041520',
     projectId: 'sudoku-mania-ac224',
     storageBucket: 'sudoku-mania-ac224.firebasestorage.app',
+    androidClientId: '893158041520-f6lu8p142ee0bhbbkerr9r4beq86d6bg.apps.googleusercontent.com',
+    iosClientId: '893158041520-9k869h3cfh966b407eqkra4j8fep27pe.apps.googleusercontent.com',
     iosBundleId: 'com.example.sudokumania',
   );
 
@@ -73,6 +75,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '893158041520',
     projectId: 'sudoku-mania-ac224',
     storageBucket: 'sudoku-mania-ac224.firebasestorage.app',
+    androidClientId: '893158041520-f6lu8p142ee0bhbbkerr9r4beq86d6bg.apps.googleusercontent.com',
+    iosClientId: '893158041520-9k869h3cfh966b407eqkra4j8fep27pe.apps.googleusercontent.com',
     iosBundleId: 'com.example.sudokumania',
   );
 

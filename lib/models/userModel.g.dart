@@ -23,7 +23,7 @@ class UserDataAdapter extends TypeAdapter<UserData> {
       totalPoints: fields[3] == null ? 0 : (fields[3] as num).toInt(),
       statistics: (fields[4] as Map?)?.cast<String, DifficultyStats>(),
       gameHistory: (fields[5] as List?)?.cast<GameHistory>(),
-      currentGame: fields[6] as GameProgress?,
+      currentGame: fields[6] as CurrentGameProgress?,
     );
   }
 
@@ -159,17 +159,17 @@ class GameHistoryAdapter extends TypeAdapter<GameHistory> {
           typeId == other.typeId;
 }
 
-class GameProgressAdapter extends TypeAdapter<GameProgress> {
+class CurrentGameProgressAdapter extends TypeAdapter<CurrentGameProgress> {
   @override
   final int typeId = 3;
 
   @override
-  GameProgress read(BinaryReader reader) {
+  CurrentGameProgress read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return GameProgress(
+    return CurrentGameProgress(
       boardState:
           (fields[0] as List).map((e) => (e as List).cast<int?>()).toList(),
       givenNumbers:
@@ -182,7 +182,7 @@ class GameProgressAdapter extends TypeAdapter<GameProgress> {
   }
 
   @override
-  void write(BinaryWriter writer, GameProgress obj) {
+  void write(BinaryWriter writer, CurrentGameProgress obj) {
     writer
       ..writeByte(6)
       ..writeByte(0)
@@ -205,7 +205,7 @@ class GameProgressAdapter extends TypeAdapter<GameProgress> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is GameProgressAdapter &&
+      other is CurrentGameProgressAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

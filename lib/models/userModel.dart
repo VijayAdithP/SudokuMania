@@ -1,6 +1,6 @@
 import 'package:hive_ce_flutter/hive_flutter.dart';
 
-part 'userModel.g.dart';  // Ensure correct casing (case-sensitive)
+part 'userModel.g.dart'; // Ensure correct casing (case-sensitive)
 
 @HiveType(typeId: 0)
 class UserData {
@@ -23,7 +23,7 @@ class UserData {
   final List<GameHistory> gameHistory;
 
   @HiveField(6)
-  GameProgress? currentGame;
+  CurrentGameProgress? currentGame;
 
   UserData({
     required this.userId,
@@ -109,7 +109,7 @@ class GameHistory {
 }
 
 @HiveType(typeId: 3)
-class GameProgress {
+class CurrentGameProgress {
   @HiveField(0)
   final List<List<int?>> boardState;
 
@@ -128,7 +128,7 @@ class GameProgress {
   @HiveField(5)
   final DateTime lastSaved;
 
-  GameProgress({
+  CurrentGameProgress({
     required this.boardState,
     required this.givenNumbers,
     required this.mistakes,
