@@ -1,6 +1,6 @@
 import 'dart:developer';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sudokumania/providers/game_state_provider.dart';
 import '../models/game_progress.dart';
 import '../service/hive_service.dart';
 
@@ -9,6 +9,7 @@ class SudokuNotifier extends StateNotifier<GameProgress?> {
     _loadSavedGame(); // Auto-load for "Continue" button
   }
 
+  /// 🔹 Start a new Sudoku game
   void startNewGame(String difficulty) {
     HiveService.clearSavedGame();
     state = GameProgress(
@@ -22,7 +23,8 @@ class SudokuNotifier extends StateNotifier<GameProgress?> {
     );
   }
 
-  void placeNumber(int row, int col, int number) {
+  /// 🔹 Handles placing a number on the Sudoku board
+  void placeNumber(int row, int col, int number, WidgetRef ref) {
     if (state == null || state!.givenNumbers[row][col]) return;
 
     bool isCorrect = _isMoveValid(row, col, number);
@@ -35,14 +37,16 @@ class SudokuNotifier extends StateNotifier<GameProgress?> {
     saveGame();
 
     if (_isGameSolved()) {
-      _markGameAsCompleted();
+      _markGameAsCompleted(ref);
     }
   }
 
+  /// 🔹 Checks if the move is valid
   bool _isMoveValid(int row, int col, int number) {
     return state!.boardState[row][col] == null && state!.givenNumbers[row][col];
   }
 
+  /// 🔹 Updates the grid state with a new number
   List<List<int?>> _updateGrid(
       List<List<int?>> grid, int row, int col, int number) {
     List<List<int?>> newGrid = grid.map((row) => List<int?>.from(row)).toList();
@@ -50,18 +54,47 @@ class SudokuNotifier extends StateNotifier<GameProgress?> {
     return newGrid;
   }
 
+  /// 🔹 Checks if the game is fully solved
   bool _isGameSolved() {
     return state!.boardState.every((row) => row.every((cell) => cell != null));
   }
 
-  void _markGameAsCompleted() {
-    if (state != null) {
-      state = state!.copyWith(isCompleted: true);
-      HiveService.saveToHistory(state!); // Store in history
-      HiveService.clearSavedGame(); // Remove from "Continue" option
+  /// 🔹 Marks game as completed and updates Firestore + Hive
+  void _markGameAsCompleted(WidgetRef ref) async {
+    if (state == null) return;
+
+    state = state!.copyWith(isCompleted: true);
+    HiveService.saveToHistory(state!); // Store in history
+    HiveService.clearSavedGame(); // Remove from "Continue" option
+
+    log("🏆 Game Completed!");
+
+    // 🔹 Get user details
+    String? userId = await HiveService.getUserId();
+    String? username = await HiveService.getUsername();
+
+    if (userId == null || username == null) {
+      log("❌ Error: User ID or username is missing.");
+      return;
     }
+
+    // 🔹 Check if online (TODO: Implement network check)
+    bool isOnline = true; // Replace this with actual network status
+
+    // 🔹 Update leaderboard & stats
+    ref.read(statsProvider.notifier).updateGameStats(
+          true,
+          state!.difficulty,
+          state!.elapsedTime,
+          userId,
+          username,
+          isOnline,
+        );
+
+    log("✅ Player stats updated in Firestore and Hive!");
   }
 
+  /// 🔹 Load saved game from Hive
   void _loadSavedGame() async {
     GameProgress? savedGame = await HiveService.loadGame();
     if (savedGame != null) {
@@ -70,10 +103,12 @@ class SudokuNotifier extends StateNotifier<GameProgress?> {
     }
   }
 
+  /// 🔹 Replay a completed game
   void replayGame(GameProgress game) {
     state = game.copyWith(isCompleted: false, mistakes: 0, elapsedTime: 0);
   }
 
+  /// 🔹 Save the current game state to Hive
   void saveGame() {
     if (state != null) {
       HiveService.saveGame(state!);
@@ -81,18 +116,19 @@ class SudokuNotifier extends StateNotifier<GameProgress?> {
   }
 }
 
+/// 🔹 Provide access to Sudoku logic across the app
 final sudokuProvider =
     StateNotifierProvider<SudokuNotifier, GameProgress?>((ref) {
   return SudokuNotifier();
 });
 
-// Replay Saved games
+// 🔹 Manage game history
 class HistoryNotifier extends StateNotifier<Map<String, List<GameProgress>>> {
   HistoryNotifier() : super({}) {
     loadHistory();
   }
 
-  /// Loads game history grouped by date
+  /// 🔹 Loads game history grouped by date
   void loadHistory() async {
     Map<String, List<GameProgress>> history =
         await HiveService.loadGroupedHistory();

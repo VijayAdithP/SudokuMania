@@ -26,6 +26,7 @@ class StatsNotifier extends StateNotifier<UserStats> {
     if (won && state.gamesWon == state.gamesWon + 1) return;
 
     state = state.copyWith(
+      gamesStarted: state.gamesStarted + 1,
       gamesWon: won ? state.gamesWon + 1 : state.gamesWon,
       totalPoints: state.totalPoints + newPoints,
       easyPoints: difficulty == "easy"
@@ -50,7 +51,7 @@ class StatsNotifier extends StateNotifier<UserStats> {
     if (isOnline) {
       log("📡 Syncing stats online"); // ✅ Debug log
 
-      FirebaseService.updatePlayerStats(userId, username, state);
+      await FirebaseService.updatePlayerStats(userId, username, state);
     } else {
       log("📂 Saving stats offline for later sync"); // ✅ Debug log
 
