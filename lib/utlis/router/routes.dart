@@ -6,4 +6,5 @@ class Routes {
   static const String statsPage = '/stats';
   static const String settingsPage = '/settings';
   static const String constTestPage = '/constTest';
+  static const String gameScreen = '/gameScreen';
 }

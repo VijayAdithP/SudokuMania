@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sudokumania/constants/colors.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
 
 class TAppTheme {
@@ -7,7 +8,7 @@ class TAppTheme {
   static ThemeData defaultTheme = ThemeData(
     brightness: Brightness.light,
     primaryColor: Colors.blue,
-    scaffoldBackgroundColor: Colors.white,
+    scaffoldBackgroundColor: TColors.backgroundPrimary,
     fontFamily: 'Poppins',
     textTheme: TTextThemes.defaultTextTheme,
   );

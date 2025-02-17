@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sudokumania/screens/game_screen.dart';
 import '../../screens/const_test.dart';
 import '../../screens/leaderboard.dart';
 import '../../screens/history.dart';
@@ -19,6 +20,11 @@ final router = GoRouter(
       path: Routes.constTestPage,
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => Consttest(),
+    ),
+    GoRoute(
+      path: Routes.gameScreen,
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => SudokuGamePage(),
     ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) => LayoutScaffold(
@@ -53,7 +59,7 @@ final router = GoRouter(
           routes: [
             GoRoute(
               path: Routes.statsPage,
-              builder: (context, state) => const StatisticsPage(),
+              builder: (context, state) => StatisticsPage(),
             ),
           ],
         ),

@@ -19,4 +19,7 @@ class TColors {
   // Icon Colors
   static Color iconDefault = HexColor("#FFFFFF");
   static Color iconSecondary = HexColor("#B0B3C0");
+
+  //Button Colors
+  static Color buttonDefault = HexColor("#56beff");
 }

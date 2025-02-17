@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 
 class Destination {
   const Destination(
@@ -11,15 +12,23 @@ class Destination {
 
 const destinations = [
   Destination(
-      label: 'Home', icon: Icons.home_outlined, selectedIcon: Icons.home),
+    label: 'Home',
+    icon: HugeIcons.strokeRoundedHome07,
+    selectedIcon: HugeIcons.strokeRoundedHome07
+  ),
   Destination(
-      label: 'Leaderboard',
-      icon: Icons.emoji_events_outlined,
-      selectedIcon: Icons.emoji_events),
+    label: 'Daily',
+    icon: HugeIcons.strokeRoundedCalendar04,
+    selectedIcon: HugeIcons.strokeRoundedCalendar04,
+  ),
   Destination(
-      label: 'History', icon: Icons.timeline, selectedIcon: Icons.timeline),
+    label: 'Leaderboard',
+    icon: HugeIcons.strokeRoundedChampion,
+    selectedIcon: HugeIcons.strokeRoundedChampion,
+  ),
   Destination(
-      label: 'Stats',
-      icon: Icons.analytics_outlined,
-      selectedIcon: Icons.analytics),
+    label: 'Stats',
+    icon: Icons.analytics_outlined,
+    selectedIcon: Icons.analytics,
+  ),
 ];
