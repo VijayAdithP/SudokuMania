@@ -272,15 +272,42 @@ class SudokuBoard {
   }
 
   /// Checks if placing `number` at (row, col) is valid
-  bool isMoveValid(int row, int col, int number) {
-    if (grid[row].contains(number)) return false; // Check row
-    if (grid.any((r) => r[col] == number)) return false; // Check column
+  // bool isMoveValid(int row, int col, int number) {
+  //   if (grid[row].contains(number)) return false; // Check row
+  //   if (grid.any((r) => r[col] == number)) return false; // Check column
 
-    int startRow = (row ~/ 3) * 3, startCol = (col ~/ 3) * 3;
+  //   int startRow = (row ~/ 3) * 3, startCol = (col ~/ 3) * 3;
+  //   for (int i = 0; i < 3; i++) {
+  //     for (int j = 0; j < 3; j++) {
+  //       if (grid[startRow + i][startCol + j] == number)
+  //         return false;
+  //     }
+  //   }
+
+  //   return true;
+  // }
+
+  bool isMoveValid(int row, int col, int number) {
+    // Skip checking the current cell position when validating
+    // Check row
+    for (int c = 0; c < 9; c++) {
+      if (c != col && grid[row][c] == number) return false;
+    }
+
+    // Check column
+    for (int r = 0; r < 9; r++) {
+      if (r != row && grid[r][col] == number) return false;
+    }
+
+    // Check 3x3 box
+    int startRow = (row ~/ 3) * 3;
+    int startCol = (col ~/ 3) * 3;
     for (int i = 0; i < 3; i++) {
       for (int j = 0; j < 3; j++) {
-        if (grid[startRow + i][startCol + j] == number)
-          return false; 
+        if ((startRow + i != row || startCol + j != col) &&
+            grid[startRow + i][startCol + j] == number) {
+          return false;
+        }
       }
     }
 

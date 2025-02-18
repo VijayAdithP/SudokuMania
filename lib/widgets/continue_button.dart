@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:sudokumania/constants/colors.dart';
 import 'package:sudokumania/models/game_progress.dart';
@@ -19,6 +21,7 @@ class ContinueButton extends StatefulWidget {
 class _ContinueButtonState extends State<ContinueButton> {
   @override
   Widget build(BuildContext context) {
+    log("${widget.gameinfo.elapsedTime.toString()} is the time");
     return Padding(
       padding: const EdgeInsets.only(
         right: 16,

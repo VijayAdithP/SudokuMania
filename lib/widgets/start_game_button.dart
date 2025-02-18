@@ -192,7 +192,6 @@ class _StartButtonState extends ConsumerState<StartButton> {
 
   @override
   Widget build(BuildContext context) {
-    final difficulty = ref.watch(difficultyProvider);
     return Padding(
       padding: const EdgeInsets.only(
         right: 16,
@@ -203,6 +202,7 @@ class _StartButtonState extends ConsumerState<StartButton> {
         onTap: () {
           showModalBottomSheet<dynamic>(
             isScrollControlled: true,
+            useRootNavigator: true,
             context: context,
             builder: (BuildContext bc) {
               return Container(

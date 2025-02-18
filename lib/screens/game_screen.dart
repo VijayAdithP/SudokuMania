@@ -378,9 +378,11 @@
 //   }
 // }
 
+import 'dart:async';
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_ce/hive.dart';
 import 'package:sudokumania/models/game_progress.dart';
 import 'package:sudokumania/models/sudoku_board.dart';
 import 'package:sudokumania/providers/newGameProviders/game_generation.dart';
@@ -398,18 +400,44 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
   int? selectedRow;
   int? selectedCol;
   late Stopwatch _stopwatch;
+  late Timer _timer;
+  String _timeDisplay = '00:00';
   late SudokuBoard _board;
   final DateTime lastPlayed = DateTime.now();
+
   @override
   void initState() {
     super.initState();
+    _stopwatch = Stopwatch();
     final difficultyString =
         ref.read(difficultyProvider.notifier).getDifficultyString();
     _loadBoard();
-    // _loadGame();
-    _stopwatch = Stopwatch()..start();
+    _startTimer();
     _board = SudokuBoard.generateNewBoard(difficultyString);
     _saveGame();
+  }
+
+  @override
+  void dispose() {
+    _stopwatch.stop();
+    _timer.cancel();
+    super.dispose();
+  }
+
+  void _startTimer() {
+    _stopwatch.start();
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        _updateTimeDisplay();
+      });
+    });
+  }
+
+  void _updateTimeDisplay() {
+    final minutes = _stopwatch.elapsed.inMinutes;
+    final seconds = _stopwatch.elapsed.inSeconds % 60;
+    _timeDisplay =
+        '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
   void _loadBoard() async {
@@ -423,11 +451,11 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
   void _saveGame() async {
     final difficultyString =
         ref.read(difficultyProvider.notifier).getDifficultyString();
-    HiveService.saveGame(GameProgress(
+    await HiveService.saveGame(GameProgress(
         boardState: _board.grid,
         givenNumbers: _board.givenNumbers,
         mistakes: _board.mistakes,
-        elapsedTime: _stopwatch.elapsed.inMinutes,
+        elapsedTime: _stopwatch.elapsed.inSeconds,
         difficulty: difficultyString,
         lastPlayed: lastPlayed));
   }
@@ -458,8 +486,10 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
   void _onPause() {
     _saveGame();
     _stopwatch.stop();
+    _timer.cancel();
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
         title: Text("Game Paused"),
         content: Text("Resume when ready."),
@@ -467,6 +497,7 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
           TextButton(
             onPressed: () {
               _stopwatch.start();
+              _startTimer();
               Navigator.pop(context);
             },
             child: Text("Resume"),
@@ -479,11 +510,6 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
   void _onGameComplete() {
     _stopwatch.stop();
     HiveService.clearSavedGame();
-    // Navigator.pushReplacement(
-    //   context,
-    //   MaterialPageRoute(
-    //       builder: (context) => SudokuCompletionPage(time: _stopwatch.elapsed)),
-    // );
   }
 
   void _onGameOver() {
@@ -519,7 +545,23 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
         itemBuilder: (context, index) {
           int row = index ~/ 9;
           int col = index % 9;
+
+          // Check various highlight conditions
           bool isSelected = row == selectedRow && col == selectedCol;
+          bool isInSameRow = selectedRow != null && row == selectedRow;
+          bool isInSameCol = selectedCol != null && col == selectedCol;
+          bool isInSame3x3 = selectedRow != null &&
+              selectedCol != null &&
+              (row ~/ 3 == selectedRow! ~/ 3) &&
+              (col ~/ 3 == selectedCol! ~/ 3);
+
+          // Check if cell has same number as selected cell
+          bool hasSameNumber = selectedRow != null &&
+              selectedCol != null &&
+              _board.grid[selectedRow!][selectedCol!] != null &&
+              _board.grid[row][col] != null &&
+              _board.grid[row][col] == _board.grid[selectedRow!][selectedCol!];
+
           bool isError = _board.grid[row][col] != null &&
               !_board.isMoveValid(row, col, _board.grid[row][col]!);
 
@@ -527,30 +569,22 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
           bool isRightBorder = (col + 1) % 3 == 0 && col != 8;
           bool isBottomBorder = (row + 1) % 3 == 0 && row != 8;
 
-          // Determine cell color
-          Color cellColor = Colors.white; // Default white background
+          // Determine cell color based on hierarchy
+          Color cellColor = Colors.white; // Default background
 
-          if (_board.givenNumbers[row][col]) {
-            cellColor = Colors.white; // Light gray for given numbers
-          } else if (isError) {
-            cellColor = Colors.red[100]!; // Light red for error cells
-          } else if (isSelected || _board.givenNumbers[row][col]) {
-            cellColor = Colors.blue[100]!; // Light blue for selected cells
-          } else if (isSelected && _board.givenNumbers[row][col]) {
-            cellColor = Colors.blue[100]!; // Light blue for selected cells
+          if (isError) {
+            cellColor = Colors.red[100]!;
+          } else if (isSelected) {
+            cellColor = Colors.blue[200]!; // Most highlighted
+          } else if (hasSameNumber) {
+            cellColor = Colors.blue[100]!; // Second most highlighted
+          } else if (isInSameRow || isInSameCol || isInSame3x3) {
+            cellColor = Colors.blue[50]!; // Mildest highlight
           }
-          // if (isSelected) {
-          //   if (isError) {
-          //     cellColor =
-          //         Colors.red.withOpacity(0.3); // Red for selected error cells
-          //   } else {
-          //     cellColor =
-          //         Colors.blue.withOpacity(0.3); // Blue for selected valid cells
-          //   }
-          // }
 
           return GestureDetector(
             onTap: () {
+              log(_stopwatch.elapsed.inSeconds.toString());
               _selectCell(row, col);
             },
             child: Container(
@@ -585,6 +619,85 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
       ),
     );
   }
+  // Widget _buildGrid() {
+  //   return AspectRatio(
+  //     aspectRatio: 1,
+  //     child: GridView.builder(
+  //       physics: NeverScrollableScrollPhysics(),
+  //       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+  //         crossAxisCount: 9,
+  //         childAspectRatio: 1,
+  //       ),
+  //       itemCount: 81,
+  //       itemBuilder: (context, index) {
+  //         int row = index ~/ 9;
+  //         int col = index % 9;
+  //         bool isSelected = row == selectedRow && col == selectedCol;
+  //         bool isError = _board.grid[row][col] != null &&
+  //             !_board.isMoveValid(row, col, _board.grid[row][col]!);
+
+  //         // Calculate border widths for 3x3 grid separation
+  //         bool isRightBorder = (col + 1) % 3 == 0 && col != 8;
+  //         bool isBottomBorder = (row + 1) % 3 == 0 && row != 8;
+
+  //         // Determine cell color
+  //         Color cellColor = Colors.white; // Default white background
+
+  //         if (_board.givenNumbers[row][col]) {
+  //           cellColor = Colors.white; // Light gray for given numbers
+  //         } else if (isError) {
+  //           cellColor = Colors.red[100]!; // Light red for error cells
+  //         } else if (isSelected || _board.givenNumbers[row][col]) {
+  //           cellColor = Colors.blue[100]!; // Light blue for selected cells
+  //         } else if (isSelected && _board.givenNumbers[row][col]) {
+  //           cellColor = Colors.blue[100]!; // Light blue for selected cells
+  //         }
+  //         // if (isSelected) {
+  //         //   if (isError) {
+  //         //     cellColor =
+  //         //         Colors.red.withOpacity(0.3); // Red for selected error cells
+  //         //   } else {
+  //         //     cellColor =
+  //         //         Colors.blue.withOpacity(0.3); // Blue for selected valid cells
+  //         //   }
+  //         // }
+
+  //         return GestureDetector(
+  //           onTap: () {
+  //             _selectCell(row, col);
+  //           },
+  //           child: Container(
+  //             margin: EdgeInsets.all(1),
+  //             alignment: Alignment.center,
+  //             decoration: BoxDecoration(
+  //               border: Border(
+  //                 top: BorderSide(width: row == 0 ? 2.0 : 0.5),
+  //                 left: BorderSide(width: col == 0 ? 2.0 : 0.5),
+  //                 right:
+  //                     BorderSide(width: isRightBorder || col == 8 ? 2.0 : 0.5),
+  //                 bottom:
+  //                     BorderSide(width: isBottomBorder || row == 8 ? 2.0 : 0.5),
+  //               ),
+  //               color: cellColor,
+  //             ),
+  //             child: Text(
+  //               _board.grid[row][col]?.toString() ?? "",
+  //               style: TextStyle(
+  //                 fontSize: 20,
+  //                 fontWeight: _board.givenNumbers[row][col]
+  //                     ? FontWeight.bold
+  //                     : FontWeight.normal,
+  //                 color: _board.givenNumbers[row][col]
+  //                     ? Colors.black
+  //                     : Colors.blue[800],
+  //               ),
+  //             ),
+  //           ),
+  //         );
+  //       },
+  //     ),
+  //   );
+  // }
 
   Widget _buildNumberPad() {
     return GridView.builder(
@@ -612,14 +725,28 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
       appBar: AppBar(
         title: Text(difficultyString),
         actions: [
-          IconButton(icon: Icon(Icons.pause), onPressed: () {}),
+          IconButton(
+            icon: Icon(Icons.pause),
+            onPressed: _onPause,
+          ),
         ],
       ),
       body: Column(
         children: [
           SizedBox(height: 10),
-          Text("Mistakes: ${_board.mistakes}/3",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Text(
+                "Time: $_timeDisplay",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                "Mistakes: ${_board.mistakes}/3",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
           SizedBox(height: 10),
           Expanded(child: _buildGrid()),
           _buildNumberPad(),

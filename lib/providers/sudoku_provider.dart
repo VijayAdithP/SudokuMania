@@ -144,6 +144,7 @@
 
 import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sudokumania/models/game_progress.dart';
 import 'package:sudokumania/models/sudoku_board.dart';
 import 'package:sudokumania/models/user_stats.dart';
@@ -247,3 +248,7 @@ class SudokuNotifier extends ChangeNotifier {
     notifyListeners();
   }
 }
+
+final sudokuProvider = ChangeNotifierProvider<SudokuNotifier>((ref) {
+  return SudokuNotifier();
+});
