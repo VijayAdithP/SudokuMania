@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
@@ -8,12 +10,31 @@ import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
 import 'package:sudokumania/widgets/continue_button.dart';
 import 'package:sudokumania/widgets/start_game_button.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // GameProgress lastPlayedGame = HiveService.loadGame();
+  ConsumerState<ConsumerStatefulWidget> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  GameProgress? lastPlayedGame;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadGameData();
+  }
+
+  Future<void> _loadGameData() async {
+    lastPlayedGame = await HiveService.loadGame();
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -26,7 +47,6 @@ class HomeScreen extends ConsumerWidget {
         children: [
           Expanded(
             child: Container(
-              // color: Colors.amber,
               child: Center(
                 child: Text(
                   "SUDOKU MANIA",
@@ -41,27 +61,12 @@ class HomeScreen extends ConsumerWidget {
             child: Column(
               children: [
                 Expanded(
-                  child: Container(
-                      // color: Colors.white,
-                      ),
+                  child: Container(),
                 ),
-                FutureBuilder<GameProgress?>(
-                  future: HiveService.loadGame(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return CircularProgressIndicator();
-                    }
-
-                    if (snapshot.hasData && snapshot.data != null) {
-                      GameProgress game = snapshot.data!;
-                      return ContinueButton(
-                        gameinfo: game,
-                      );
-                    }
-
-                    return SizedBox();
-                  },
-                ),
+                if (lastPlayedGame != null)
+                  ContinueButton(
+                    gameinfo: lastPlayedGame!,
+                  ),
                 StartButton(
                   lable: "New Game",
                 ),
@@ -73,12 +78,3 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 }
-
-          // ElevatedButton(
-          //     onPressed: () {
-          //       context.push(Routes.gameScreen);
-          //     },
-          //     child: Text(
-          //       "Play Game",
-          //       style: TTextThemes.lightTextTheme.labelLarge!,
-          //     )),

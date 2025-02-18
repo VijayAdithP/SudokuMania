@@ -1,115 +1,124 @@
 // import 'package:flutter/material.dart';
 // import 'package:flutter/services.dart';
+// import 'package:flutter_riverpod/flutter_riverpod.dart';
 // import 'package:hive_ce/hive.dart';
 // import 'package:sudokumania/models/sudoku_board.dart';
+// import 'package:sudokumania/providers/newGameProviders/game_generation.dart';
 // import 'package:vibration/vibration.dart';
 
-// class SudokuGamePage extends StatefulWidget {
+// class SudokuGamePage extends ConsumerStatefulWidget {
 //   @override
-//   _SudokuGamePageState createState() => _SudokuGamePageState();
+//   ConsumerState<ConsumerStatefulWidget> createState() => _SudokuGamePageState();
 // }
 
-// class _SudokuGamePageState extends State<SudokuGamePage> {
+// class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
 //   int? selectedRow;
 //   int? selectedCol;
 //   late Stopwatch _stopwatch;
+//   late SudokuBoard _board;
 
 //   @override
 //   void initState() {
 //     super.initState();
+//     final difficultyString =
+//         ref.read(difficultyProvider.notifier).getDifficultyString();
+//     _stopwatch = Stopwatch()..start();
+//     _board = SudokuBoard.generateNewBoard(difficultyString);
 //     _loadBoard();
 //     _loadGame();
 //     _stopwatch = Stopwatch()..start();
 //   }
 
-//   late SudokuBoard _board = SudokuBoard.generateNewBoard();
+// void _loadBoard() async {
+//   var box = await Hive.openBox<SudokuBoard>('sudoku_game');
+//   SudokuBoard? savedBoard = box.get('current_game');
 
-//   void _loadBoard() async {
-//     var box = await Hive.openBox<SudokuBoard>('sudoku_game');
-//     SudokuBoard? savedBoard = box.get('current_game');
+//   final difficultyString =
+//       ref.read(difficultyProvider.notifier).getDifficultyString();
+//   setState(() {
+//     _board = savedBoard ?? SudokuBoard.generateNewBoard(difficultyString);
+//   });
+// }
 
+// void _loadGame() async {
+//   var box = await Hive.openBox<SudokuBoard>('sudoku_game');
+//   final difficultyString =
+//       ref.read(difficultyProvider.notifier).getDifficultyString();
+//   setState(() {
+//     _board = box.get('current_game') ?? SudokuBoard.generateNewBoard(difficultyString);
+//   });
+// }
+
+// void _saveGame() async {
+//   var box = await Hive.openBox<SudokuBoard>('sudoku_game');
+//   box.put('current_game', _board);
+// }
+
+// void _onNumberTap(int number) {
+//   if (selectedRow == null || selectedCol == null) return;
+//   if (_board.givenNumbers[selectedRow!][selectedCol!]) return;
+
+//   if (!_board.isMoveValid(selectedRow!, selectedCol!, number)) {
+//     Vibration.vibrate(duration: 200);
 //     setState(() {
-//       _board = savedBoard ?? SudokuBoard.generateNewBoard();
+//       _board = _board.copyWith(
+//         mistakes: _board.mistakes + 1,
+//         gameOver: _board.mistakes + 1 >= _board.maxMistakes,
+//       );
 //     });
-//   }
-
-//   void _loadGame() async {
-//     var box = await Hive.openBox<SudokuBoard>('sudoku_game');
+//     if (_board.gameOver) _onGameOver();
+//   } else {
 //     setState(() {
-//       _board = box.get('current_game') ?? SudokuBoard.generateNewBoard();
+//       _board = _board.copyWith(
+//           grid: _board.updateGrid(selectedRow!, selectedCol!, number));
 //     });
+//     if (_board.isSolved()) _onGameComplete();
 //   }
+//   _saveGame();
+// }
 
-//   void _saveGame() async {
-//     var box = await Hive.openBox<SudokuBoard>('sudoku_game');
-//     box.put('current_game', _board);
-//   }
+// void _onGameComplete() {
+//   _stopwatch.stop();
+//   // Navigator.pushReplacement(
+//   //   context,
+//   //   MaterialPageRoute(
+//   //       builder: (context) => SudokuCompletionPage(time: _stopwatch.elapsed)),
+//   // );
+// }
 
-//   void _onNumberTap(int number) {
-//     if (selectedRow == null || selectedCol == null) return;
-//     if (_board.givenNumbers[selectedRow!][selectedCol!]) return;
+// void _onGameOver() {
+//   showDialog(
+//     context: context,
+//     builder: (context) => AlertDialog(
+//       title: Text("Game Over"),
+//       content: Text("You've reached the mistake limit!"),
+//       actions: [
+//         TextButton(onPressed: () => Navigator.pop(context), child: Text("OK"))
+//       ],
+//     ),
+//   );
+// }
 
-//     if (!_board.isMoveValid(selectedRow!, selectedCol!, number)) {
-//       Vibration.vibrate(duration: 200);
-//       setState(() {
-//         _board = _board.copyWith(
-//           mistakes: _board.mistakes + 1,
-//           gameOver: _board.mistakes + 1 >= _board.maxMistakes,
-//         );
-//       });
-//       if (_board.gameOver) _onGameOver();
-//     } else {
-//       setState(() {
-//         _board = _board.copyWith(
-//             grid: _board.updateGrid(selectedRow!, selectedCol!, number));
-//       });
-//       if (_board.isSolved()) _onGameComplete();
-//     }
-//     _saveGame();
-//   }
-
-//   void _onGameComplete() {
-//     _stopwatch.stop();
-//     Navigator.pushReplacement(
-//       context,
-//       MaterialPageRoute(
-//           builder: (context) => SudokuCompletionPage(time: _stopwatch.elapsed)),
-//     );
-//   }
-
-//   void _onGameOver() {
-//     showDialog(
-//       context: context,
-//       builder: (context) => AlertDialog(
-//         title: Text("Game Over"),
-//         content: Text("You've reached the mistake limit!"),
-//         actions: [
-//           TextButton(onPressed: () => Navigator.pop(context), child: Text("OK"))
-//         ],
-//       ),
-//     );
-//   }
-
-//   void _onPause() {
-//     _saveGame();
-//     _stopwatch.stop();
-//     showDialog(
-//       context: context,
-//       builder: (context) => AlertDialog(
-//         title: Text("Game Paused"),
-//         content: Text("Resume when ready."),
-//         actions: [
-//           TextButton(
-//             onPressed: () {
-//               _stopwatch.start();
-//               Navigator.pop(context);
-//             },
-//             child: Text("Resume"),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
+// void _onPause() {
+//   _saveGame();
+//   _stopwatch.stop();
+//   showDialog(
+//     context: context,
+//     builder: (context) => AlertDialog(
+//       title: Text("Game Paused"),
+//       content: Text("Resume when ready."),
+//       actions: [
+//         TextButton(
+//           onPressed: () {
+//             _stopwatch.start();
+//             Navigator.pop(context);
+//           },
+//           child: Text("Resume"),
+//         ),
+//       ],
+//     ),
+//   );
+// }
 
 //   Widget _buildNumberPad() {
 //     return GridView.builder(
@@ -136,8 +145,8 @@
 //         int row = index ~/ 9;
 //         int col = index % 9;
 //         bool isSelected = row == selectedRow && col == selectedCol;
-//         bool isError = _board.grid[row][col] != null &&
-//             !_board.isMoveValid(row, col, _board.grid[row][col]!);
+// bool isError = _board.grid[row][col] != null &&
+//     !_board.isMoveValid(row, col, _board.grid[row][col]!);
 //         return GestureDetector(
 //           onTap: () => setState(() {
 //             selectedRow = row;
@@ -145,11 +154,11 @@
 //           }),
 //           child: Container(
 //             margin: EdgeInsets.all(2),
-//             alignment: Alignment.center,
+//
 //             decoration: BoxDecoration(
-//               color: isSelected
-//                   ? Colors.blue.withOpacity(0.3)
-//                   : (isError ? Colors.red.withOpacity(0.5) : Colors.white),
+// color: isSelected
+//     ? Colors.blue.withOpacity(0.3)
+//     : (isError ? Colors.red.withOpacity(0.5) : Colors.white),
 //               border: Border.all(color: Colors.black),
 //             ),
 //             child: Text(
@@ -268,25 +277,226 @@
 //     );
 //   }
 // }
-import 'package:flutter/material.dart';
-import 'package:sudokumania/models/sudoku_board.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter_riverpod/flutter_riverpod.dart';
+// import 'package:sudokumania/models/sudoku_board.dart';
 
-class SudokuGamePage extends StatefulWidget {
+// class SudokuGamePage extends StatefulWidget {
+//   @override
+//   _SudokuGamePageState createState() => _SudokuGamePageState();
+// }
+
+// class _SudokuGamePageState extends State<SudokuGamePage> {
+//   int? selectedRow;
+//   int? selectedCol;
+//   late Stopwatch _stopwatch;
+//   late SudokuBoard _board;
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     _stopwatch = Stopwatch()..start();
+//     _board = SudokuBoard.generateNewBoard(0);
+//   }
+
+//   void _selectCell(int row, int col) {
+//     setState(() {
+//       selectedRow = row;
+//       selectedCol = col;
+//     });
+//   }
+
+//   Widget _buildGrid() {
+//     return AspectRatio(
+//       aspectRatio: 1,
+//       child: GridView.builder(
+//         physics: NeverScrollableScrollPhysics(),
+//         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+//           crossAxisCount: 9,
+//           childAspectRatio: 1,
+//         ),
+//         itemCount: 81,
+//         itemBuilder: (context, index) {
+//           int row = index ~/ 9;
+//           int col = index % 9;
+//           bool isSelected = row == selectedRow && col == selectedCol;
+
+//           return GestureDetector(
+//             onTap: () => _selectCell(row, col),
+//             child: Container(
+//               decoration: BoxDecoration(
+//                 border: Border.all(color: Colors.black, width: 0.5),
+//                 color: isSelected ? Colors.blue.withOpacity(0.3) : Colors.white,
+//               ),
+//               alignment: Alignment.center,
+//               child: Text(
+//                 _board.grid[row][col]?.toString() ?? "",
+//                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+//               ),
+//             ),
+//           );
+//         },
+//       ),
+//     );
+//   }
+
+//   Widget _buildNumberPad() {
+//     return GridView.builder(
+//       shrinkWrap: true,
+//       gridDelegate:
+//           SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5),
+//       itemCount: 9,
+//       itemBuilder: (context, index) {
+//         return ElevatedButton(
+//           onPressed: () {},
+//           child: Text("${index + 1}"),
+//         );
+//       },
+//     );
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text("Sudoku"),
+//         actions: [
+//           IconButton(icon: Icon(Icons.pause), onPressed: () {}),
+//         ],
+//       ),
+//       body: Column(
+//         children: [
+//           SizedBox(height: 10),
+//           Text("Mistakes: 0/3",
+//               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+//           SizedBox(height: 10),
+//           Expanded(child: _buildGrid()),
+//           _buildNumberPad(),
+//         ],
+//       ),
+//     );
+//   }
+// }
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive_ce/hive.dart';
+import 'package:sudokumania/models/game_progress.dart';
+import 'package:sudokumania/models/sudoku_board.dart';
+import 'package:sudokumania/providers/newGameProviders/game_generation.dart';
+import 'package:sudokumania/service/hive_service.dart';
+import 'package:vibration/vibration.dart';
+
+class SudokuGamePage extends ConsumerStatefulWidget {
+  const SudokuGamePage({super.key});
+
   @override
-  _SudokuGamePageState createState() => _SudokuGamePageState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _SudokuGamePageState();
 }
 
-class _SudokuGamePageState extends State<SudokuGamePage> {
+class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
   int? selectedRow;
   int? selectedCol;
   late Stopwatch _stopwatch;
   late SudokuBoard _board;
-
+  final DateTime lastPlayed = DateTime.now();
   @override
   void initState() {
     super.initState();
+    final difficultyString =
+        ref.read(difficultyProvider.notifier).getDifficultyString();
+    _loadBoard();
+    // _loadGame();
     _stopwatch = Stopwatch()..start();
-    _board = SudokuBoard.generateNewBoard();
+    _board = SudokuBoard.generateNewBoard(difficultyString);
+    _saveGame();
+  }
+
+  void _loadBoard() async {
+    final difficultyString =
+        ref.read(difficultyProvider.notifier).getDifficultyString();
+    setState(() {
+      _board = SudokuBoard.generateNewBoard(difficultyString);
+    });
+  }
+
+  void _saveGame() async {
+    final difficultyString =
+        ref.read(difficultyProvider.notifier).getDifficultyString();
+    HiveService.saveGame(GameProgress(
+        boardState: _board.grid,
+        givenNumbers: _board.givenNumbers,
+        mistakes: _board.mistakes,
+        elapsedTime: _stopwatch.elapsed.inMinutes,
+        difficulty: difficultyString,
+        lastPlayed: lastPlayed));
+  }
+
+  void _onNumberTap(int number) {
+    if (selectedRow == null || selectedCol == null) return;
+    if (_board.givenNumbers[selectedRow!][selectedCol!]) return;
+
+    if (!_board.isMoveValid(selectedRow!, selectedCol!, number)) {
+      Vibration.vibrate(duration: 200);
+      setState(() {
+        _board = _board.copyWith(
+          mistakes: _board.mistakes + 1,
+          gameOver: _board.mistakes + 1 >= _board.maxMistakes,
+        );
+      });
+      if (_board.gameOver) _onGameOver();
+    } else {
+      setState(() {
+        _board = _board.copyWith(
+            grid: _board.updateGrid(selectedRow!, selectedCol!, number));
+      });
+      if (_board.isSolved()) _onGameComplete();
+    }
+    _saveGame();
+  }
+
+  void _onPause() {
+    _saveGame();
+    _stopwatch.stop();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Game Paused"),
+        content: Text("Resume when ready."),
+        actions: [
+          TextButton(
+            onPressed: () {
+              _stopwatch.start();
+              Navigator.pop(context);
+            },
+            child: Text("Resume"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _onGameComplete() {
+    _stopwatch.stop();
+    HiveService.clearSavedGame();
+    // Navigator.pushReplacement(
+    //   context,
+    //   MaterialPageRoute(
+    //       builder: (context) => SudokuCompletionPage(time: _stopwatch.elapsed)),
+    // );
+  }
+
+  void _onGameOver() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Game Over"),
+        content: Text("You've reached the mistake limit!"),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: Text("OK"))
+        ],
+      ),
+    );
   }
 
   void _selectCell(int row, int col) {
@@ -310,18 +520,64 @@ class _SudokuGamePageState extends State<SudokuGamePage> {
           int row = index ~/ 9;
           int col = index % 9;
           bool isSelected = row == selectedRow && col == selectedCol;
-          
+          bool isError = _board.grid[row][col] != null &&
+              !_board.isMoveValid(row, col, _board.grid[row][col]!);
+
+          // Calculate border widths for 3x3 grid separation
+          bool isRightBorder = (col + 1) % 3 == 0 && col != 8;
+          bool isBottomBorder = (row + 1) % 3 == 0 && row != 8;
+
+          // Determine cell color
+          Color cellColor = Colors.white; // Default white background
+
+          if (_board.givenNumbers[row][col]) {
+            cellColor = Colors.white; // Light gray for given numbers
+          } else if (isError) {
+            cellColor = Colors.red[100]!; // Light red for error cells
+          } else if (isSelected || _board.givenNumbers[row][col]) {
+            cellColor = Colors.blue[100]!; // Light blue for selected cells
+          } else if (isSelected && _board.givenNumbers[row][col]) {
+            cellColor = Colors.blue[100]!; // Light blue for selected cells
+          }
+          // if (isSelected) {
+          //   if (isError) {
+          //     cellColor =
+          //         Colors.red.withOpacity(0.3); // Red for selected error cells
+          //   } else {
+          //     cellColor =
+          //         Colors.blue.withOpacity(0.3); // Blue for selected valid cells
+          //   }
+          // }
+
           return GestureDetector(
-            onTap: () => _selectCell(row, col),
+            onTap: () {
+              _selectCell(row, col);
+            },
             child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.black, width: 0.5),
-                color: isSelected ? Colors.blue.withOpacity(0.3) : Colors.white,
-              ),
+              margin: EdgeInsets.all(1),
               alignment: Alignment.center,
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(width: row == 0 ? 2.0 : 0.5),
+                  left: BorderSide(width: col == 0 ? 2.0 : 0.5),
+                  right:
+                      BorderSide(width: isRightBorder || col == 8 ? 2.0 : 0.5),
+                  bottom:
+                      BorderSide(width: isBottomBorder || row == 8 ? 2.0 : 0.5),
+                ),
+                color: cellColor,
+              ),
               child: Text(
                 _board.grid[row][col]?.toString() ?? "",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: _board.givenNumbers[row][col]
+                      ? FontWeight.bold
+                      : FontWeight.normal,
+                  color: _board.givenNumbers[row][col]
+                      ? Colors.black
+                      : Colors.blue[800],
+                ),
               ),
             ),
           );
@@ -333,11 +589,15 @@ class _SudokuGamePageState extends State<SudokuGamePage> {
   Widget _buildNumberPad() {
     return GridView.builder(
       shrinkWrap: true,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5),
+      gridDelegate:
+          SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5),
       itemCount: 9,
       itemBuilder: (context, index) {
         return ElevatedButton(
-          onPressed: () {},
+          onPressed: () {
+            _onNumberTap(index + 1);
+            setState(() {});
+          },
           child: Text("${index + 1}"),
         );
       },
@@ -346,9 +606,11 @@ class _SudokuGamePageState extends State<SudokuGamePage> {
 
   @override
   Widget build(BuildContext context) {
+    final difficultyString =
+        ref.read(difficultyProvider.notifier).getDifficultyString();
     return Scaffold(
       appBar: AppBar(
-        title: Text("Sudoku"),
+        title: Text(difficultyString),
         actions: [
           IconButton(icon: Icon(Icons.pause), onPressed: () {}),
         ],
@@ -356,7 +618,8 @@ class _SudokuGamePageState extends State<SudokuGamePage> {
       body: Column(
         children: [
           SizedBox(height: 10),
-          Text("Mistakes: 0/3", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          Text("Mistakes: ${_board.mistakes}/3",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           SizedBox(height: 10),
           Expanded(child: _buildGrid()),
           _buildNumberPad(),

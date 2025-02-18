@@ -21,6 +21,7 @@ class HiveService {
   /// Load the last saved game
   static Future<GameProgress?> loadGame() async {
     var box = await Hive.openBox<GameProgress>(_gameBox);
+    log("✅ Game loaded");
     return box.get('currentGame');
   }
 
