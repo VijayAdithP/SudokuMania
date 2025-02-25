@@ -116,42 +116,42 @@ class _StatisticsPageState extends State<StatisticsPage> {
   @override
   void initState() {
     super.initState();
+    HiveService.saveUserId("testUser123");
     _loadUserData();
   }
 
   void _loadUserData() async {
-    var box = await Hive.openBox('user_data');
-    userId = box.get('user_id');
+    userId = HiveService.getUserId().toString();
     if (userId != null) {
       _fetchPlayerStats();
     }
   }
 
   void _fetchPlayerStats() async {
-    var localStats = await HiveService.loadUserStats();
+    // var localStats = await HiveService.loadUserStats();
 
-    setState(() {
-      playerStats = localStats != null
-          ? {
-              'points': localStats.totalPoints,
-              'gamesPlayed': localStats.gamesStarted,
-              'winPercentage': localStats.winRate,
-              'username': userId // Assuming username is stored elsewhere
-            }
-          : null;
-    });
+    // setState(() {
+    //   playerStats = localStats != null
+    //       ? {
+    //           'points': localStats.totalPoints,
+    //           'gamesPlayed': localStats.gamesStarted,
+    //           'winPercentage': localStats.winRate,
+    //           'username': userId // Assuming username is stored elsewhere
+    //         }
+    //       : null;
+    // });
 
     try {
       DocumentSnapshot snapshot = await FirebaseFirestore.instance
           .collection('users')
-          .doc(userId)
+          .doc("testUser123")
           .get();
       if (snapshot.exists) {
         setState(() {
           playerStats = snapshot.data() as Map<String, dynamic>?;
         });
-        var box = await Hive.openBox('player_stats');
-        box.put(userId, playerStats);
+        // var box = await Hive.openBox('player_stats');
+        // box.put(userId, playerStats);
       }
     } catch (e) {
       print("Error fetching stats: $e");
@@ -174,10 +174,10 @@ class _StatisticsPageState extends State<StatisticsPage> {
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 10),
-                  Text("Total Points: ${playerStats!['points'] ?? 0}"),
-                  Text("Games Played: ${playerStats!['gamesPlayed'] ?? 0}"),
+                  Text("Total Points: ${playerStats!['totalPoints'] ?? 0}"),
+                  Text("Games Played: ${playerStats!['gamesStarted'] ?? 0}"),
                   Text(
-                      "Win Percentage: ${playerStats!['winPercentage'] ?? 0}%"),
+                      "Win Percentage: ${playerStats!['winRate'] ?? 0}%"),
                 ],
               ),
             ),

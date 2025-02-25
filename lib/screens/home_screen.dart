@@ -1,14 +1,20 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:sudokumania/constants/colors.dart';
 import 'package:sudokumania/models/game_progress.dart';
 import 'package:sudokumania/service/hive_service.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
+import 'package:sudokumania/utlis/router/routes.dart';
 import 'package:sudokumania/widgets/continue_button.dart';
 import 'package:sudokumania/widgets/start_game_button.dart';
+
+final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
+final gameDataProvider = FutureProvider.autoDispose<GameProgress?>((ref) async {
+  return await HiveService.loadGame();
+});
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -17,30 +23,61 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<ConsumerStatefulWidget> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
   GameProgress? lastPlayedGame;
+
+  Future<void> _loadGameData() async {
+    final gameData = await HiveService.loadGame(); // Wait for data first
+    log(gameData!.difficulty.toString());
+    setState(() {
+      lastPlayedGame = gameData; // Update UI inside setState
+    });
+  }
 
   @override
   void initState() {
     super.initState();
-    _loadGameData();
+    // Initial load is handled by the provider
   }
 
-  Future<void> _loadGameData() async {
-    lastPlayedGame = await HiveService.loadGame();
-    if (mounted) {
-      setState(() {});
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Subscribe to route changes
+    final route = ModalRoute.of(context);
+    if (route is PageRoute) {
+      routeObserver.subscribe(this, route);
     }
   }
 
   @override
+  void didPopNext() {
+    // This is called when user returns to this page from another page
+    // Refresh the data
+    ref.refresh(gameDataProvider);
+    super.didPopNext();
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final gameDataAsync = ref.watch(gameDataProvider);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        leading: Icon(
-          color: TColors.iconDefault,
-          HugeIcons.strokeRoundedSetting07,
+        leading: GestureDetector(
+          onTap: () {
+            context.push(Routes.settingsPage);
+          },
+          child: Icon(
+            color: TColors.iconDefault,
+            HugeIcons.strokeRoundedSetting07,
+          ),
         ),
       ),
       body: Column(
@@ -63,15 +100,40 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 Expanded(
                   child: Container(),
                 ),
-                if (lastPlayedGame != null)
-                  ContinueButton(
-                    gameinfo: lastPlayedGame!,
+                gameDataAsync.when(
+                  data: (gameData) {
+                    if (gameData != null) {
+                      return ContinueButton(
+                        gameinfo: gameData,
+                      );
+                    }
+                    // Return empty container if no saved game
+                    return const SizedBox.shrink();
+                  },
+                  loading: () => const Center(
+                    child: CircularProgressIndicator(),
                   ),
-                StartButton(
-                  lable: "New Game",
+                  error: (error, stack) => Text('Error: $error'),
+                ),
+                // if (lastPlayedGame != null)
+                //   ContinueButton(
+                //     gameinfo: lastPlayedGame!,
+                //   ),
+                Padding(
+                  padding: const EdgeInsets.only(
+                    right: 16,
+                    left: 16,
+                    bottom: 16,
+                  ),
+                  child: StartButton(
+                    lable: "New Game",
+                  ),
                 ),
               ],
             ),
+          ),
+          const SizedBox(
+            height: 20,
           ),
         ],
       ),

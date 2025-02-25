@@ -7,4 +7,5 @@ class Routes {
   static const String settingsPage = '/settings';
   static const String constTestPage = '/constTest';
   static const String gameScreen = '/gameScreen';
+  static const String gameCompleteScreen = '/gameCompleteScreen';
 }

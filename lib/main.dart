@@ -1,8 +1,6 @@
-import 'dart:developer';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get/get.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:sudokumania/hive_registrar.g.dart';
 import 'package:sudokumania/providers/app_startup_provider.dart';
@@ -35,7 +33,9 @@ class SudukoSolver extends ConsumerWidget {
     ref.watch(appStartupProvider); // 🔹 Trigger background sync at startup
     ref.watch(onlineSyncProvider); // 🔹 Listen for network changes
     return MaterialApp.router(
-      routerConfig: router,
+      routeInformationProvider: router.routeInformationProvider,
+      routerDelegate: router.routerDelegate,
+      routeInformationParser: router.routeInformationParser,
       debugShowCheckedModeBanner: false,
       theme: TAppTheme.defaultTheme,
       themeMode: ThemeMode.system,

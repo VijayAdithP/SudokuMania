@@ -38,7 +38,8 @@ class _ConsttestState extends State<Consttest> {
       TColors.textDefault,
       TColors.textSecondary,
       TColors.iconDefault,
-      TColors.iconSecondary
+      TColors.iconSecondary,
+      TColors.darkContrast,
     ];
 
     return Scaffold(

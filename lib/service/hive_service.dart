@@ -19,10 +19,29 @@ class HiveService {
   }
 
   /// Load the last saved game
+  // static Future<GameProgress?> loadGame() async {
+  //   var box = await Hive.openBox<GameProgress>(_gameBox);
+  //   log("✅ Game loaded");
+  //   return box.get('currentGame');
+  // }
+
   static Future<GameProgress?> loadGame() async {
-    var box = await Hive.openBox<GameProgress>(_gameBox);
-    log("✅ Game loaded");
-    return box.get('currentGame');
+    try {
+      var box = await Hive.openBox<GameProgress>(_gameBox);
+      var game = box.get('currentGame');
+
+      if (game != null) {
+        log("✅ Game loaded with elapsed time: ${game.elapsedTime}");
+        return game;
+      } else {
+        log("⚠️ No saved game found");
+        return null;
+      }
+    } catch (e) {
+      log("❌ Error loading game: $e");
+      // Return null on error or consider returning a default game
+      return null;
+    }
   }
 
   /// Save user statistics to Hive
@@ -105,10 +124,28 @@ class HiveService {
   }
 
   /// Clear current saved game (when a new one starts)
-  static Future<void> clearSavedGame() async {
-    var box = await Hive.openBox<GameProgress>(_gameBox);
-    await box.delete('currentGame');
-    log("🗑️ Saved game cleared");
+  // static Future<void> clearSavedGame() async {
+  //   var box = await Hive.openBox<GameProgress>(_gameBox);
+  //   await box.delete('currentGame');
+  //   log("🗑️ Saved game cleared");
+  // }
+  static Future<bool> clearSavedGame() async {
+    try {
+      log("🔍 Attempting to clear saved game...");
+      var box = await Hive.openBox<GameProgress>(_gameBox);
+
+      // Check if the key exists before trying to delete
+      if (box.containsKey('currentGame')) {
+        await box.delete('currentGame');
+        log("🗑️ Saved game cleared successfully");
+      } else {
+        log("⚠️ No saved game found to clear");
+      }
+      return true;
+    } catch (e) {
+      log("❌ Error clearing saved game: $e");
+      return false;
+    }
   }
 
   /// Format date as "Today", "Yesterday", or "MMM dd, yyyy"

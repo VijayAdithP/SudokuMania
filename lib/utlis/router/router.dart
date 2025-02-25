@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sudokumania/screens/game_completedScreen.dart';
 import 'package:sudokumania/screens/game_screen.dart';
 import '../../screens/const_test.dart';
 import '../../screens/leaderboard.dart';
@@ -13,6 +14,7 @@ import '../router/routes.dart';
 final _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
 final router = GoRouter(
+  observers: [routeObserver],
   navigatorKey: _rootNavigatorKey,
   initialLocation: Routes.homePage,
   routes: [
@@ -20,6 +22,11 @@ final router = GoRouter(
       path: Routes.constTestPage,
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => Consttest(),
+    ),
+    GoRoute(
+      path: Routes.gameCompleteScreen,
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => GameCompletedscreen(),
     ),
     GoRoute(
       path: Routes.gameScreen,

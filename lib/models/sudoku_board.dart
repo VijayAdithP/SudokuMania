@@ -129,7 +129,7 @@ class SudokuBoard {
 
     final random = Random();
     final Map<String, int> difficultyRemovals = {
-      'Easy': 30, // 51 numbers remain
+      'Easy': 2, // 51 numbers remain
       'Medium': 40, // 41 numbers remain
       'Hard': 50, // 31 numbers remain
       'Nightmare': 60 // 21 numbers remain

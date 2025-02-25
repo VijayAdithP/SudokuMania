@@ -22,4 +22,7 @@ class TColors {
 
   //Button Colors
   static Color buttonDefault = HexColor("#56beff");
+  static Color darkContrast = HexColor("#000243");
+  static Color dullBackground = const Color.fromARGB(255, 51, 46, 72);
+  static Color majorHighlight = HexColor("#4f42ef");
 }
