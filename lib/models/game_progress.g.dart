@@ -26,13 +26,15 @@ class GameProgressAdapter extends TypeAdapter<GameProgress> {
       difficulty: fields[4] as String,
       isCompleted: fields[5] == null ? false : fields[5] as bool,
       lastPlayed: fields[6] as DateTime,
+      invalidCells:
+          (fields[7] as List?)?.map((e) => (e as List).cast<bool>()).toList(),
     );
   }
 
   @override
   void write(BinaryWriter writer, GameProgress obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.boardState)
       ..writeByte(1)
@@ -46,7 +48,9 @@ class GameProgressAdapter extends TypeAdapter<GameProgress> {
       ..writeByte(5)
       ..write(obj.isCompleted)
       ..writeByte(6)
-      ..write(obj.lastPlayed);
+      ..write(obj.lastPlayed)
+      ..writeByte(7)
+      ..write(obj.invalidCells);
   }
 
   @override

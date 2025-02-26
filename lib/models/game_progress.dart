@@ -24,6 +24,8 @@ class GameProgress {
 
   @HiveField(6)
   final DateTime lastPlayed; // Timestamp for "Continue" button
+  @HiveField(7)
+  final List<List<bool>> invalidCells;
 
   GameProgress({
     required this.boardState,
@@ -33,7 +35,9 @@ class GameProgress {
     required this.difficulty,
     this.isCompleted = false,
     required this.lastPlayed,
-  });
+    List<List<bool>>? invalidCells,
+  }) : this.invalidCells =
+            invalidCells ?? List.generate(9, (_) => List.filled(9, false));
 
   /// Creates a copy with updated values
   GameProgress copyWith({
@@ -44,6 +48,7 @@ class GameProgress {
     String? difficulty,
     bool? isCompleted,
     DateTime? lastPlayed,
+    List<List<bool>>? invalidCells,
   }) {
     return GameProgress(
       boardState: boardState ?? this.boardState,
@@ -53,6 +58,7 @@ class GameProgress {
       difficulty: difficulty ?? this.difficulty,
       isCompleted: isCompleted ?? this.isCompleted,
       lastPlayed: lastPlayed ?? this.lastPlayed,
+      invalidCells: invalidCells ?? this.invalidCells,
     );
   }
 

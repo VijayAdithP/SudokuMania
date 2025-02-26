@@ -113,26 +113,31 @@ class SudokuBoard {
   @HiveField(4)
   final bool gameOver;
 
+  @HiveField(5)
+  final List<List<bool>> invalidCells;
+
   SudokuBoard({
     required this.grid,
     required this.givenNumbers,
     this.mistakes = 0,
     required this.maxMistakes,
     this.gameOver = false,
-  });
+    List<List<bool>>? invalidCells,
+  }) : invalidCells =
+            invalidCells ?? List.generate(9, (_) => List.filled(9, false));
 
   /// Generates a new Sudoku board based on difficulty
-  static SudokuBoard generateNewBoard(String difficulty) {
+  static SudokuBoard generateNewBoard(String difficulty, int maxMistakes) {
     List<List<int?>> emptyGrid = List.generate(9, (_) => List.filled(9, null));
     List<List<bool>> givenNumbers =
         List.generate(9, (_) => List.filled(9, false));
 
     final random = Random();
     final Map<String, int> difficultyRemovals = {
-      'Easy': 2, // 51 numbers remain
-      'Medium': 40, // 41 numbers remain
-      'Hard': 50, // 31 numbers remain
-      'Nightmare': 60 // 21 numbers remain
+      'Easy': 2,
+      'Medium': 40,
+      'Hard': 50,
+      'Nightmare': 60
     };
 
     // Fill the grid with a valid solution
@@ -149,7 +154,7 @@ class SudokuBoard {
     return SudokuBoard(
       grid: puzzleGrid,
       givenNumbers: givenNumbers,
-      maxMistakes: 3,
+      maxMistakes: maxMistakes,
     );
   }
 
@@ -271,7 +276,7 @@ class SudokuBoard {
     }
   }
 
-  /// Checks if placing `number` at (row, col) is valid
+  // / Checks if placing `number` at (row, col) is valid
   // bool isMoveValid(int row, int col, int number) {
   //   if (grid[row].contains(number)) return false; // Check row
   //   if (grid.any((r) => r[col] == number)) return false; // Check column
@@ -279,8 +284,9 @@ class SudokuBoard {
   //   int startRow = (row ~/ 3) * 3, startCol = (col ~/ 3) * 3;
   //   for (int i = 0; i < 3; i++) {
   //     for (int j = 0; j < 3; j++) {
-  //       if (grid[startRow + i][startCol + j] == number)
+  //       if (grid[startRow + i][startCol + j] == number) {
   //         return false;
+  //       }
   //     }
   //   }
 
@@ -321,9 +327,17 @@ class SudokuBoard {
     return newGrid;
   }
 
-  /// Checks if the Sudoku is completely filled
+  /// Checks if the Sudoku is completely filled and valid
   bool isSolved() {
-    return grid.every((row) => row.every((cell) => cell != null));
+    for (int row = 0; row < 9; row++) {
+      for (int col = 0; col < 9; col++) {
+        int? number = grid[row][col];
+        if (number == null || !isMoveValid(row, col, number)) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 
   /// Creates a copy with updated values (for Riverpod state updates)
@@ -333,6 +347,7 @@ class SudokuBoard {
     int? mistakes,
     int? maxMistakes,
     bool? gameOver,
+    List<List<bool>>? invalidCells,
   }) {
     return SudokuBoard(
       grid: grid ?? this.grid,
@@ -340,6 +355,7 @@ class SudokuBoard {
       mistakes: mistakes ?? this.mistakes,
       maxMistakes: maxMistakes ?? this.maxMistakes,
       gameOver: gameOver ?? this.gameOver,
+      invalidCells: invalidCells ?? this.invalidCells,
     );
   }
 }

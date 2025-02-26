@@ -27,8 +27,8 @@ class _NumberPadState extends State<NumberPad> {
       onTap: () => widget.onNumberTap(number),
       onLongPress: () => widget.onNumberLongPress(number),
       child: Container(
-        height: 60,
-        width: 60,
+        height: 65,
+        width: 65,
         decoration: BoxDecoration(
           color:
               isHighlighted ? TColors.majorHighlight : TColors.dullBackground,

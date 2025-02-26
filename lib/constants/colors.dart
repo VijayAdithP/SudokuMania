@@ -25,4 +25,8 @@ class TColors {
   static Color darkContrast = HexColor("#000243");
   static Color dullBackground = const Color.fromARGB(255, 51, 46, 72);
   static Color majorHighlight = HexColor("#4f42ef");
+
+  //gradient
+  static Color g1Color = const Color(0xff4338CA);
+  static Color g2Color = const Color(0xff6D28D9);
 }

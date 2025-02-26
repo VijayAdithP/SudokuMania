@@ -8,4 +8,5 @@ class Routes {
   static const String constTestPage = '/constTest';
   static const String gameScreen = '/gameScreen';
   static const String gameCompleteScreen = '/gameCompleteScreen';
+  static const String maxMistakesScreen = '/maxMistakesScreen';
 }

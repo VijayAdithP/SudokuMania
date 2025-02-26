@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:sudokumania/constants/colors.dart';
+import 'package:sudokumania/models/game_progress.dart';
 import 'package:sudokumania/providers/gameProgressProviders/gameProgressProviders.dart';
 import 'package:sudokumania/providers/newGameProviders/game_generation.dart';
+import 'package:sudokumania/service/hive_service.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
 import 'package:sudokumania/utlis/router/routes.dart';
 import 'package:sudokumania/widgets/start_game_button.dart';
@@ -19,6 +22,48 @@ class GameCompletedscreen extends ConsumerStatefulWidget {
 
 class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
   @override
+  void initState() {
+    scoreValue();
+    _loadGame();
+    super.initState();
+  }
+
+  int score = 0;
+
+  scoreValue() {
+    final difficulty =
+        ref.read(difficultyProvider.notifier).getDifficultyString();
+
+    if (difficulty == "Easy") {
+      setState(() {
+        score = 100;
+      });
+    } else if (difficulty == "Medium") {
+      setState(() {
+        score = 100;
+      });
+    } else if (difficulty == "Hard") {
+      setState(() {
+        score = 100;
+      });
+    } else if (difficulty == "Nightmare") {
+      setState(() {
+        score = 100;
+      });
+    }
+  }
+
+  void _clearGame() async {
+    await HiveService.clearSavedGame();
+  }
+
+  int? mistakes;
+  Future<void> _loadGame() async {
+    var game = await HiveService.loadGame();
+    mistakes = game!.mistakes;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final elapsedTime = ref.read(timeProvider.notifier).getElapsedTime();
     // final minutes = elapsedTime ~/ 60;
@@ -31,6 +76,7 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
 
     final diffuculty =
         ref.read(difficultyProvider.notifier).getDifficultyString();
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -42,7 +88,6 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
-          // mainAxisAlignment: MainAxisAlignment.center,
           spacing: 16,
           children: [
             // Text("Completed in $minutes:${seconds.toString().padLeft(2, '0')}"),
@@ -58,13 +103,44 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
                 fontWeight: FontWeight.normal,
                 fontSize: 40,
                 letterSpacing: 1.5,
-                color: TColors.textSecondary,
+                // color: TColors.textSecondary,
               ),
             ),
             Container(
-              height: 80,
+              // height: 80,
               width: MediaQuery.of(context).size.width,
-              color: Colors.red,
+              // color: Colors.blue,
+              child: Row(
+                spacing: 10,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SvgPicture.asset(
+                    height: 45,
+                    width: 45,
+                    "assets/images/trophy.svg",
+                  ),
+                  Text.rich(
+                    TextSpan(
+                        text: "+ ",
+                        style: TTextThemes.defaultTextTheme.headlineSmall!
+                            .copyWith(
+                          color: TColors.buttonDefault,
+                          fontWeight: FontWeight.normal,
+                          fontSize: 20,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: score.toString(),
+                            style: TTextThemes.defaultTextTheme.headlineSmall!
+                                .copyWith(
+                              fontWeight: FontWeight.normal,
+                              fontSize: 20,
+                            ),
+                          )
+                        ]),
+                  ),
+                ],
+              ),
             ),
             Container(
               width: MediaQuery.of(context).size.width,
@@ -93,7 +169,7 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
                     tiles(
                       "Best Score",
                       diffuculty,
-                      HugeIcons.strokeRoundedStar,
+                      HugeIcons.strokeRoundedAward01,
                       Colors.red,
                     ),
                   ],
@@ -102,11 +178,26 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
             ),
             Expanded(
               child: Container(
-                color: Colors.white,
+                width: MediaQuery.of(context).size.width,
+                decoration: BoxDecoration(
+                  color: TColors.primaryDefault,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Column(
+                  children: [
+                    tiles(
+                      "Mistakes",
+                      mistakes.toString(),
+                      HugeIcons.strokeRoundedStar,
+                      TColors.buttonDefault,
+                    ),
+                  ],
+                ),
               ),
             ),
             GestureDetector(
               onTap: () {
+                _clearGame();
                 context.go(Routes.homePage);
               },
               child: Container(
@@ -134,6 +225,9 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
             StartButton(
               lable: "New Game",
             ),
+            SizedBox(
+              height: MediaQuery.of(context).size.height * 0.001,
+            ),
           ],
         ),
       ),
@@ -151,8 +245,7 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Row(
-              textBaseline: TextBaseline.alphabetic,
-              crossAxisAlignment: CrossAxisAlignment.baseline,
+              crossAxisAlignment: CrossAxisAlignment.center,
               spacing: 20,
               children: [
                 HugeIcon(
@@ -161,6 +254,7 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
                   color: iconColor,
                 ),
                 Text(
+                  textAlign: TextAlign.center,
                   title,
                   style: TTextThemes.defaultTextTheme.bodyLarge!.copyWith(
                     fontSize: 18,
@@ -172,6 +266,7 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
             ),
             Text(
               value,
+              textAlign: TextAlign.center,
               style: TTextThemes.defaultTextTheme.bodyLarge!.copyWith(
                 fontSize: 18,
                 letterSpacing: 1.5,

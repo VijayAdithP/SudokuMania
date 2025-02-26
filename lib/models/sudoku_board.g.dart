@@ -23,13 +23,15 @@ class SudokuBoardAdapter extends TypeAdapter<SudokuBoard> {
       mistakes: fields[2] == null ? 0 : (fields[2] as num).toInt(),
       maxMistakes: (fields[3] as num).toInt(),
       gameOver: fields[4] == null ? false : fields[4] as bool,
+      invalidCells:
+          (fields[5] as List?)?.map((e) => (e as List).cast<bool>()).toList(),
     );
   }
 
   @override
   void write(BinaryWriter writer, SudokuBoard obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.grid)
       ..writeByte(1)
@@ -39,7 +41,9 @@ class SudokuBoardAdapter extends TypeAdapter<SudokuBoard> {
       ..writeByte(3)
       ..write(obj.maxMistakes)
       ..writeByte(4)
-      ..write(obj.gameOver);
+      ..write(obj.gameOver)
+      ..writeByte(5)
+      ..write(obj.invalidCells);
   }
 
   @override

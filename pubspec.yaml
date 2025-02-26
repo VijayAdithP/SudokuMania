@@ -49,7 +49,8 @@ dependencies:
   vibration: ^3.1.3
   hugeicons: ^0.0.7
   get: ^4.7.2
-
+  flutter_svg: ^2.0.17
+ 
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -62,9 +63,17 @@ dev_dependencies:
   flutter_lints: ^5.0.0
   build_runner: ^2.4.14
   hive_ce_generator: ^1.8.2
-
+  flutter_launcher_icons: "^0.14.3"
+  
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/sudoku.png"
+  min_sdk_android: 21 # android min sdk min:16, default 21
+  adaptive_icon_background: "#FFFFFF"
 
 # The following section is specific to Flutter packages.
 flutter:
@@ -91,6 +100,9 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
+
+
+
   fonts:
     - family: Poppins
       fonts:
@@ -123,6 +135,10 @@ flutter:
         - asset: assets/fonts/Poppins-ThinItalic.ttf
           weight: 300
           style: italic
+
+ 
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+ 

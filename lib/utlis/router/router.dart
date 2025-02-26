@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sudokumania/screens/game_completedScreen.dart';
 import 'package:sudokumania/screens/game_screen.dart';
+import 'package:sudokumania/screens/max_mistakes_screen.dart';
 import '../../screens/const_test.dart';
 import '../../screens/leaderboard.dart';
 import '../../screens/history.dart';
@@ -22,6 +23,11 @@ final router = GoRouter(
       path: Routes.constTestPage,
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => Consttest(),
+    ),
+    GoRoute(
+      path: Routes.maxMistakesScreen,
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => MaxMistakesScreen(),
     ),
     GoRoute(
       path: Routes.gameCompleteScreen,

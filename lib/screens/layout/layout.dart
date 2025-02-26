@@ -28,7 +28,7 @@ class LayoutScaffold extends StatelessWidget {
             ),
             child: Padding(
               padding: const EdgeInsets.only(
-                top: 1,
+                top: 2,
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.only(

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,9 +13,11 @@ import 'package:sudokumania/widgets/continue_button.dart';
 import 'package:sudokumania/widgets/start_game_button.dart';
 
 final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
-final gameDataProvider = FutureProvider.autoDispose<GameProgress?>((ref) async {
-  return await HiveService.loadGame();
-});
+// final gameDataProvider = FutureProvider.autoDispose<GameProgress?>((ref) async {
+//   ref.keepAlive();
+//   log("Loading game data from provider");
+//   return await HiveService.loadGame();
+// });
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -25,48 +28,80 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
   GameProgress? lastPlayedGame;
-
-  Future<void> _loadGameData() async {
-    final gameData = await HiveService.loadGame(); // Wait for data first
-    log(gameData!.difficulty.toString());
-    setState(() {
-      lastPlayedGame = gameData; // Update UI inside setState
-    });
-  }
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
-    // Initial load is handled by the provider
+    _startTimer();
+    _loadGameData();
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Subscribe to route changes
-    final route = ModalRoute.of(context);
-    if (route is PageRoute) {
-      routeObserver.subscribe(this, route);
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      _loadGameData();
+    });
+  }
+
+  Future<void> _loadGameData() async {
+    final gameData = await HiveService.loadGame();
+    log("Im loaded");
+    // log(gameData!.difficulty.toString());
+    if (mounted) {
+      setState(() {
+        lastPlayedGame = gameData;
+      });
     }
   }
 
   @override
-  void didPopNext() {
-    // This is called when user returns to this page from another page
-    // Refresh the data
-    ref.refresh(gameDataProvider);
-    super.didPopNext();
-  }
-
-  @override
   void dispose() {
-    routeObserver.unsubscribe(this);
+    _timer?.cancel();
     super.dispose();
   }
 
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   WidgetsBinding.instance.addPostFrameCallback((_) {
+  //     log("Forcing provider refresh on page load");
+  //     ref.refresh(gameDataProvider);
+  //   });
+  // }
+
+  // void _refreshData() {
+  //   // Force refresh the provider
+  //   // ref.invalidate(gameDataProvider);
+  //   ref.refresh(gameDataProvider);
+  // }
+
+  // @override
+  // void didChangeDependencies() {
+  //   super.didChangeDependencies();
+  //   // Subscribe to route changes
+  //   final route = ModalRoute.of(context);
+  //   if (route is PageRoute) {
+  //     routeObserver.subscribe(this, route);
+  //   }
+  // }
+
+  // @override
+  // void didPopNext() {
+  //   log("didPopNext called, refreshing data");
+  //   // This is called when user returns to this page from another page
+  //   _refreshData();
+  //   super.didPopNext();
+  // }
+
+  // @override
+  // void dispose() {
+  //   routeObserver.unsubscribe(this);
+  //   super.dispose();
+  // }
+
   @override
   Widget build(BuildContext context) {
-    final gameDataAsync = ref.watch(gameDataProvider);
+    // final gameDataAsync = ref.watch(gameDataProvider);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -84,13 +119,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
         children: [
           Expanded(
             child: Container(
-              child: Center(
-                child: Text(
-                  "SUDOKU MANIA",
-                  style: TTextThemes.defaultTextTheme.headlineLarge!.copyWith(
-                    fontSize: 40,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    "SUDOKU MANIA",
+                    style: TTextThemes.defaultTextTheme.headlineLarge!.copyWith(
+                      fontSize: 40,
+                    ),
                   ),
-                ),
+                  Text(
+                    textAlign: TextAlign.end,
+                    "By Vijay Adith P",
+                    style: TTextThemes.defaultTextTheme.bodySmall!.copyWith(),
+                  ),
+                ],
               ),
             ),
           ),
@@ -100,25 +144,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                 Expanded(
                   child: Container(),
                 ),
-                gameDataAsync.when(
-                  data: (gameData) {
-                    if (gameData != null) {
-                      return ContinueButton(
-                        gameinfo: gameData,
-                      );
-                    }
-                    // Return empty container if no saved game
-                    return const SizedBox.shrink();
-                  },
-                  loading: () => const Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                  error: (error, stack) => Text('Error: $error'),
-                ),
-                // if (lastPlayedGame != null)
-                //   ContinueButton(
-                //     gameinfo: lastPlayedGame!,
+                if (lastPlayedGame != null)
+                  ContinueButton(
+                    gameinfo: lastPlayedGame!,
+                  )
+                else
+                  const SizedBox.shrink(),
+                // gameDataAsync.when(
+                //   data: (gameData) {
+                //     if (gameData != null) {
+                //       return ContinueButton(
+                //         gameinfo: gameData,
+                //       );
+                //     }
+                //     return const SizedBox.shrink();
+                //   },
+                //   loading: () => const Center(
+                //     child: CircularProgressIndicator(),
                 //   ),
+                //   error: (error, stack) => Text('Error: $error'),
+                // ),
                 Padding(
                   padding: const EdgeInsets.only(
                     right: 16,
