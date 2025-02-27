@@ -163,6 +163,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sudokumania/constants/colors.dart';
+import 'package:sudokumania/models/user_stats.dart';
 import 'package:sudokumania/providers/gameProgressProviders/gameProgressProviders.dart';
 import 'package:sudokumania/providers/newGameProviders/game_generation.dart';
 import 'package:sudokumania/service/hive_service.dart';
@@ -191,8 +192,44 @@ class _StartButtonState extends ConsumerState<StartButton> {
     "😵",
   ];
 
+  Future<void> updateStatsForGameStart(String difficulty) async {
+    UserStats currentStats = await HiveService.loadUserStats() ?? UserStats();
+
+    switch (difficulty) {
+      case "Easy":
+        currentStats = currentStats.copyWith(
+          gamesStarted: currentStats.gamesStarted + 1,
+          easyGamesStarted: currentStats.easyGamesStarted + 1,
+        );
+        break;
+      case "Medium":
+        currentStats = currentStats.copyWith(
+          gamesStarted: currentStats.gamesStarted + 1,
+          mediumGamesStarted: currentStats.mediumGamesStarted + 1,
+        );
+        break;
+      case "Hard":
+        currentStats = currentStats.copyWith(
+          gamesStarted: currentStats.gamesStarted + 1,
+          hardGamesStarted: currentStats.hardGamesStarted + 1,
+        );
+        break;
+      case "Nightmare":
+        currentStats = currentStats.copyWith(
+          gamesStarted: currentStats.gamesStarted + 1,
+          nightmareGamesStarted: currentStats.nightmareGamesStarted + 1,
+        );
+        break;
+    }
+
+    await HiveService.saveUserStats(currentStats);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final difficultyString =
+        ref.read(difficultyProvider.notifier).getDifficultyString();
+
     return GestureDetector(
       onTap: () {
         showModalBottomSheet<dynamic>(
@@ -236,7 +273,8 @@ class _StartButtonState extends ConsumerState<StartButton> {
                           Padding(
                             padding: const EdgeInsets.all(16),
                             child: InkWell(
-                              onTap: () {
+                              onTap: () async {
+                                updateStatsForGameStart(difficultyString);
                                 ref
                                     .read(difficultyProvider.notifier)
                                     .setDifficulty(
@@ -277,16 +315,6 @@ class _StartButtonState extends ConsumerState<StartButton> {
                               ),
                             ),
                           ),
-                          // if (index != difficultyLevels.length - 1)
-                          //   Padding(
-                          //     padding: const EdgeInsets.symmetric(
-                          //       horizontal: 16,
-                          //     ),
-                          //     child: Divider(
-                          //       thickness: 2,
-                          //       color: TColors.textSecondary,
-                          //     ),
-                          //   )
                         ],
                       );
                     },

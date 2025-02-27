@@ -10,6 +10,7 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:sudokumania/constants/colors.dart';
 import 'package:sudokumania/models/game_progress.dart';
 import 'package:sudokumania/models/sudoku_board.dart';
+import 'package:sudokumania/models/user_stats.dart';
 import 'package:sudokumania/providers/gameProgressProviders/gameProgressProviders.dart';
 import 'package:sudokumania/providers/newGameProviders/game_generation.dart';
 import 'package:sudokumania/screens/max_mistakes_screen.dart';
@@ -36,6 +37,7 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
   late SudokuBoard _board;
   bool paused = false;
   final DateTime lastPlayed = DateTime.now();
+  List<Map<String, dynamic>> _moveHistory = [];
 
   @override
   void initState() {
@@ -177,10 +179,20 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
       lastPlayed: lastPlayed,
       invalidCells: _board.invalidCells,
     ));
+    // log(_board.mistakes.toString());
   }
 
-  void _clearGame() async {
-    await HiveService.clearSavedGame();
+  // void _clearGame() async {
+  //   await HiveService.clearSavedGame();
+  // }
+
+  void _recordMove(int row, int col, int? previousValue, bool wasInvalid) {
+    _moveHistory.add({
+      'row': row,
+      'col': col,
+      'previousValue': previousValue,
+      'wasInvalid': wasInvalid,
+    });
   }
 
   int? lockedNumber;
@@ -219,7 +231,8 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
         grid: _board.updateGrid(selectedRow!, selectedCol!, number),
         invalidCells: newInvalidCells,
       );
-
+      _recordMove(selectedRow!, selectedCol!,
+          _board.grid[selectedRow!][selectedCol!], isValid);
       if (!isValid) {
         Vibration.vibrate(duration: 200);
         _board = _board.copyWith(
@@ -270,7 +283,7 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
     setState(() {
       paused = true;
     });
-    _clearGame();
+    // _clearGame();
     showDialog(
         barrierDismissible: false,
         context: context,
@@ -278,6 +291,7 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
   }
 
   void _selectCell(int row, int col) {
+    final previousValue = _board.grid[row][col];
     final maxMistakes = ref.read(maxMistakesProvider);
     if (isLongPressMode) {
       if (!_board.givenNumbers[row][col]) {
@@ -293,9 +307,10 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
           // Check if the move is valid before making it
           bool isValid = _board.isMoveValid(row, col, lockedNumber!);
 
+          _recordMove(row, col, previousValue, !isValid);
           // Mark this specific cell as invalid if needed
           newInvalidCells[row][col] = !isValid;
-          log(newInvalidCells[row][col].toString());
+          // log(newInvalidCells[row][col].toString());
 
           // Always update with the locked number
           _board = _board.copyWith(
@@ -355,6 +370,7 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
                 int row = index ~/ 9;
                 int col = index % 9;
 
+                // Color cellColor = const Color.fromARGB(255, 51, 46, 72);
                 Color cellColor = const Color.fromARGB(255, 51, 46, 72);
 
                 if (isLongPressMode) {
@@ -386,6 +402,7 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
                     cellColor = Colors.red.withValues(alpha: 0.3);
                   } else if (isSelected) {
                     cellColor = TColors.majorHighlight;
+                    // cellColor = TColors.buttonDefault;
                   } else if (hasSameNumber) {
                     cellColor = const Color.fromARGB(255, 51, 46, 72)
                         .withValues(alpha: 0.3);
@@ -421,7 +438,8 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       gradient: (_board.grid[row][col] != null &&
-                              _board.grid[row][col] == lockedNumber)
+                              _board.grid[row][col] == lockedNumber &&
+                              isLongPressMode)
                           ? LinearGradient(
                               colors: [TColors.g1Color, TColors.g2Color],
                             )
@@ -613,6 +631,50 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
     }
   }
 
+  void _onUndo() {
+    if (_moveHistory.isEmpty) return;
+
+    // Get the last move from history
+    final lastMove = _moveHistory.removeLast();
+    final row = lastMove['row'];
+    final col = lastMove['col'];
+    final wasInvalid = lastMove['wasInvalid'];
+
+    // Create a copy of the current invalidCells to modify
+    var newInvalidCells =
+        List.generate(9, (i) => List<bool>.from(_board.invalidCells[i]));
+
+    // Update the board state
+    setState(() {
+      _board.invalidCells[row][col] = false; // Mark the cell as valid
+      _board.grid[row][col] = null; // Clear the cell
+      _saveGame(); // Save the game state
+      // Reset the cell to its previous value
+      // _board = _board.copyWith(
+      //   grid: _board.updateGrid(row, col, 0),
+      // );
+
+      // If the move was invalid, decrement the mistake counter
+      if (wasInvalid) {
+        // Remove invalid marker from the cell
+        newInvalidCells[row][col] = false;
+
+        _board = _board.copyWith(
+          invalidCells: newInvalidCells,
+          mistakes: _board.mistakes - 1,
+          gameOver: false, // Always set to false since we're reducing mistakes
+        );
+      } else {
+        _board = _board.copyWith(
+          invalidCells: newInvalidCells,
+        );
+      }
+    });
+
+    // Save the updated game state
+    _saveGame();
+  }
+
   Widget _buildAccButtons(int row, int col) {
     return Row(
       spacing: 16,
@@ -624,7 +686,9 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
           50,
           TColors.backgroundPrimary,
           TColors.dullBackground,
-          () {},
+          () {
+            _onUndo();
+          },
           TColors.textSecondary,
           24,
           HugeIcons.strokeRoundedReload,
@@ -682,6 +746,7 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
       Color iconColor, double iconSize, IconData icon) {
     return InkWell(
       borderRadius: BorderRadius.circular(50),
+      splashColor: TColors.textSecondary.withValues(alpha: 0.2),
       onTap: onTap,
       child: Container(
         height: h,
@@ -732,17 +797,27 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
           },
           icon: HugeIcon(
             icon: HugeIcons.strokeRoundedArrowLeft01,
-            size: 24,
+            size: 30,
             color: TColors.iconDefault,
           ),
         ),
-        title: Text(
-          difficultyString,
-          style: TextStyle(
-            color: TColors.textDefault,
-            fontSize: 20,
-            fontWeight: FontWeight.normal,
-          ),
+        title: Row(
+          spacing: 16,
+          children: [
+            HugeIcon(
+              icon: HugeIcons.strokeRoundedGoogleGemini,
+              size: 24,
+              color: TColors.majorHighlight,
+            ),
+            Text(
+              difficultyString,
+              style: TextStyle(
+                color: TColors.textDefault,
+                fontSize: 20,
+                fontWeight: FontWeight.normal,
+              ),
+            ),
+          ],
         ),
         actions: [
           IconButton(
@@ -751,7 +826,7 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
             },
             icon: HugeIcon(
               icon: HugeIcons.strokeRoundedSetting07,
-              size: 24,
+              size: 30,
               color: TColors.iconDefault,
             ),
           ),

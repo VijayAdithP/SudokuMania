@@ -30,8 +30,8 @@ class SudukoSolver extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.watch(appStartupProvider); // 🔹 Trigger background sync at startup
-    ref.watch(onlineSyncProvider); // 🔹 Listen for network changes
+    // ref.watch(appStartupProvider);
+    // ref.watch(onlineSyncProvider);
     return MaterialApp.router(
       routeInformationProvider: router.routeInformationProvider,
       routerDelegate: router.routerDelegate,

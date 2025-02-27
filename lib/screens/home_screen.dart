@@ -111,6 +111,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
           },
           child: Icon(
             color: TColors.iconDefault,
+            size: 30,
             HugeIcons.strokeRoundedSetting07,
           ),
         ),
@@ -118,26 +119,78 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
       body: Column(
         children: [
           Expanded(
-            child: Container(
               child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(
+                height: 80,
+                width: 80,
+                opacity: const AlwaysStoppedAnimation(.7),
+                "assets/images/sudoku.png",
+              ),
+              // Positioned(
+              //   top: 80,
+              //   left: 80,
+              //   right: 80,
+              //   child: Image.asset(
+              //     opacity: const AlwaysStoppedAnimation(.7),
+              //     "assets/images/sudoku.png",
+              //   ),
+              // ),
+              Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
                     "SUDOKU MANIA",
                     style: TTextThemes.defaultTextTheme.headlineLarge!.copyWith(
+                      color: TColors.textDefault,
                       fontSize: 40,
                     ),
                   ),
                   Text(
                     textAlign: TextAlign.end,
                     "By Vijay Adith P",
-                    style: TTextThemes.defaultTextTheme.bodySmall!.copyWith(),
+                    style: TTextThemes.defaultTextTheme.bodySmall!.copyWith(
+                      color: TColors.textDefault,
+                    ),
                   ),
                 ],
               ),
-            ),
-          ),
+            ],
+          )
+              // Stack(
+              //   children: [
+              //     Positioned(
+              //       top: 80,
+              //       left: 80,
+              //       right: 80,
+              //       child: Image.asset(
+              //         "assets/images/sudoku.png",
+              //       ),
+              //     ),
+              //     Column(
+              //       mainAxisAlignment: MainAxisAlignment.center,
+              //       crossAxisAlignment: CrossAxisAlignment.end,
+              //       children: [
+              //         Text(
+              //           "SUDOKU MANIA",
+              //           style:
+              //               TTextThemes.defaultTextTheme.headlineLarge!.copyWith(
+              //             fontSize: 40,
+              //           ),
+              //         ),
+              //         Text(
+              //           textAlign: TextAlign.end,
+              //           "By Vijay Adith P",
+              //           style: TTextThemes.defaultTextTheme.bodySmall!.copyWith(),
+              //         ),
+              //       ],
+              //     ),
+              //   ],
+              // ),
+              ),
           Expanded(
             child: Column(
               children: [
@@ -150,20 +203,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                   )
                 else
                   const SizedBox.shrink(),
-                // gameDataAsync.when(
-                //   data: (gameData) {
-                //     if (gameData != null) {
-                //       return ContinueButton(
-                //         gameinfo: gameData,
-                //       );
-                //     }
-                //     return const SizedBox.shrink();
-                //   },
-                //   loading: () => const Center(
-                //     child: CircularProgressIndicator(),
-                //   ),
-                //   error: (error, stack) => Text('Error: $error'),
-                // ),
                 Padding(
                   padding: const EdgeInsets.only(
                     right: 16,

@@ -16,14 +16,15 @@ class _MaxMistakesScreenState extends ConsumerState<MaxMistakesScreen> {
   int selectedIndex = 0;
   @override
   Widget build(BuildContext context) {
-    final selectedMistakes = ref.watch(maxMistakesProvider);
     return Scaffold(
       appBar: AppBar(
-        leading: GestureDetector(
+        leading: InkWell(
+          splashColor: Colors.transparent,
+          radius: 50,
           onTap: () => Navigator.pop(context),
           child: HugeIcon(
             icon: HugeIcons.strokeRoundedArrowLeft01,
-            size: 24,
+            size: 30,
             color: TColors.iconDefault,
           ),
         ),
@@ -70,7 +71,9 @@ class _MaxMistakesScreenState extends ConsumerState<MaxMistakesScreen> {
     final selectedMistakes = ref.watch(maxMistakesProvider);
     return InkWell(
       onTap: () {
-        ref.read(maxMistakesProvider.notifier).state = value;
+        setState(() {
+          ref.read(maxMistakesProvider.notifier).state = value;
+        });
       },
       child: Padding(
         padding: const EdgeInsets.all(8.0),

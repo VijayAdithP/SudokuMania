@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sudokumania/constants/colors.dart';
@@ -106,6 +104,10 @@ class _GameOverDialogState extends ConsumerState<GameOverDialog> {
     super.initState();
   }
 
+  void _clearGame() async {
+    await HiveService.clearSavedGame();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -193,10 +195,8 @@ class _GameOverDialogState extends ConsumerState<GameOverDialog> {
                           .read(difficultyProvider.notifier)
                           .setDifficulty(SudokuDifficulty.nightmare);
                     }
-
+                    // _clearGame();
                     context.push(Routes.gameScreen);
-                  } else if (lastPlayedGame == null) {
-                    Navigator.of(context).pop();
                   }
                 },
                 child: Container(
@@ -226,6 +226,7 @@ class _GameOverDialogState extends ConsumerState<GameOverDialog> {
               GestureDetector(
                 onTap: () {
                   context.go(Routes.homePage);
+                  _clearGame();
                 },
                 child: Container(
                   width: MediaQuery.of(context).size.width,

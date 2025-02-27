@@ -235,10 +235,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     return Scaffold(
       appBar: AppBar(
         leading: InkWell(
+          splashColor: Colors.transparent,
+          radius: 50,
           onTap: () => Navigator.pop(context),
           child: HugeIcon(
             icon: HugeIcons.strokeRoundedArrowLeft01,
-            size: 24,
+            size: 30,
             color: TColors.iconDefault,
           ),
         ),
@@ -399,12 +401,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               ],
             ),
             if (!isChangable)
-              Padding(
-                padding: const EdgeInsets.only(
-                  top: 16,
-                ),
-                child: GestureDetector(
-                  onTap: () => nav != null ? nav() : null,
+              GestureDetector(
+                onTap: () => nav != null ? nav() : null,
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    top: 16,
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
