@@ -22,7 +22,7 @@ class StatsNotifier extends StateNotifier<UserStats> {
   void updateGameStats(bool won, String difficulty, int time, String userId,
       String username, bool isOnline) async {
     int newPoints = _calculatePoints(difficulty, won);
-    log("🛠 updateGameStats() called - isOnline: $isOnline"); // ✅ Debug log
+    // log("🛠 updateGameStats() called - isOnline: $isOnline"); // ✅ Debug log
     if (won && state.gamesWon == state.gamesWon + 1) return;
 
     state = state.copyWith(
@@ -49,11 +49,11 @@ class StatsNotifier extends StateNotifier<UserStats> {
     _saveStats();
 
     if (isOnline) {
-      log("📡 Syncing stats online"); // ✅ Debug log
+      // log("📡 Syncing stats online"); // ✅ Debug log
 
       await FirebaseService.updatePlayerStats(userId, username, state);
     } else {
-      log("📂 Saving stats offline for later sync"); // ✅ Debug log
+      // log("📂 Saving stats offline for later sync"); // ✅ Debug log
 
       await HiveService.queueOfflineSync(state);
     }
@@ -88,7 +88,7 @@ class StatsNotifier extends StateNotifier<UserStats> {
 
   /// Save stats to Hive
   void _saveStats() {
-    log("✅ User stats saved to Hive"); // ✅ Debug log
+    // log("✅ User stats saved to Hive"); // ✅ Debug log
 
     HiveService.saveUserStats(state);
   }

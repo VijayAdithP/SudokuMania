@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sudokumania/constants/colors.dart';
 import 'package:sudokumania/models/game_progress.dart';
+import 'package:sudokumania/models/user_stats.dart';
 import 'package:sudokumania/providers/gameProgressProviders/gameProgressProviders.dart';
 import 'package:sudokumania/providers/newGameProviders/game_generation.dart';
 import 'package:sudokumania/service/hive_service.dart';
@@ -91,11 +92,16 @@ class _GameOverDialogState extends ConsumerState<GameOverDialog> {
   GameProgress? lastPlayedGame;
 
   Future<void> _loadGameData() async {
-    final gameData = await HiveService.loadGame(); // Wait for data first
-    // log(gameData!.difficulty.toString());
+    final gameData = await HiveService.loadGame();
     setState(() {
-      lastPlayedGame = gameData; // Update UI inside setState
+      lastPlayedGame = gameData;
     });
+
+    UserStats? currentStats = await HiveService.loadUserStats() ?? UserStats();
+    final updatedStats = currentStats.copyWith(
+      currentWinStreak: 0,
+    );
+    await HiveService.saveUserStats(updatedStats);
   }
 
   @override
@@ -106,6 +112,11 @@ class _GameOverDialogState extends ConsumerState<GameOverDialog> {
 
   void _clearGame() async {
     await HiveService.clearSavedGame();
+    UserStats? currentStats = await HiveService.loadUserStats() ?? UserStats();
+    final updatedStats = currentStats.copyWith(
+      currentWinStreak: 0,
+    );
+    await HiveService.saveUserStats(updatedStats);
   }
 
   @override
@@ -198,6 +209,12 @@ class _GameOverDialogState extends ConsumerState<GameOverDialog> {
                     // _clearGame();
                     context.push(Routes.gameScreen);
                   }
+                  UserStats? currentStats =
+                      await HiveService.loadUserStats() ?? UserStats();
+                  final updatedStats = currentStats.copyWith(
+                    currentWinStreak: 0,
+                  );
+                  await HiveService.saveUserStats(updatedStats);
                 },
                 child: Container(
                   width: MediaQuery.of(context).size.width,

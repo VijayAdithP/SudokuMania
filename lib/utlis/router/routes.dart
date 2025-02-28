@@ -9,4 +9,5 @@ class Routes {
   static const String gameScreen = '/gameScreen';
   static const String gameCompleteScreen = '/gameCompleteScreen';
   static const String maxMistakesScreen = '/maxMistakesScreen';
+  static const String loginScreen = '/loginScreen';
 }

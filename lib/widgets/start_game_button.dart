@@ -159,6 +159,8 @@
 //   }
 // }
 
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -222,14 +224,13 @@ class _StartButtonState extends ConsumerState<StartButton> {
         break;
     }
 
+    log("lets see ${currentStats.gamesStarted.toString()}");
+
     await HiveService.saveUserStats(currentStats);
   }
 
   @override
   Widget build(BuildContext context) {
-    final difficultyString =
-        ref.read(difficultyProvider.notifier).getDifficultyString();
-
     return GestureDetector(
       onTap: () {
         showModalBottomSheet<dynamic>(
@@ -274,13 +275,14 @@ class _StartButtonState extends ConsumerState<StartButton> {
                             padding: const EdgeInsets.all(16),
                             child: InkWell(
                               onTap: () async {
-                                updateStatsForGameStart(difficultyString);
                                 ref
                                     .read(difficultyProvider.notifier)
                                     .setDifficulty(
                                         SudokuDifficulty.values[index]);
                                 context.push(Routes.gameScreen);
                                 ref.read(timeProvider.notifier).reset();
+                                updateStatsForGameStart(
+                                    difficultyLevels[index]);
                                 Navigator.of(context).pop();
                                 HiveService.clearSavedGame();
                               },

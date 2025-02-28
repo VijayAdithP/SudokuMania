@@ -99,13 +99,17 @@
 //     );
 //   }
 // }
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:sudokumania/constants/colors.dart';
 import 'package:sudokumania/models/user_stats.dart';
 import 'package:sudokumania/service/hive_service.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
+import 'package:sudokumania/utlis/router/routes.dart';
 
 class StatisticsPage extends StatefulWidget {
   @override
@@ -129,9 +133,11 @@ class _StatisticsPageState extends State<StatisticsPage> {
   void _loadUserData() async {
     userId = HiveService.getUserId().toString();
     userName = await HiveService.getUsername();
-    if (userId != null) {
-      _fetchPlayerStats();
-    }
+    final stats = await HiveService.loadUserStats(); // Reload stats from Hive
+    setState(() {
+      currentStats = stats; // Update the state with the new data
+    });
+    _fetchPlayerStats(); // Fetch player stats from Firestore
   }
 
   Future<void> _loadUserStats() async {
@@ -139,6 +145,11 @@ class _StatisticsPageState extends State<StatisticsPage> {
     setState(() {
       currentStats = stats;
     });
+  }
+
+  bool _isReloading = false;
+  Future<void> _saveUserStats(UserStats stats) async {
+    await HiveService.saveUserStats(stats);
   }
 
   void _fetchPlayerStats() async {
@@ -157,220 +168,8 @@ class _StatisticsPageState extends State<StatisticsPage> {
     }
   }
 
-  //  onRefresh: () async {
-  //     await _loadUserStats();
-  //   },
-  // @override
-  // Widget build(BuildContext context) {
-  //   return Scaffold(
-  //     appBar: AppBar(
-  //       centerTitle: true,
-  //       backgroundColor: Colors.transparent,
-  //       title: Text(
-  //         "Statistics",
-  //         style: TTextThemes.defaultTextTheme.headlineMedium!.copyWith(
-  //           fontWeight: FontWeight.normal,
-  //         ),
-  //       ),
-  //     ),
-  //     body: currentStats == null
-  //         ? Center(child: CircularProgressIndicator())
-  //         : SingleChildScrollView(
-  //             physics: AlwaysScrollableScrollPhysics(),
-  //             child: Padding(
-  //               padding: EdgeInsets.all(16.0),
-  //               child: SizedBox(
-  //                 width: MediaQuery.of(context).size.width,
-  //                 child: Column(
-  //                   crossAxisAlignment: CrossAxisAlignment.center,
-  //                   children: [
-  //                     InkWell(
-  //                       radius: 100,
-  //                       child: Text(
-  //                         (userName == null)
-  //                             ? "Login in to Sync Data"
-  //                             : "$userName.toString()",
-  //                         style: TTextThemes.defaultTextTheme.headlineSmall!
-  //                             .copyWith(
-  //                           fontWeight: FontWeight.normal,
-  //                           color: TColors.textSecondary,
-  //                         ),
-  //                       ),
-  //                     ),
-  //                     Text("Started games: ${currentStats!.gamesStarted}"),
-  //                     Text(
-  //                         "easy Started games: ${currentStats!.easyGamesStarted}"),
-  //                     Text(
-  //                         "medium Started games: ${currentStats!.mediumGamesStarted}"),
-  //                     Text(
-  //                         "hard Started games: ${currentStats!.hardGamesStarted}"),
-  //                     Text(
-  //                         "nightmare Started games: ${currentStats!.nightmareGamesStarted}"),
-  //                     Text("Average Time: ${currentStats!.avgTime}"),
-  //                     Text("easy Average Time: ${currentStats!.easyAvgTime}"),
-  //                     Text(
-  //                         "meditm Average Time: ${currentStats!.mediumAvgTime}"),
-  //                     Text("hard Average Time: ${currentStats!.hardAvgTime}"),
-  //                     Text(
-  //                         "nightmare Average Time: ${currentStats!.nightmareAvgTime}"),
-  //                     Text("Best Time: ${currentStats!.bestTime}"),
-  //                     Text("easy Best Time: ${currentStats!.easyBestTime}"),
-  //                     Text("medium Best Time: ${currentStats!.mediumBestTime}"),
-  //                     Text("hard Best Time: ${currentStats!.hardBestTime}"),
-  //                     Text(
-  //                         "nightmare Best Time: ${currentStats!.nightmareBestTime}"),
-  //                     Text("Easy Points: ${currentStats!.easyPoints}"),
-  //                     Text("Medium Points: ${currentStats!.mediumPoints}"),
-  //                     Text("Hard Points: ${currentStats!.hardPoints}"),
-  //                     Text("NightmarePoints: ${currentStats!.nightmarePoints}"),
-  //                     Text("Games Won: ${currentStats!.gamesWon}"),
-  //                     Text("TotalPoints: ${currentStats!.totalPoints}"),
-  //                   ],
-  //                 ),
-  //               ),
-  //             ),
-  //           ),
-  //   );
-  // }
-  // @override
-  // Widget build(BuildContext context) {
-  //   return Scaffold(
-  //     appBar: AppBar(
-  //       centerTitle: true,
-  //       backgroundColor: Colors.transparent,
-  //       title: Text(
-  //         "Statistics",
-  //         style: TTextThemes.defaultTextTheme.headlineMedium!.copyWith(
-  //           fontWeight: FontWeight.normal,
-  //         ),
-  //       ),
-  //     ),
-  //     body: currentStats == null
-  //         ? Center(child: CircularProgressIndicator())
-  //         : DefaultTabController(
-  //             length: 5,
-  //             child: Column(
-  //               children: [
-  //                 // Login text widget at the top
-  //                 Padding(
-  //                   padding: const EdgeInsets.all(16.0),
-  //                   child: InkWell(
-  //                     radius: 100,
-  //                     child: Text(
-  //                       (userName == null)
-  //                           ? "Login in to Sync Data"
-  //                           : "$userName.toString()",
-  //                       style: TTextThemes.defaultTextTheme.headlineSmall!
-  //                           .copyWith(
-  //                         fontWeight: FontWeight.normal,
-  //                         color: TColors.textSecondary,
-  //                       ),
-  //                     ),
-  //                   ),
-  //                 ),
-  //                 // TabBar with five tabs
-  //                 TabBar(
-  //                   tabs: [
-  //                     Tab(text: "Overall"),
-  //                     Tab(text: "Easy"),
-  //                     Tab(text: "Medium"),
-  //                     Tab(text: "Hard"),
-  //                     Tab(text: "Nightmare"),
-  //                   ],
-  //                 ),
-  //                 // Expanded TabBarView to display content for each tab
-  //                 Expanded(
-  //                   child: TabBarView(
-  //                     children: [
-  //                       // Overall Tab: Display overall statistics
-  //                       SingleChildScrollView(
-  //                         padding: const EdgeInsets.all(16.0),
-  //                         child: Column(
-  //                           crossAxisAlignment: CrossAxisAlignment.center,
-  //                           children: [
-  //                             Text(
-  //                                 "Started games: ${currentStats!.gamesStarted}"),
-  //                             Text("Average Time: ${currentStats!.avgTime}"),
-  //                             Text("Best Time: ${currentStats!.bestTime}"),
-  //                             Text("Games Won: ${currentStats!.gamesWon}"),
-  //                             Text("TotalPoints: ${currentStats!.totalPoints}"),
-  //                           ],
-  //                         ),
-  //                       ),
-  //                       // Easy Tab: Display easy-level statistics
-  //                       SingleChildScrollView(
-  //                         padding: const EdgeInsets.all(16.0),
-  //                         child: Column(
-  //                           crossAxisAlignment: CrossAxisAlignment.center,
-  //                           children: [
-  //                             Text(
-  //                                 "Easy Started games: ${currentStats!.easyGamesStarted}"),
-  //                             Text(
-  //                                 "Easy Average Time: ${currentStats!.easyAvgTime}"),
-  //                             Text(
-  //                                 "Easy Best Time: ${currentStats!.easyBestTime}"),
-  //                             Text("Easy Points: ${currentStats!.easyPoints}"),
-  //                           ],
-  //                         ),
-  //                       ),
-  //                       // Medium Tab: Display medium-level statistics
-  //                       SingleChildScrollView(
-  //                         padding: const EdgeInsets.all(16.0),
-  //                         child: Column(
-  //                           crossAxisAlignment: CrossAxisAlignment.center,
-  //                           children: [
-  //                             Text(
-  //                                 "Medium Started games: ${currentStats!.mediumGamesStarted}"),
-  //                             Text(
-  //                                 "Medium Average Time: ${currentStats!.mediumAvgTime}"),
-  //                             Text(
-  //                                 "Medium Best Time: ${currentStats!.mediumBestTime}"),
-  //                             Text(
-  //                                 "Medium Points: ${currentStats!.mediumPoints}"),
-  //                           ],
-  //                         ),
-  //                       ),
-  //                       // Hard Tab: Display hard-level statistics
-  //                       SingleChildScrollView(
-  //                         padding: const EdgeInsets.all(16.0),
-  //                         child: Column(
-  //                           crossAxisAlignment: CrossAxisAlignment.center,
-  //                           children: [
-  //                             Text(
-  //                                 "Hard Started games: ${currentStats!.hardGamesStarted}"),
-  //                             Text(
-  //                                 "Hard Average Time: ${currentStats!.hardAvgTime}"),
-  //                             Text(
-  //                                 "Hard Best Time: ${currentStats!.hardBestTime}"),
-  //                             Text("Hard Points: ${currentStats!.hardPoints}"),
-  //                           ],
-  //                         ),
-  //                       ),
-  //                       // Nightmare Tab: Display nightmare-level statistics
-  //                       SingleChildScrollView(
-  //                         padding: const EdgeInsets.all(16.0),
-  //                         child: Column(
-  //                           crossAxisAlignment: CrossAxisAlignment.center,
-  //                           children: [
-  //                             Text(
-  //                                 "Nightmare Started games: ${currentStats!.nightmareGamesStarted}"),
-  //                             Text(
-  //                                 "Nightmare Average Time: ${currentStats!.nightmareAvgTime}"),
-  //                             Text(
-  //                                 "Nightmare Best Time: ${currentStats!.nightmareBestTime}"),
-  //                             Text(
-  //                                 "Nightmare Points: ${currentStats!.nightmarePoints}"),
-  //                           ],
-  //                         ),
-  //                       ),
-  //                     ],
-  //                   ),
-  //                 ),
-  //               ],
-  //             ),
-  //           ),
-  //   );
-  // }
+  int _currIndex = 0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -379,17 +178,74 @@ class _StatisticsPageState extends State<StatisticsPage> {
           horizontal: 16,
         ),
         actions: [
-          InkWell(
-            radius: 50,
-            onTap: () async {
-              await _loadUserStats();
-              setState(() {});
-            },
-            child: HugeIcon(
-              icon: HugeIcons.strokeRoundedRefresh,
-              color: TColors.iconDefault,
+          // IconButton(
+          //   icon: AnimatedSwitcher(
+          //     duration: const Duration(seconds: 1),
+          //     transitionBuilder: (child, anim) => RotationTransition(
+          //       turns: child.key == ValueKey('icon1')
+          //           ? Tween<double>(begin: -1, end: 1).animate(anim)
+          //           : Tween<double>(begin: 1, end: -1).animate(anim),
+          //       child: FadeTransition(opacity: anim, child: child),
+          //     ),
+          //     child: _currIndex == 0
+          //         ? Icon(
+          //             HugeIcons.strokeRoundedRefresh,
+          //             color: TColors.iconDefault,
+          //             key: const ValueKey('icon1'),
+          //             size: 20,
+          //           )
+          //         : Icon(
+          //             HugeIcons.strokeRoundedRefresh,
+          //             color: TColors.iconDefault,
+          //             key: const ValueKey('icon2'),
+          //             size: 20,
+          //           ),
+          //   ),
+          //   onPressed: () async {
+          //     // setState(() {});
+          //     await _loadUserStats();
+          //     setState(() {
+          //       _currIndex = _currIndex == 0 ? 1 : 0;
+          //     });
+          //   },
+          // ),
+          IconButton(
+            icon: AnimatedSwitcher(
+              duration: const Duration(seconds: 1),
+              transitionBuilder: (child, anim) => RotationTransition(
+                turns: child.key == ValueKey('icon1')
+                    ? Tween<double>(begin: -1, end: 1).animate(anim)
+                    : Tween<double>(begin: 1, end: -1).animate(anim),
+                child: FadeTransition(opacity: anim, child: child),
+              ),
+              child: _currIndex == 0
+                  ? Icon(
+                      HugeIcons.strokeRoundedRefresh,
+                      color: TColors.iconDefault,
+                      key: const ValueKey('icon1'),
+                      size: 20,
+                    )
+                  : Icon(
+                      HugeIcons.strokeRoundedRefresh,
+                      color: TColors.iconDefault,
+                      key: const ValueKey('icon2'),
+                      size: 20,
+                    ),
             ),
-          )
+            onPressed: () async {
+              if (_isReloading) return; // Prevent multiple reloads
+              setState(() {
+                _isReloading = true;
+              });
+
+              await _loadUserStats();
+              _loadUserData();
+              setState(() {
+                _currIndex = _currIndex == 0 ? 1 : 0;
+                _isReloading = false;
+              });
+            },
+          ),
         ],
         centerTitle: true,
         backgroundColor: Colors.transparent,
@@ -401,14 +257,24 @@ class _StatisticsPageState extends State<StatisticsPage> {
         ),
       ),
       body: currentStats == null
-          ? Center(child: CircularProgressIndicator())
+          ? Center(
+              child: Text(
+                "Initiate a game to access you stats",
+                style: TTextThemes.defaultTextTheme.headlineSmall!.copyWith(
+                  fontWeight: FontWeight.normal,
+                  color: TColors.textSecondary,
+                ),
+              ),
+            )
           : DefaultTabController(
               length: 5,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  InkWell(
-                    radius: 100,
+                  GestureDetector(
+                    onTap: () {
+                      context.push(Routes.loginScreen);
+                    },
                     child: Text(
                       userName == null ? "Login to Sync Data" : "$userName",
                       style:
@@ -489,6 +355,46 @@ class _StatisticsPageState extends State<StatisticsPage> {
       return "$minutes:${seconds.toString().padLeft(2, '0')}";
     }
 
+    // overAllBestTime();
+    String overAllBestTime(UserStats currentStats) {
+      final List<int?> bestTimes = [
+        currentStats.bestTime,
+        currentStats.easyBestTime,
+        currentStats.mediumBestTime,
+        currentStats.hardBestTime,
+        currentStats.nightmareBestTime,
+      ];
+      // Get all the best times in milliseconds
+
+      // Filter out null values and 0 values
+      final validTimes =
+          bestTimes.where((time) => time != null && time > 0).toList();
+
+      // If no valid times are found, return a default message
+      if (validTimes.isEmpty) {
+        return "0";
+      }
+
+      // Find the minimum time
+      final int? minTime = validTimes.reduce((a, b) => a! < b! ? a : b);
+
+      // Convert milliseconds to seconds
+      final int totalSeconds = minTime! ~/ 1000;
+
+      // Format the time into minutes and seconds
+      final int minutes = (totalSeconds % 3600) ~/ 60;
+      final int seconds = totalSeconds % 60;
+
+      // Save the best time to Hive
+      // await HiveService.saveUserStats(UserStats(
+      //   bestTime: minTime,
+      // ));
+
+      log("the best time ${"$minutes:${seconds.toString().padLeft(2, '0')}"}");
+      return "$minutes:${seconds.toString().padLeft(2, '0')}";
+    }
+
+    log(currentStats!.currentWinStreak.toString());
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -544,14 +450,41 @@ class _StatisticsPageState extends State<StatisticsPage> {
                             children: [
                               tiles(
                                   "Average Time",
-                                  currentStats.avgTime.toString(),
+                                  formatTime(
+                                    UserStats.calculateAvgTime(
+                                      currentStats.totalTime,
+                                      currentStats.gamesStarted,
+                                    ),
+                                  ),
                                   HugeIcons.strokeRoundedTime01,
                                   TColors.buttonDefault,
                                   () {}),
                               seperator(),
+                              // FutureBuilder<String>(
+                              //   future: overAllBestTime(currentStats),
+                              //   builder: (context, snapshot) {
+                              //     if (snapshot.connectionState ==
+                              //         ConnectionState.waiting) {
+                              //       return CircularProgressIndicator(); // Show loading indicator
+                              //     } else if (snapshot.hasError) {
+                              //       return Text("Error: ${snapshot.error}");
+                              //     } else if (snapshot.hasData) {
+                              //       return tiles(
+                              //         "Overall Best Time",
+                              //         snapshot.data!,
+                              //         HugeIcons.strokeRoundedCrown,
+                              //         TColors.majorHighlight,
+                              //         () {},
+                              //       );
+                              //     } else {
+                              //       return Text("No data");
+                              //     }
+                              //   },
+                              // ),
                               tiles(
                                   "Overall Best Time",
-                                  formatTime(currentStats.avgTime),
+                                  // formatTime(currentStats.bestTime),
+                                  overAllBestTime(currentStats),
                                   HugeIcons.strokeRoundedCrown,
                                   TColors.majorHighlight,
                                   () {}),
@@ -609,18 +542,17 @@ class _StatisticsPageState extends State<StatisticsPage> {
                                   () {}),
                               seperator(),
                               tiles(
-                                "Win Rate",
-                                "${currentStats.winRate}%",
-                                Icons.star_rate_rounded,
-                                const Color.fromARGB(255, 225, 136, 129),
-                                () {},
-                              ),
-                              seperator(),
-                              tiles(
                                   "Longest Winning Streak",
                                   currentStats.longestWinStreak.toString(),
                                   Icons.auto_graph_outlined,
                                   TColors.iconDefault,
+                                  () {}),
+                              seperator(),
+                              tiles(
+                                  "Current Winning Streak",
+                                  currentStats.currentWinStreak.toString(),
+                                  HugeIcons.strokeRoundedTickDouble02,
+                                  TColors.secondaryDefault,
                                   () {}),
                             ],
                           ),
@@ -676,6 +608,8 @@ class _StatisticsPageState extends State<StatisticsPage> {
               return currentStats.easyGamesWon;
             case 'winRate':
               return currentStats.easyWinRate;
+            case 'totalTime':
+              return currentStats.easyTotalTime;
             default:
               return null;
           }
@@ -693,6 +627,8 @@ class _StatisticsPageState extends State<StatisticsPage> {
               return currentStats.mediumGamesWon;
             case 'winRate':
               return currentStats.mediumWinRate;
+            case 'totalTime':
+              return currentStats.mediumTotalTime;
             default:
               return null;
           }
@@ -710,6 +646,8 @@ class _StatisticsPageState extends State<StatisticsPage> {
               return currentStats.hardGamesWon;
             case 'winRate':
               return currentStats.hardWinRate;
+            case 'totalTime':
+              return currentStats.hardTotalTime;
             default:
               return null;
           }
@@ -727,6 +665,8 @@ class _StatisticsPageState extends State<StatisticsPage> {
               return currentStats.nightmareGamesWon;
             case 'winRate':
               return currentStats.nightmareWinRate;
+            case 'totalTime':
+              return currentStats.nightmareTotalTime;
             default:
               return null;
           }
@@ -741,6 +681,13 @@ class _StatisticsPageState extends State<StatisticsPage> {
       final int seconds = totalSeconds % 60;
       return "$minutes:${seconds.toString().padLeft(2, '0')}";
     }
+
+    // Future<String> overAllWinRate(UserStats currentStats) async {
+    //   await HiveService.saveUserStats(UserStats(
+    //       winRate: UserStats.calculateWinRate(
+    //           getStat('gamesWon'), getStat('gamesStarted'))));
+    //   return "${UserStats.calculateWinRate(getStat('gamesWon'), getStat('gamesStarted')).toString()}%";
+    // }
 
     return SingleChildScrollView(
       child: Padding(
@@ -796,7 +743,9 @@ class _StatisticsPageState extends State<StatisticsPage> {
                             children: [
                               tiles(
                                 "Average Time",
-                                formatTime(getStat('avgTime')),
+                                formatTime(UserStats.calculateAvgTime(
+                                    getStat('totalTime'),
+                                    getStat('gamesStarted'))),
                                 HugeIcons.strokeRoundedTime01,
                                 TColors.buttonDefault,
                                 () {},
@@ -863,10 +812,32 @@ class _StatisticsPageState extends State<StatisticsPage> {
                                 Colors.green,
                                 () {},
                               ),
+                              // seperator(),
+                              // FutureBuilder<String>(
+                              //   future: overAllWinRate(currentStats),
+                              //   builder: (context, snapshot) {
+                              //     if (snapshot.connectionState ==
+                              //         ConnectionState.waiting) {
+                              //       return CircularProgressIndicator(); // Show loading indicator
+                              //     } else if (snapshot.hasError) {
+                              //       return Text("Error: ${snapshot.error}");
+                              //     } else if (snapshot.hasData) {
+                              //       return tiles(
+                              //         "Win Rate",
+                              //         snapshot.data!,
+                              //         HugeIcons.strokeRoundedCrown,
+                              //         TColors.majorHighlight,
+                              //         () {},
+                              //       );
+                              //     } else {
+                              //       return Text("No data");
+                              //     }
+                              //   },
+                              // )
                               seperator(),
                               tiles(
                                 " Win Rate",
-                                "${getStat('winRate')}%",
+                                "${(UserStats.calculateWinRate(getStat('gamesWon'), getStat('gamesStarted'))).toStringAsFixed(1)}%",
                                 Icons.star_rate_rounded,
                                 const Color.fromARGB(255, 225, 136, 129),
                                 () {},
@@ -885,167 +856,6 @@ class _StatisticsPageState extends State<StatisticsPage> {
       ),
     );
   }
-  // Widget _buildDifficultyTab(
-  //   // int gamesStarted,
-  //   // String avgTime,
-  //   // String bestTime,
-  //   // int points,
-  //   String diffuclty,
-  //   UserStats? currentStats,
-  // ) {
-  //   return SingleChildScrollView(
-  //     child: Padding(
-  //       padding: const EdgeInsets.symmetric(horizontal: 8.0),
-  //       child: Column(
-  //         crossAxisAlignment: CrossAxisAlignment.center,
-  //         children: [
-  //           Padding(
-  //             padding: const EdgeInsets.symmetric(
-  //               vertical: 16,
-  //             ),
-  //             child: Column(
-  //               crossAxisAlignment: CrossAxisAlignment.start,
-  //               children: [
-  //                 Padding(
-  //                   padding: const EdgeInsets.only(bottom: 10),
-  //                   child: Text(
-  //                     "Game Started",
-  //                     style: TTextThemes.defaultTextTheme.headlineMedium,
-  //                   ),
-  //                 ),
-  //                 dullContainer(
-  //                   Column(
-  //                     children: [
-  //                       Padding(
-  //                         padding: const EdgeInsets.all(8.0),
-  //                         child: Column(
-  //                           children: [
-  //                             tiles(
-  //                                 "Total $diffuclty Games",
-  //                                 currentStats!.easyGamesStarted.toString(),
-  //                                 HugeIcons.strokeRoundedListView,
-  //                                 Colors.green,
-  //                                 () {}),
-  //                           ],
-  //                         ),
-  //                       )
-  //                     ],
-  //                   ),
-  //                 ),
-  //                 Padding(
-  //                   padding: const EdgeInsets.symmetric(vertical: 10),
-  //                   child: Text(
-  //                     "Time",
-  //                     style: TTextThemes.defaultTextTheme.headlineMedium,
-  //                   ),
-  //                 ),
-  //                 dullContainer(
-  //                   Column(
-  //                     children: [
-  //                       Padding(
-  //                         padding: const EdgeInsets.all(8.0),
-  //                         child: Column(
-  //                           children: [
-  //                             tiles(
-  //                                 "Average Time",
-  //                                 currentStats.easyAvgTime.toString(),
-  //                                 HugeIcons.strokeRoundedTime01,
-  //                                 TColors.buttonDefault,
-  //                                 () {}),
-  //                             seperator(),
-  //                             tiles(
-  //                                 "$diffuclty Game Best Time",
-  //                                 currentStats.easyBestTime.toString(),
-  //                                 HugeIcons.strokeRoundedCrown,
-  //                                 TColors.majorHighlight,
-  //                                 () {}),
-  //                           ],
-  //                         ),
-  //                       )
-  //                     ],
-  //                   ),
-  //                 ),
-  //                 Padding(
-  //                   padding: const EdgeInsets.symmetric(vertical: 10),
-  //                   child: Text(
-  //                     "Score",
-  //                     style: TTextThemes.defaultTextTheme.headlineMedium,
-  //                   ),
-  //                 ),
-  //                 dullContainer(
-  //                   Column(
-  //                     children: [
-  //                       Padding(
-  //                         padding: const EdgeInsets.all(8.0),
-  //                         child: Column(
-  //                           children: [
-  //                             tiles(
-  //                                 "$diffuclty Score",
-  //                                 //switch (diffuclty) {
-  //                                 //   case "Easy":
-  //                                 //       currentStats.easyPoints.toString(),
-  //                                 //   case "medium":
-  //                                 //       currentStats.easyPoints.toString(),
-  //                                 //   case "hard":
-  //                                 //       currentStats.easyPoints.toString(),
-  //                                 //   case "expert":
-  //                                 //       currentStats.easyPoints.toString(),
-  //                                 //   case "nightmare":
-  //                                 //       currentStats.easyPoints.toString(),
-
-  //                                 // },
-  //                                 currentStats.easyPoints.toString(),
-  //                                 Icons.score,
-  //                                 Colors.lightGreenAccent,
-  //                                 () {}),
-  //                           ],
-  //                         ),
-  //                       )
-  //                     ],
-  //                   ),
-  //                 ),
-  //                 Padding(
-  //                   padding: const EdgeInsets.symmetric(vertical: 10),
-  //                   child: Text(
-  //                     "Wins",
-  //                     style: TTextThemes.defaultTextTheme.headlineMedium,
-  //                   ),
-  //                 ),
-  //                 dullContainer(
-  //                   Column(
-  //                     children: [
-  //                       Padding(
-  //                         padding: const EdgeInsets.all(8.0),
-  //                         child: Column(
-  //                           children: [
-  //                             tiles(
-  //                                 "$diffuclty Wins",
-  //                                 currentStats.easyGamesWon.toString(),
-  //                                 Icons.emoji_events_outlined,
-  //                                 Colors.green,
-  //                                 () {}),
-  //                             seperator(),
-  //                             tiles(
-  //                               "$diffuclty Win Rate",
-  //                               "${currentStats.easyWinRate}%",
-  //                               Icons.star_rate_rounded,
-  //                               const Color.fromARGB(255, 225, 136, 129),
-  //                               () {},
-  //                             ),
-  //                           ],
-  //                         ),
-  //                       )
-  //                     ],
-  //                   ),
-  //                 ),
-  //               ],
-  //             ),
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
 
   bool test = false;
   Widget tiles(String title, String value, IconData icon, Color iconColor,
@@ -1097,22 +907,6 @@ class _StatisticsPageState extends State<StatisticsPage> {
                     color: TColors.textDefault.withValues(alpha: 0.8),
                   ),
                 ),
-                // Switch(
-                //   activeTrackColor: TColors.iconDefault,
-                //   inactiveThumbColor: TColors.backgroundSecondary,
-                //   trackOutlineColor: const WidgetStatePropertyAll(
-                //     Colors.transparent,
-                //   ),
-                //   trackColor: WidgetStatePropertyAll(
-                //     TColors.majorHighlight,
-                //   ),
-                //   value: test,
-                //   onChanged: (x) {
-                //     setState(() {
-                //       test = !test;
-                //     });
-                //   },
-                // ),
               ],
             ),
           ],
@@ -1129,16 +923,6 @@ class _StatisticsPageState extends State<StatisticsPage> {
         borderRadius: BorderRadius.circular(20),
       ),
       child: child,
-    );
-  }
-
-  Widget _buildStatItem(String title, String value) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8),
-      child: Text(
-        '$title: $value',
-        style: TTextThemes.defaultTextTheme.bodyLarge,
-      ),
     );
   }
 }

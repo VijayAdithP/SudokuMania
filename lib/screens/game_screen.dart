@@ -170,6 +170,7 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
     final time = ref.read(timeProvider.notifier).getElapsedTime();
     final difficultyString =
         ref.read(difficultyProvider.notifier).getDifficultyString();
+    final stats = await HiveService.loadUserStats() ?? UserStats();
     await HiveService.saveGame(GameProgress(
       boardState: _board.grid,
       givenNumbers: _board.givenNumbers,
@@ -179,7 +180,34 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
       lastPlayed: lastPlayed,
       invalidCells: _board.invalidCells,
     ));
-    // log(_board.mistakes.toString());
+    var updatedStats = stats.copyWith(
+      totalTime: stats.totalTime + time,
+    );
+    if (difficultyString == "Easy") {
+      updatedStats = updatedStats.copyWith(
+        easyTotalTime: updatedStats.easyTotalTime + time,
+      );
+    } else if (difficultyString == "Medium") {
+      updatedStats = updatedStats.copyWith(
+        mediumTotalTime: updatedStats.mediumTotalTime + time,
+      );
+    } else if (difficultyString == "Hard") {
+      updatedStats = updatedStats.copyWith(
+        hardTotalTime: updatedStats.hardTotalTime + time,
+      );
+    } else if (difficultyString == "Nightmare") {
+      updatedStats = updatedStats.copyWith(
+        nightmareTotalTime: updatedStats.nightmareTotalTime + time,
+      );
+    }
+
+    // Save the updated stats
+    await HiveService.saveUserStats(updatedStats);
+
+    // Log the results
+    log("plus the difficulty $difficultyString");
+    log("This is the elapsed time ${updatedStats.easyTotalTime.toString()}");
+    log("This is the current elapsed time ${time.toString()}");
   }
 
   // void _clearGame() async {
@@ -278,39 +306,126 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
     context.go(Routes.gameCompleteScreen);
   }
 
-  void _onGameOver() {
+  // void _onGameOver() async {
+  //   UserStats? currentStats = await HiveService.loadUserStats() ?? UserStats();
+  //   ref.read(timeProvider.notifier).stop();
+
+  //   setState(() {
+  //     paused = true;
+  //   });
+
+  //   final updatedStats = currentStats.copyWith(
+  //     currentWinStreak: 0,
+  //   );
+  //   showDialog(
+  //       barrierDismissible: false,
+  //       context: context,
+  //       builder: (context) => GameOverDialog());
+  //   await HiveService.saveUserStats(updatedStats);
+  // }
+
+  void _onGameOver() async {
+    UserStats? currentStats = await HiveService.loadUserStats() ?? UserStats();
     ref.read(timeProvider.notifier).stop();
+
     setState(() {
       paused = true;
     });
-    // _clearGame();
+
+    final updatedStats = currentStats.copyWith(
+      currentWinStreak: 0,
+    );
+
+    log("Updated Stats: ${updatedStats.currentWinStreak}"); // Log the updated stats
+
     showDialog(
-        barrierDismissible: false,
-        context: context,
-        builder: (context) => GameOverDialog());
+      barrierDismissible: false,
+      context: context,
+      builder: (context) => GameOverDialog(),
+    );
+
+    await HiveService.saveUserStats(updatedStats);
   }
 
+  // void _selectCell(int row, int col) {
+  //   final previousValue = _board.grid[row][col];
+  //   final maxMistakes = ref.read(maxMistakesProvider);
+  //   if (isLongPressMode) {
+  //     if (!_board.givenNumbers[row][col]) {
+  //       // Create a copy of the current invalidCells to modify
+  //       var newInvalidCells;
+  //       if (!_board.isMoveValid(row, col, lockedNumber!) ||
+  //           _board.grid[row][col] == null) {
+  //         newInvalidCells =
+  //             List.generate(9, (i) => List<bool>.from(_board.invalidCells[i]));
+  //       }
+
+  //       setState(() {
+  //         // Check if the move is valid before making it
+  //         bool isValid = _board.isMoveValid(row, col, lockedNumber!);
+
+  //         _recordMove(row, col, previousValue, !isValid);
+  //         // Mark this specific cell as invalid if needed
+  //         newInvalidCells[row][col] = !isValid;
+  //         // log(newInvalidCells[row][col].toString());
+
+  //         // Always update with the locked number
+  //         _board = _board.copyWith(
+  //           grid: _board.updateGrid(row, col, lockedNumber!),
+  //           invalidCells: newInvalidCells,
+  //         );
+
+  //         if (!isValid) {
+  //           Vibration.vibrate(duration: 200);
+  //           setState(() {
+  //             _board = _board.copyWith(
+  //               mistakes: _board.mistakes + 1,
+  //               gameOver: _board.mistakes + 1 >= maxMistakes,
+  //             );
+  //           });
+  //           if (_board.gameOver) _onGameOver();
+  //         } else if (_board.isSolved()) {
+  //           _onGameComplete();
+  //         }
+  //       });
+  //       _saveGame();
+  //     } else if (_board.grid[row][col] != 0) {
+  //       _saveGame();
+  //       setState(() {
+  //         lockedNumber = _board.grid[row][col];
+  //       });
+  //     }
+  //   } else {
+  //     // Normal mode selection (unchanged)
+  //     setState(() {
+  //       selectedRow = row;
+  //       selectedCol = col;
+  //       if (_board.grid[row][col] != 0) {
+  //         lockedNumber = _board.grid[row][col];
+  //       } else {
+  //         lockedNumber = null;
+  //       }
+  //     });
+  //   }
+  // }
   void _selectCell(int row, int col) {
     final previousValue = _board.grid[row][col];
     final maxMistakes = ref.read(maxMistakesProvider);
+
     if (isLongPressMode) {
       if (!_board.givenNumbers[row][col]) {
         // Create a copy of the current invalidCells to modify
-        var newInvalidCells;
-        if (!_board.isMoveValid(row, col, lockedNumber!) ||
-            _board.grid[row][col] == null) {
-          newInvalidCells =
-              List.generate(9, (i) => List<bool>.from(_board.invalidCells[i]));
-        }
+        var newInvalidCells =
+            List.generate(9, (i) => List<bool>.from(_board.invalidCells[i]));
 
         setState(() {
           // Check if the move is valid before making it
           bool isValid = _board.isMoveValid(row, col, lockedNumber!);
 
           _recordMove(row, col, previousValue, !isValid);
+
           // Mark this specific cell as invalid if needed
           newInvalidCells[row][col] = !isValid;
-          // log(newInvalidCells[row][col].toString());
 
           // Always update with the locked number
           _board = _board.copyWith(
@@ -331,6 +446,7 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
             _onGameComplete();
           }
         });
+
         _saveGame();
       } else if (_board.grid[row][col] != 0) {
         _saveGame();

@@ -201,7 +201,7 @@ class SudokuNotifier extends ChangeNotifier {
   Future<void> saveGame() async {
     if (_gameProgress != null) {
       await HiveService.saveGame(_gameProgress!);
-      log("✅ Game progress saved");
+      // log("✅ Game progress saved");
     }
   }
 
@@ -216,7 +216,7 @@ class SudokuNotifier extends ChangeNotifier {
       await HiveService.clearSavedGame();
       _gameProgress = null;
       notifyListeners();
-      log("✅ Game completed and saved to history");
+      // log("✅ Game completed and saved to history");
     }
   }
 

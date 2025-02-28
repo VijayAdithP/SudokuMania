@@ -1,6 +1,8 @@
 // import 'dart:developer';
 
 // import 'package:confetti/confetti.dart';
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
@@ -41,10 +43,10 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
   }
 
   Future<void> _initializeGameData() async {
+    await _loadGame();
     await scoreValue();
     await _saveScore();
     await _loadUserStats();
-    await _loadGame();
   }
 
   UserStats? userDetails;
@@ -189,44 +191,79 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
     return "$minutes:${seconds.toString().padLeft(2, '0')}";
   }
 
+  // void updateAvgTime(int totalTime, int gamesCompleted) async {
+  //   UserStats currentStats = await HiveService.loadUserStats() ?? UserStats();
+  //   UserStats.calculateAvgTime(currentStats.time, gamesCompleted);
+  //   UserStats.calculateAvgTime(currentStats., easyGamesCompleted);
+
+  //   UserStats.calculateAvgTime(mediumTotalTime, mediumGamesCompleted);
+  //   UserStats.calculateAvgTime(hardTotalTime, hardGamesCompleted);
+
+  //   UserStats.calculateAvgTime(expertTotalTime, expertGamesCompleted);
+
+  //   UserStats.calculateAvgTime(nightmareTotalTime, nightmareGamesCompleted);
+  // }
+
   Future<void> _saveScore() async {
     final difficulty =
         ref.read(difficultyProvider.notifier).getDifficultyString();
     UserStats currentStats = await HiveService.loadUserStats() ?? UserStats();
+
     switch (difficulty) {
-      case "Easy":
+      case 'Easy':
         currentStats = currentStats.copyWith(
           totalPoints: currentStats.totalPoints + score,
           easyPoints: currentStats.easyPoints + score,
           easyGamesWon: currentStats.easyGamesWon + 1,
           gamesWon: currentStats.gamesWon + 1,
+          longestWinStreak:
+              (currentStats.currentWinStreak >= currentStats.longestWinStreak)
+                  ? currentStats.currentWinStreak
+                  : currentStats.longestWinStreak,
+          currentWinStreak: currentStats.currentWinStreak + 1,
         );
         break;
-      case "Medium":
+      case 'Medium':
         currentStats = currentStats.copyWith(
           totalPoints: currentStats.totalPoints + score,
           mediumPoints: currentStats.mediumPoints + score,
           mediumGamesWon: currentStats.mediumGamesWon + 1,
           gamesWon: currentStats.gamesWon + 1,
+          longestWinStreak:
+              (currentStats.currentWinStreak >= currentStats.longestWinStreak)
+                  ? currentStats.currentWinStreak
+                  : currentStats.longestWinStreak,
+          currentWinStreak: currentStats.currentWinStreak + 1,
         );
         break;
-      case "Hard":
+      case 'Hard':
         currentStats = currentStats.copyWith(
           totalPoints: currentStats.totalPoints + score,
           hardPoints: currentStats.hardPoints + score,
           hardGamesWon: currentStats.hardGamesWon + 1,
           gamesWon: currentStats.gamesWon + 1,
+          longestWinStreak:
+              (currentStats.currentWinStreak >= currentStats.longestWinStreak)
+                  ? currentStats.currentWinStreak
+                  : currentStats.longestWinStreak,
+          currentWinStreak: currentStats.currentWinStreak + 1,
         );
         break;
-      case "Nightmare":
+      case 'Nightmare':
         currentStats = currentStats.copyWith(
           totalPoints: currentStats.totalPoints + score,
           nightmarePoints: currentStats.nightmarePoints + score,
           nightmareGamesWon: currentStats.nightmareGamesWon + 1,
           gamesWon: currentStats.gamesWon + 1,
+          longestWinStreak:
+              (currentStats.currentWinStreak >= currentStats.longestWinStreak)
+                  ? currentStats.currentWinStreak
+                  : currentStats.longestWinStreak,
+          currentWinStreak: currentStats.currentWinStreak + 1,
         );
         break;
     }
+
     await HiveService.saveUserStats(currentStats);
   }
 

@@ -15,7 +15,7 @@ class HiveService {
   static Future<void> saveGame(GameProgress game) async {
     var box = await Hive.openBox<GameProgress>(_gameBox);
     await box.put('currentGame', game);
-    log("✅ Game saved");
+    // log("✅ Game saved");
   }
 
   /// Load the last saved game
@@ -31,14 +31,14 @@ class HiveService {
       var game = box.get('currentGame');
 
       if (game != null) {
-        log("✅ Game loaded with elapsed time: ${game.elapsedTime}");
+        // log("✅ Game loaded with elapsed time: ${game.elapsedTime}");
         return game;
       } else {
-        log("⚠️ No saved game found");
+        // log("⚠️ No saved game found");
         return null;
       }
     } catch (e) {
-      log("❌ Error loading game: $e");
+      // log("❌ Error loading game: $e");
       // Return null on error or consider returning a default game
       return null;
     }
@@ -46,7 +46,7 @@ class HiveService {
 
   /// Save user statistics to Hive
   static Future<void> saveUserStats(UserStats stats) async {
-    log("✅ User stats saved to Hive");
+    // log("✅ User stats saved to Hive");
     var box = await Hive.openBox<UserStats>(_statsBox);
     await box.put('stats', stats);
   }
@@ -55,19 +55,19 @@ class HiveService {
   static Future<void> saveUserId(String userId) async {
     var box = await Hive.openBox<String>(_userBox);
     await box.put('userId', userId);
-    log("✅ User ID saved: $userId");
+    // log("✅ User ID saved: $userId");
   }
 
   /// 🔹 Retrieve user ID from Hive
   static Future<String?> getUserId() async {
-    log("🗑️ Getting Offline UserId");
+    // log("🗑️ Getting Offline UserId");
     var box = await Hive.openBox<String>(_userBox);
     return box.get('userId');
   }
 
   /// 🔹 Clear offline sync queue
   static Future<void> clearOfflineSyncQueue() async {
-    log("🗑️ Offline sync queue cleared");
+    // log("🗑️ Offline sync queue cleared");
     var box = await Hive.openBox<UserStats>(_offlineSyncBox);
     await box.delete('pendingSync');
   }
@@ -80,11 +80,11 @@ class HiveService {
 
   /// 🔹 Save stats for offline sync
   static Future<void> queueOfflineSync(UserStats stats) async {
-    log("📂 queueOfflineSync() called"); // ✅ Debug log
+    // log("📂 queueOfflineSync() called"); // ✅ Debug log
 
     var box = await Hive.openBox<UserStats>(_offlineSyncBox);
     await box.put('pendingSync', stats);
-    log("📂 User stats queued for sync when online");
+    // log("📂 User stats queued for sync when online");
   }
 
   /// Load user statistics from Hive
@@ -97,7 +97,7 @@ class HiveService {
   static Future<void> saveToHistory(GameProgress game) async {
     var box = await Hive.openBox<GameProgress>(_historyBox);
     await box.add(game); // Adds a new entry
-    log("📂 Game added to history");
+    // log("📂 Game added to history");
   }
 
   /// Load all completed games from history
@@ -150,23 +150,23 @@ class HiveService {
 
   static Future<bool> clearSavedGame() async {
     try {
-      log("🔍 Attempting to clear saved game...");
+      // log("🔍 Attempting to clear saved game...");
       var box = await Hive.openBox<GameProgress>(_gameBox);
 
       // Check if the key exists before trying to delete
       if (box.containsKey('currentGame')) {
         await box.delete('currentGame');
         await box.delete('currentGame');
-        log("🗑️ Saved game cleared successfully");
+        // log("🗑️ Saved game cleared successfully");
       } else {
-        log("⚠️ No saved game found to clear");
+        // log("⚠️ No saved game found to clear");
       }
 
       // Close the box to ensure changes are saved
       // await box.close();
       return true;
     } catch (e) {
-      log("❌ Error clearing saved game: $e");
+      // log("❌ Error clearing saved game: $e");
       return false;
     }
   }
@@ -184,7 +184,7 @@ class HiveService {
   static Future<void> saveUsername(String username) async {
     var box = await Hive.openBox<String>(_userBox);
     await box.put('username', username);
-    log("✅ Username saved: $username");
+    // log("✅ Username saved: $username");
   }
 
   /// 🔹 Retrieve username from Hive

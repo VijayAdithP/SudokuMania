@@ -45,7 +45,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
 
   Future<void> _loadGameData() async {
     final gameData = await HiveService.loadGame();
-    log("Im loaded");
+    // log("Im loaded");
     // log(gameData!.difficulty.toString());
     if (mounted) {
       setState(() {

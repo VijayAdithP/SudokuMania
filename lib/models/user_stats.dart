@@ -119,100 +119,119 @@ class UserStats {
   @HiveField(7)
   final int totalPoints;
 
-  // Easy difficulty stats
   @HiveField(8)
+  final int totalTime;
+
+  // Easy difficulty stats
+  @HiveField(9)
   final int easyPoints;
 
-  @HiveField(13)
+  @HiveField(10)
   final int easyGamesStarted;
 
-  @HiveField(14)
+  @HiveField(11)
   final int easyGamesWon;
 
-  @HiveField(15)
+  @HiveField(12)
+  
   final double easyWinRate;
 
-  @HiveField(16)
+  @HiveField(13)
   final int easyBestTime;
 
-  @HiveField(17)
+  @HiveField(14)
   final int easyAvgTime;
 
+  @HiveField(15)
+  final int easyTotalTime;
+
   // Medium difficulty stats
-  @HiveField(9)
+  @HiveField(16)
   final int mediumPoints;
 
-  @HiveField(18)
+  @HiveField(17)
   final int mediumGamesStarted;
 
-  @HiveField(19)
+  @HiveField(18)
   final int mediumGamesWon;
 
-  @HiveField(20)
+  @HiveField(19)
   final double mediumWinRate;
 
-  @HiveField(21)
+  @HiveField(20)
   final int mediumBestTime;
 
-  @HiveField(22)
+  @HiveField(21)
   final int mediumAvgTime;
 
+  @HiveField(22)
+  final int mediumTotalTime;
+
   // Hard difficulty stats
-  @HiveField(10)
+  @HiveField(23)
   final int hardPoints;
 
-  @HiveField(23)
+  @HiveField(24)
   final int hardGamesStarted;
 
-  @HiveField(24)
+  @HiveField(25)
   final int hardGamesWon;
 
-  @HiveField(25)
+  @HiveField(26)
   final double hardWinRate;
 
-  @HiveField(26)
+  @HiveField(27)
   final int hardBestTime;
 
-  @HiveField(27)
+  @HiveField(28)
   final int hardAvgTime;
 
+  @HiveField(29)
+  final int hardTotalTime;
+
   // Expert difficulty stats
-  @HiveField(11)
+  @HiveField(30)
   final int expertPoints;
 
-  @HiveField(28)
+  @HiveField(31)
   final int expertGamesStarted;
 
-  @HiveField(29)
+  @HiveField(32)
   final int expertGamesWon;
 
-  @HiveField(30)
+  @HiveField(33)
   final double expertWinRate;
 
-  @HiveField(31)
+  @HiveField(34)
   final int expertBestTime;
 
-  @HiveField(32)
+  @HiveField(35)
   final int expertAvgTime;
 
+  @HiveField(36)
+  final int expertTotalTime;
+
   // Nightmare difficulty stats
-  @HiveField(12)
+  @HiveField(37)
   final int nightmarePoints;
 
-  @HiveField(33)
+  @HiveField(38)
   final int nightmareGamesStarted;
 
-  @HiveField(34)
+  @HiveField(39)
   final int nightmareGamesWon;
 
-  @HiveField(35)
+  @HiveField(40)
   final double nightmareWinRate;
 
-  @HiveField(36)
+  @HiveField(41)
   final int nightmareBestTime;
 
-  @HiveField(37)
+  @HiveField(42)
   final int nightmareAvgTime;
+
+  @HiveField(43)
+  final int nightmareTotalTime;
 
   UserStats({
     // Overall stats
@@ -224,6 +243,7 @@ class UserStats {
     this.currentWinStreak = 0,
     this.longestWinStreak = 0,
     this.totalPoints = 0,
+    this.totalTime = 0,
 
     // Easy difficulty stats
     this.easyPoints = 0,
@@ -232,6 +252,7 @@ class UserStats {
     this.easyWinRate = 0.0,
     this.easyBestTime = 0,
     this.easyAvgTime = 0,
+    this.easyTotalTime = 0,
 
     // Medium difficulty stats
     this.mediumPoints = 0,
@@ -240,6 +261,7 @@ class UserStats {
     this.mediumWinRate = 0.0,
     this.mediumBestTime = 0,
     this.mediumAvgTime = 0,
+    this.mediumTotalTime = 0,
 
     // Hard difficulty stats
     this.hardPoints = 0,
@@ -248,6 +270,7 @@ class UserStats {
     this.hardWinRate = 0.0,
     this.hardBestTime = 0,
     this.hardAvgTime = 0,
+    this.hardTotalTime = 0,
 
     // Expert difficulty stats
     this.expertPoints = 0,
@@ -256,6 +279,7 @@ class UserStats {
     this.expertWinRate = 0.0,
     this.expertBestTime = 0,
     this.expertAvgTime = 0,
+    this.expertTotalTime = 0,
 
     // Nightmare difficulty stats
     this.nightmarePoints = 0,
@@ -264,6 +288,7 @@ class UserStats {
     this.nightmareWinRate = 0.0,
     this.nightmareBestTime = 0,
     this.nightmareAvgTime = 0,
+    this.nightmareTotalTime = 0,
   });
 
   /// Creates a copy with updated values
@@ -277,6 +302,7 @@ class UserStats {
     int? currentWinStreak,
     int? longestWinStreak,
     int? totalPoints,
+    int? totalTime,
 
     // Easy difficulty stats
     int? easyPoints,
@@ -285,6 +311,7 @@ class UserStats {
     double? easyWinRate,
     int? easyBestTime,
     int? easyAvgTime,
+    int? easyTotalTime,
 
     // Medium difficulty stats
     int? mediumPoints,
@@ -293,6 +320,7 @@ class UserStats {
     double? mediumWinRate,
     int? mediumBestTime,
     int? mediumAvgTime,
+    int? mediumTotalTime,
 
     // Hard difficulty stats
     int? hardPoints,
@@ -301,6 +329,7 @@ class UserStats {
     double? hardWinRate,
     int? hardBestTime,
     int? hardAvgTime,
+    int? hardTotalTime,
 
     // Expert difficulty stats
     int? expertPoints,
@@ -309,6 +338,7 @@ class UserStats {
     double? expertWinRate,
     int? expertBestTime,
     int? expertAvgTime,
+    int? expertTotalTime,
 
     // Nightmare difficulty stats
     int? nightmarePoints,
@@ -317,6 +347,7 @@ class UserStats {
     double? nightmareWinRate,
     int? nightmareBestTime,
     int? nightmareAvgTime,
+    int? nightmareTotalTime,
   }) {
     return UserStats(
       // Overall stats
@@ -328,6 +359,7 @@ class UserStats {
       currentWinStreak: currentWinStreak ?? this.currentWinStreak,
       longestWinStreak: longestWinStreak ?? this.longestWinStreak,
       totalPoints: totalPoints ?? this.totalPoints,
+      totalTime: totalTime ?? this.totalTime,
 
       // Easy difficulty stats
       easyPoints: easyPoints ?? this.easyPoints,
@@ -336,6 +368,7 @@ class UserStats {
       easyWinRate: easyWinRate ?? this.easyWinRate,
       easyBestTime: easyBestTime ?? this.easyBestTime,
       easyAvgTime: easyAvgTime ?? this.easyAvgTime,
+      easyTotalTime: easyTotalTime ?? this.easyTotalTime,
 
       // Medium difficulty stats
       mediumPoints: mediumPoints ?? this.mediumPoints,
@@ -344,6 +377,7 @@ class UserStats {
       mediumWinRate: mediumWinRate ?? this.mediumWinRate,
       mediumBestTime: mediumBestTime ?? this.mediumBestTime,
       mediumAvgTime: mediumAvgTime ?? this.mediumAvgTime,
+      mediumTotalTime: mediumTotalTime ?? this.mediumTotalTime,
 
       // Hard difficulty stats
       hardPoints: hardPoints ?? this.hardPoints,
@@ -352,6 +386,7 @@ class UserStats {
       hardWinRate: hardWinRate ?? this.hardWinRate,
       hardBestTime: hardBestTime ?? this.hardBestTime,
       hardAvgTime: hardAvgTime ?? this.hardAvgTime,
+      hardTotalTime: hardTotalTime ?? this.hardTotalTime,
 
       // Expert difficulty stats
       expertPoints: expertPoints ?? this.expertPoints,
@@ -360,15 +395,16 @@ class UserStats {
       expertWinRate: expertWinRate ?? this.expertWinRate,
       expertBestTime: expertBestTime ?? this.expertBestTime,
       expertAvgTime: expertAvgTime ?? this.expertAvgTime,
+      expertTotalTime: expertTotalTime ?? this.expertTotalTime,
 
       // Nightmare difficulty stats
       nightmarePoints: nightmarePoints ?? this.nightmarePoints,
-      nightmareGamesStarted:
-          nightmareGamesStarted ?? this.nightmareGamesStarted,
+      nightmareGamesStarted: nightmareGamesStarted ?? this.nightmareGamesStarted,
       nightmareGamesWon: nightmareGamesWon ?? this.nightmareGamesWon,
       nightmareWinRate: nightmareWinRate ?? this.nightmareWinRate,
       nightmareBestTime: nightmareBestTime ?? this.nightmareBestTime,
       nightmareAvgTime: nightmareAvgTime ?? this.nightmareAvgTime,
+      nightmareTotalTime: nightmareTotalTime ?? this.nightmareTotalTime,
     );
   }
 
