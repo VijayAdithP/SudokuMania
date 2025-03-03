@@ -119,12 +119,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 const SizedBox(height: 20),
                 if (authState.isSignedIn)
                   Text(
-                    'Welcome, ${authState.user!.email}!',
+                    'Welcome, ${authState.user!.displayName}!',
                     style: TTextThemes.defaultTextTheme.bodyLarge!.copyWith(
                       fontSize: 18,
                       color: TColors.textDefault,
                     ),
                   ),
+                const SizedBox(
+                  height: 20,
+                ),
                 if (!authState.isSignedIn)
                   InkWell(
                     splashColor: TColors.textSecondary.withValues(alpha: 0.2),

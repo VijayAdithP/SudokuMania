@@ -113,3 +113,4 @@ class _MaxMistakesScreenState extends ConsumerState<MaxMistakesScreen> {
 }
 
 final maxMistakesProvider = StateProvider<int>((ref) => 3);
+final switchStateProvider = StateProvider<bool>((ref) => true);

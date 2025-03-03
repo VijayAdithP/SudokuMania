@@ -127,6 +127,7 @@ class SudokuBoard {
             invalidCells ?? List.generate(9, (_) => List.filled(9, false));
 
   /// Generates a new Sudoku board based on difficulty
+
   static SudokuBoard generateNewBoard(String difficulty, int maxMistakes) {
     List<List<int?>> emptyGrid = List.generate(9, (_) => List.filled(9, null));
     List<List<bool>> givenNumbers =

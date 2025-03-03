@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sudokumania/screens/account_details.dart';
+import 'package:sudokumania/screens/daily_challenges_screen.dart';
 import 'package:sudokumania/screens/game_completedScreen.dart';
 import 'package:sudokumania/screens/game_screen.dart';
 import 'package:sudokumania/screens/login_screen.dart';
@@ -45,6 +47,11 @@ final router = GoRouter(
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => LoginScreen(),
     ),
+    GoRoute(
+      path: Routes.accountDetails,
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => AccountDetails(),
+    ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) => LayoutScaffold(
         navigationShell: navigationShell,
@@ -61,16 +68,16 @@ final router = GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: Routes.leaderboardPage,
-              builder: (context, state) => LeaderboardPage(),
+              path: Routes.dailyChallenges,
+              builder: (context, state) => DailyChallenges(),
             ),
           ],
         ),
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: Routes.dailyChallengesPage,
-              builder: (context, state) => const HistoryPage(),
+              path: Routes.leaderboardPage,
+              builder: (context, state) => LeaderboardPage(),
             ),
           ],
         ),

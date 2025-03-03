@@ -10,4 +10,6 @@ class Routes {
   static const String gameCompleteScreen = '/gameCompleteScreen';
   static const String maxMistakesScreen = '/maxMistakesScreen';
   static const String loginScreen = '/loginScreen';
+  static const String accountDetails = '/accountDetails';
+  static const String dailyChallenges = '/dailyChallenges';
 }

@@ -14,7 +14,7 @@ const destinations = [
   Destination(
     label: 'Home',
     icon: HugeIcons.strokeRoundedHome07,
-    selectedIcon: HugeIcons.strokeRoundedHome07
+    selectedIcon: HugeIcons.strokeRoundedHome07,
   ),
   Destination(
     label: 'Daily',

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:restart_app/restart_app.dart';
 import 'package:sudokumania/constants/colors.dart';
 import 'package:sudokumania/screens/max_mistakes_screen.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
@@ -236,6 +237,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     "Vibration": false,
     "Mistakes Limit": false,
     "Clear Data": false,
+    "account": false,
   };
 
   @override
@@ -276,7 +278,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                           "Sounds",
                           "on",
                           HugeIcons.strokeRoundedMusicNote01,
-                          const Color.fromARGB(255, 230, 123, 116),
+                          TColors.buttonDefault,
                           true,
                           false,
                           null,
@@ -312,20 +314,45 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   padding: const EdgeInsets.all(8.0),
                   child: Column(
                     children: [
+                      // tiles(
+                      //     "Mistakes Limit",
+                      //     "on",
+                      //     HugeIcons.strokeRoundedCancel01,
+                      //     const Color.fromARGB(255, 230, 123, 116),
+                      //     false,
+                      //     false,
+                      //     push,
+                      //     ref,
+                      //     _switchStates["Mistakes Limit"]!, (value) {
+                      //   setState(() {
+                      //     setState(() {
+                      //       ref.read(maxMistakesProvider.notifier).state = 11;
+                      //     });
+                      //     _switchStates["Mistakes Limit"] = value;
+                      //   });
+                      // }),
                       tiles(
-                          "Mistakes Limit",
-                          "on",
-                          HugeIcons.strokeRoundedCancel01,
-                          const Color.fromARGB(255, 230, 123, 116),
-                          false,
-                          false,
-                          push,
-                          ref,
-                          _switchStates["Mistakes Limit"]!, (value) {
-                        setState(() {
-                          _switchStates["Mistakes Limit"] = value;
-                        });
-                      }),
+                        "Mistakes Limit",
+                        "on",
+                        HugeIcons.strokeRoundedCancel01,
+                        const Color.fromARGB(255, 230, 123, 116),
+                        !ref.read(switchStateProvider),
+                        false,
+                        push,
+                        ref,
+                        ref.watch(switchStateProvider),
+                        (value) {
+                          setState(() {
+                            ref.read(switchStateProvider.notifier).state =
+                                value;
+                            if (value) {
+                              ref.read(maxMistakesProvider.notifier).state = 3;
+                            } else {
+                              ref.read(maxMistakesProvider.notifier).state = 1000000;
+                            }
+                          });
+                        },
+                      ),
                     ],
                   ),
                 ),
@@ -335,6 +362,25 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   padding: const EdgeInsets.all(8.0),
                   child: Column(
                     children: [
+                      tiles(
+                        "Account",
+                        "on",
+                        HugeIcons.strokeRoundedUser,
+                        TColors.accentDefault,
+                        true,
+                        true,
+                        () => {
+                          context.push(Routes.accountDetails),
+                        },
+                        ref,
+                        _switchStates["account"]!,
+                        (value) {
+                          setState(() {
+                            _switchStates["account"] = value;
+                          });
+                        },
+                      ),
+                      seperator(),
                       tiles(
                         "Clear Data",
                         "on",
@@ -418,7 +464,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      Hive.close();
+                      Hive.deleteFromDisk();
                       Navigator.pop(context);
                     },
                     child: Container(
@@ -601,6 +647,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       ),
                     ],
                   ),
+                  if (isTappable)
+                    HugeIcon(
+                      icon: HugeIcons.strokeRoundedArrowRight01,
+                      size: 24,
+                      color: TColors.iconDefault,
+                    ),
                   if (!isTappable)
                     Switch(
                       activeTrackColor: TColors.iconDefault,

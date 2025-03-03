@@ -63,7 +63,12 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
   void _loadBoard() async {
     final difficultyString =
         ref.read(difficultyProvider.notifier).getDifficultyString();
-    final maxMistakes = ref.read(maxMistakesProvider);
+    var maxMistakes = ref.read(maxMistakesProvider);
+    if (ref.read(switchStateProvider)) {
+      maxMistakes = ref.read(maxMistakesProvider);
+    } else {
+      maxMistakes = 10000;
+    }
     setState(() {
       _board = SudokuBoard.generateNewBoard(difficultyString, maxMistakes);
     });
@@ -983,13 +988,15 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
                       ),
                   ],
                 ),
-                Text(
-                  "Mistakes: ${_board.mistakes}/$maxMistakes",
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.normal,
-                  ),
-                ),
+                (ref.read(switchStateProvider))
+                    ? Text(
+                        "Mistakes: ${_board.mistakes}/$maxMistakes",
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.normal,
+                        ),
+                      )
+                    : SizedBox(),
               ],
             ),
             _buildGrid(),

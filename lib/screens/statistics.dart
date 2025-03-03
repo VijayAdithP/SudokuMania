@@ -103,20 +103,23 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:sudokumania/constants/colors.dart';
 import 'package:sudokumania/models/user_stats.dart';
+import 'package:sudokumania/providers/auth_provider.dart';
 import 'package:sudokumania/service/hive_service.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
+import 'package:sudokumania/utlis/auth/auth.dart';
 import 'package:sudokumania/utlis/router/routes.dart';
 
-class StatisticsPage extends StatefulWidget {
+class StatisticsPage extends ConsumerStatefulWidget {
   @override
-  _StatisticsPageState createState() => _StatisticsPageState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _StatisticsPageState();
 }
 
-class _StatisticsPageState extends State<StatisticsPage> {
+class _StatisticsPageState extends ConsumerState<StatisticsPage> {
   Map<String, dynamic>? playerStats;
   String? userId;
   String? userName;
@@ -126,7 +129,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
   void initState() {
     super.initState();
     HiveService.saveUserId("testUser123");
-    _loadUserStats();
+    // _loadUserStats();
     _loadUserData();
   }
 
@@ -172,6 +175,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
     return Scaffold(
       appBar: AppBar(
         actionsPadding: EdgeInsets.symmetric(
@@ -273,15 +277,25 @@ class _StatisticsPageState extends State<StatisticsPage> {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      context.push(Routes.loginScreen);
+                      authState.user == null
+                          ? context.push(Routes.loginScreen)
+                          : null;
                     },
                     child: Text(
-                      userName == null ? "Login to Sync Data" : "$userName",
-                      style:
-                          TTextThemes.defaultTextTheme.headlineSmall!.copyWith(
-                        fontWeight: FontWeight.normal,
-                        color: TColors.textSecondary,
-                      ),
+                      authState.user == null
+                          ? "Login to Sync Data"
+                          : "${authState.user!.displayName}",
+                      style: authState.user == null
+                          ? TTextThemes.defaultTextTheme.headlineSmall!
+                              .copyWith(
+                              fontWeight: FontWeight.normal,
+                              color: TColors.textSecondary,
+                            )
+                          : TTextThemes.defaultTextTheme.headlineLarge!
+                              .copyWith(
+                              fontWeight: FontWeight.normal,
+                              color: TColors.buttonDefault,
+                            ),
                     ),
                   ),
                   SizedBox(height: 16),
@@ -857,7 +871,6 @@ class _StatisticsPageState extends State<StatisticsPage> {
     );
   }
 
-  bool test = false;
   Widget tiles(String title, String value, IconData icon, Color iconColor,
       Function? nav) {
     return Padding(
