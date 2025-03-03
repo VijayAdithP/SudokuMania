@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:hive_ce/hive.dart';
 import 'package:intl/intl.dart';
+import 'package:sudokumania/models/daily_challenge_progress.dart';
 import 'package:sudokumania/models/user_stats.dart';
 import '../models/game_progress.dart';
 
@@ -10,6 +11,7 @@ class HiveService {
   static const String _statsBox = 'userStats';
   static const String _userBox = 'userData';
   static const String _offlineSyncBox = 'offlineSync';
+  static const String _dailyChallengeBox = 'dailyChallengeBox';
 
   /// Save the current game state (for "Continue" button)
   static Future<void> saveGame(GameProgress game) async {
@@ -123,31 +125,6 @@ class HiveService {
     return groupedHistory;
   }
 
-  /// Clear current saved game (when a new one starts)
-  // static Future<void> clearSavedGame() async {
-  //   var box = await Hive.openBox<GameProgress>(_gameBox);
-  //   await box.delete('currentGame');
-  //   log("🗑️ Saved game cleared");
-  // }
-  // static Future<bool> clearSavedGame() async {
-  //   try {
-  //     log("🔍 Attempting to clear saved game...");
-  //     var box = await Hive.openBox<GameProgress>(_gameBox);
-  //     log("Box contents: ${box.toMap()}");
-  //     // Check if the key exists before trying to delete
-  //     if (box.containsKey('currentGame')) {
-  //       await box.delete('currentGame');
-  //       log("🗑️ Saved game cleared successfully");
-  //     } else {
-  //       log("⚠️ No saved game found to clear");
-  //     }
-  //     return true;
-  //   } catch (e) {
-  //     log("❌ Error clearing saved game: $e");
-  //     return false;
-  //   }
-  // }
-
   static Future<bool> clearSavedGame() async {
     try {
       // log("🔍 Attempting to clear saved game...");
@@ -191,5 +168,20 @@ class HiveService {
   static Future<String?> getUsername() async {
     var box = await Hive.openBox<String>(_userBox);
     return box.get('username');
+  }
+
+  static Future<void> init() async {
+    await Hive.openBox<DailyChallengeProgress>(_dailyChallengeBox);
+  }
+
+  static Future<void> saveDailyChallengeProgress(
+      DailyChallengeProgress progress) async {
+    var box = await Hive.openBox<DailyChallengeProgress>(_dailyChallengeBox);
+    await box.put('progress', progress);
+  }
+
+  static Future<DailyChallengeProgress?> loadDailyChallengeProgress() async {
+    var box = await Hive.openBox<DailyChallengeProgress>(_dailyChallengeBox);
+    return box.get('progress');
   }
 }

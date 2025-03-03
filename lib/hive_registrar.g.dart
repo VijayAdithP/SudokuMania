@@ -3,6 +3,7 @@
 // Check in to version control
 
 import 'package:hive_ce/hive.dart';
+import 'package:sudokumania/models/daily_challenge_progress.dart';
 import 'package:sudokumania/models/game_progress.dart';
 import 'package:sudokumania/models/sudoku_board.dart';
 import 'package:sudokumania/models/userModel.dart';
@@ -11,6 +12,7 @@ import 'package:sudokumania/models/user_stats.dart';
 extension HiveRegistrar on HiveInterface {
   void registerAdapters() {
     registerAdapter(CurrentGameProgressAdapter());
+    registerAdapter(DailyChallengeProgressAdapter());
     registerAdapter(DifficultyStatsAdapter());
     registerAdapter(GameHistoryAdapter());
     registerAdapter(GameProgressAdapter());

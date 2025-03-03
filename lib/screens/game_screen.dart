@@ -74,58 +74,6 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
     });
   }
 
-  // void _continueGame() async {
-  //   var game = await HiveService.loadGame();
-  //   if (game != null) {
-  //     setState(() {
-  //       _board = SudokuBoard(
-  //         grid: game.boardState,
-  //         givenNumbers: game.givenNumbers,
-  //         maxMistakes: game.mistakes,
-  //         mistakes: game.mistakes,
-  //       );
-  //     });
-  //   }
-  // }
-
-  // Future<void> _continueGame() async {
-  //   final maxMistakes = ref.read(maxMistakesProvider);
-  //   var game = await HiveService.loadGame();
-  //   if (game == null) {
-  //     // Handle the case where the game could not be loaded
-  //     return;
-  //   }
-
-  //   // Initialize invalidCells array
-  //   List<List<bool>> invalidCells = game.invalidCells;
-
-  //   // Validate user-entered values
-  //   for (int row = 0; row < 9; row++) {
-  //     for (int col = 0; col < 9; col++) {
-  //       if (game.boardState[row][col] != null && !game.givenNumbers[row][col]) {
-  //         // Check if this user-entered value is valid
-  //         bool isValid = await isMoveValidAgainstSolution(
-  //           row,
-  //           col,
-  //           game.boardState[row][col]!,
-  //         );
-  //         log("$row $col ${invalidCells[row][col]}");
-  //         invalidCells[row][col] = !isValid;
-  //       }
-  //     }
-  //   }
-
-  //   setState(() {
-  //     _board = SudokuBoard(
-  //       grid: game.boardState,
-  //       givenNumbers: game.givenNumbers,
-  //       maxMistakes: maxMistakes,
-  //       mistakes: game.mistakes,
-  //       invalidCells: invalidCells,
-  //     );
-  //   });
-  // }
-
   Future<void> _continueGame() async {
     final maxMistakes = ref.read(maxMistakesProvider);
     var game = await HiveService.loadGame();
@@ -311,24 +259,6 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
     context.go(Routes.gameCompleteScreen);
   }
 
-  // void _onGameOver() async {
-  //   UserStats? currentStats = await HiveService.loadUserStats() ?? UserStats();
-  //   ref.read(timeProvider.notifier).stop();
-
-  //   setState(() {
-  //     paused = true;
-  //   });
-
-  //   final updatedStats = currentStats.copyWith(
-  //     currentWinStreak: 0,
-  //   );
-  //   showDialog(
-  //       barrierDismissible: false,
-  //       context: context,
-  //       builder: (context) => GameOverDialog());
-  //   await HiveService.saveUserStats(updatedStats);
-  // }
-
   void _onGameOver() async {
     UserStats? currentStats = await HiveService.loadUserStats() ?? UserStats();
     ref.read(timeProvider.notifier).stop();
@@ -352,67 +282,6 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
     await HiveService.saveUserStats(updatedStats);
   }
 
-  // void _selectCell(int row, int col) {
-  //   final previousValue = _board.grid[row][col];
-  //   final maxMistakes = ref.read(maxMistakesProvider);
-  //   if (isLongPressMode) {
-  //     if (!_board.givenNumbers[row][col]) {
-  //       // Create a copy of the current invalidCells to modify
-  //       var newInvalidCells;
-  //       if (!_board.isMoveValid(row, col, lockedNumber!) ||
-  //           _board.grid[row][col] == null) {
-  //         newInvalidCells =
-  //             List.generate(9, (i) => List<bool>.from(_board.invalidCells[i]));
-  //       }
-
-  //       setState(() {
-  //         // Check if the move is valid before making it
-  //         bool isValid = _board.isMoveValid(row, col, lockedNumber!);
-
-  //         _recordMove(row, col, previousValue, !isValid);
-  //         // Mark this specific cell as invalid if needed
-  //         newInvalidCells[row][col] = !isValid;
-  //         // log(newInvalidCells[row][col].toString());
-
-  //         // Always update with the locked number
-  //         _board = _board.copyWith(
-  //           grid: _board.updateGrid(row, col, lockedNumber!),
-  //           invalidCells: newInvalidCells,
-  //         );
-
-  //         if (!isValid) {
-  //           Vibration.vibrate(duration: 200);
-  //           setState(() {
-  //             _board = _board.copyWith(
-  //               mistakes: _board.mistakes + 1,
-  //               gameOver: _board.mistakes + 1 >= maxMistakes,
-  //             );
-  //           });
-  //           if (_board.gameOver) _onGameOver();
-  //         } else if (_board.isSolved()) {
-  //           _onGameComplete();
-  //         }
-  //       });
-  //       _saveGame();
-  //     } else if (_board.grid[row][col] != 0) {
-  //       _saveGame();
-  //       setState(() {
-  //         lockedNumber = _board.grid[row][col];
-  //       });
-  //     }
-  //   } else {
-  //     // Normal mode selection (unchanged)
-  //     setState(() {
-  //       selectedRow = row;
-  //       selectedCol = col;
-  //       if (_board.grid[row][col] != 0) {
-  //         lockedNumber = _board.grid[row][col];
-  //       } else {
-  //         lockedNumber = null;
-  //       }
-  //     });
-  //   }
-  // }
   void _selectCell(int row, int col) {
     final previousValue = _board.grid[row][col];
     final maxMistakes = ref.read(maxMistakesProvider);
@@ -626,117 +495,6 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
       ),
     );
   }
-  // Widget _buildGrid() {
-  //   return AspectRatio(
-  //     aspectRatio: 1,
-  //     child: ClipPath(
-  //       clipper: SquircleClipper(cornerRadius: 50),
-  //       child: Stack(
-  //         children: [
-  //           GridView.builder(
-  //             physics: NeverScrollableScrollPhysics(),
-  //             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-  //               crossAxisCount: 9,
-  //               childAspectRatio: 1,
-  //             ),
-  //             itemCount: 81,
-  //             itemBuilder: (context, index) {
-  //               int row = index ~/ 9;
-  //               int col = index % 9;
-
-  //               Color cellColor = const Color.fromARGB(255, 51, 46, 72);
-
-  //               // Check if the current cell is invalid
-  //               bool isInvalidMove = _board.grid[row][col] != null &&
-  //                   !_board.isMoveValid(row, col, _board.grid[row][col]!);
-
-  //               if (isInvalidMove) {
-  //                 cellColor = Colors.red[100]!; // Highlight in red if invalid
-  //               }
-
-  //               // Normal and long press mode logic (as in your existing code)
-  //               if (isLongPressMode) {
-  //                 if (_board.grid[row][col] != null &&
-  //                     _board.grid[row][col] == lockedNumber) {
-  //                   cellColor = TColors.majorHighlight;
-  //                 }
-  //               } else {
-  //                 bool isSelected = row == selectedRow && col == selectedCol;
-  //                 bool isInSameRow = selectedRow != null && row == selectedRow;
-  //                 bool isInSameCol = selectedCol != null && col == selectedCol;
-  //                 bool isInSame3x3 = selectedRow != null &&
-  //                     selectedCol != null &&
-  //                     (row ~/ 3 == selectedRow! ~/ 3) &&
-  //                     (col ~/ 3 == selectedCol! ~/ 3);
-  //                 bool hasSameNumber = selectedRow != null &&
-  //                     selectedCol != null &&
-  //                     _board.grid[selectedRow!][selectedCol!] != null &&
-  //                     _board.grid[row][col] != null &&
-  //                     _board.grid[row][col] ==
-  //                         _board.grid[selectedRow!][selectedCol!];
-
-  //                 if (isSelected) {
-  //                   cellColor = TColors.majorHighlight;
-  //                 } else if (hasSameNumber) {
-  //                   cellColor =
-  //                       const Color.fromARGB(255, 51, 46, 72).withOpacity(0.3);
-  //                 } else if (isInSameRow || isInSameCol || isInSame3x3) {
-  //                   cellColor = HexColor("#363e79").withOpacity(0.7);
-  //                 }
-  //               }
-
-  //               // Rest of your existing grid cell code...
-  //               bool isRightOf3x3 = (col + 1) % 3 == 0 && col != 8;
-  //               bool isBottomOf3x3 = (row + 1) % 3 == 0 && row != 8;
-  //               bool isLeftOf3x3 = col % 3 == 0 && col != 0;
-  //               bool isTopOf3x3 = row % 3 == 0 && row != 0;
-
-  //               EdgeInsets cellMargin = EdgeInsets.only(
-  //                 top: isTopOf3x3 ? 2.0 : 1.0,
-  //                 left: isLeftOf3x3 ? 2.0 : 1.0,
-  //                 right: isRightOf3x3 ? 2.0 : 1.0,
-  //                 bottom: isBottomOf3x3 ? 2.0 : 1.0,
-  //               );
-
-  //               return GestureDetector(
-  //                 onTap: paused
-  //                     ? null
-  //                     : () {
-  //                         _selectCell(row, col);
-  //                       },
-  //                 child: Container(
-  //                   margin: cellMargin,
-  //                   alignment: Alignment.center,
-  //                   decoration: BoxDecoration(
-  //                     gradient: (_board.grid[row][col] != null &&
-  //                             _board.grid[row][col] == lockedNumber)
-  //                         ? LinearGradient(
-  //                             colors: [TColors.g1Color, TColors.g2Color],
-  //                           )
-  //                         : null,
-  //                     color: cellColor, // Apply the color based on validity
-  //                   ),
-  //                   child: Text(
-  //                     _board.grid[row][col]?.toString() ?? "",
-  //                     style: TTextThemes.defaultTextTheme.bodyMedium!.copyWith(
-  //                       fontSize: 20,
-  //                       fontWeight: FontWeight.normal,
-  //                       color: _board.givenNumbers[row][col]
-  //                           ? (cellColor == TColors.majorHighlight)
-  //                               ? Colors.white
-  //                               : TColors.textSecondary
-  //                           : Colors.white,
-  //                     ),
-  //                   ),
-  //                 ),
-  //               );
-  //             },
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
 
   void erase(int row, int col) {
     // Check if the cell is already empty
@@ -770,10 +528,6 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
       _board.invalidCells[row][col] = false; // Mark the cell as valid
       _board.grid[row][col] = null; // Clear the cell
       _saveGame(); // Save the game state
-      // Reset the cell to its previous value
-      // _board = _board.copyWith(
-      //   grid: _board.updateGrid(row, col, 0),
-      // );
 
       // If the move was invalid, decrement the mistake counter
       if (wasInvalid) {
