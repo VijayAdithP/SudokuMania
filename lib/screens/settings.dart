@@ -4,6 +4,7 @@ import 'package:hive_ce/hive.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:restart_app/restart_app.dart';
 import 'package:sudokumania/constants/colors.dart';
+import 'package:sudokumania/providers/daily_challenges_provider.dart';
 import 'package:sudokumania/screens/max_mistakes_screen.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
 import 'package:sudokumania/utlis/router/routes.dart';
@@ -348,7 +349,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                             if (value) {
                               ref.read(maxMistakesProvider.notifier).state = 3;
                             } else {
-                              ref.read(maxMistakesProvider.notifier).state = 1000000;
+                              ref.read(maxMistakesProvider.notifier).state =
+                                  1000000;
                             }
                           });
                         },
@@ -466,6 +468,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     onTap: () {
                       Hive.deleteFromDisk();
                       Navigator.pop(context);
+                      ref.invalidate(dailyChallengeProvider);
                     },
                     child: Container(
                       width: MediaQuery.of(context).size.width,

@@ -93,6 +93,7 @@ import 'package:go_router/go_router.dart';
 import 'package:sudokumania/constants/colors.dart';
 import 'package:sudokumania/models/game_progress.dart';
 import 'package:sudokumania/providers/newGameProviders/game_generation.dart';
+import 'package:sudokumania/providers/type_game_provider.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
 import 'package:sudokumania/utlis/router/routes.dart';
 
@@ -121,6 +122,7 @@ class _ContinueButtonState extends ConsumerState<ContinueButton> {
       ),
       child: GestureDetector(
         onTap: () {
+          ref.read(gameSourceProvider.notifier).state = GameSource.normal;
           if (widget.gameinfo.difficulty == "Easy") {
             ref
                 .read(difficultyProvider.notifier)

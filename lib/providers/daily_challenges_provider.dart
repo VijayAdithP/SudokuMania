@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sudokumania/models/daily_challenge_progress.dart';
 import 'package:sudokumania/service/hive_service.dart';
@@ -16,11 +18,13 @@ class DailyChallengeNotifier extends StateNotifier<DailyChallengeProgress> {
     if (progress != null) {
       state = progress;
     }
+    log("Loaded daily challenge progress: ${state.completedDays}");
   }
 
   Future<void> completeChallenge(DateTime date, double score) async {
     final updatedDays = Map<DateTime, bool>.from(state.completedDays);
-    updatedDays[date] = true;
+    final normalizedDate = DateTime(date.year, date.month, date.day);
+    updatedDays[normalizedDate] = true;
 
     final newMultiplier = state.multiplier + 0.5;
     final newCompletedCount = state.completedCount + 1;
@@ -30,7 +34,8 @@ class DailyChallengeNotifier extends StateNotifier<DailyChallengeProgress> {
       multiplier: newMultiplier,
       completedCount: newCompletedCount,
     );
-
+    // log("Marking date as completed: $date");
+    // log("Updated completedDays: ${state.completedDays}");
     await HiveService.saveDailyChallengeProgress(state);
   }
 }

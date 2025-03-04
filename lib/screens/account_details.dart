@@ -19,7 +19,9 @@ class _AccountDetailsState extends ConsumerState<AccountDetails> {
     await authService.signOut();
 
     // Update the auth state using the provider
+
     ref.read(authProvider.notifier).signOut();
+    setState(() {});
   }
 
   @override

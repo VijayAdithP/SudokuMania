@@ -60,17 +60,20 @@
 //   }
 // }
 import 'dart:math';
+import 'dart:developer' as dev;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:intl/intl.dart';
 import 'package:sudokumania/constants/colors.dart';
-import 'package:sudokumania/providers/daily_challenges_privider.dart';
+import 'package:sudokumania/providers/daily_challenges_provider.dart';
 import 'package:sudokumania/providers/newGameProviders/game_generation.dart';
+import 'package:sudokumania/providers/type_game_provider.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
 import 'package:sudokumania/utlis/router/routes.dart';
+import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 
@@ -86,8 +89,8 @@ class _DailyChallengesState extends ConsumerState<DailyChallenges> {
 
   @override
   void initState() {
-    super.initState();
     ref.read(dailyChallengeProvider.notifier).loadProgress();
+    super.initState();
   }
 
   SudokuDifficulty getRandomDifficulty() {
@@ -96,25 +99,28 @@ class _DailyChallengesState extends ConsumerState<DailyChallenges> {
     return difficulties[random.nextInt(difficulties.length)];
   }
 
-  // Function to start the game
   void _startGame(DateTime selectedDate) {
     final today = DateTime.now();
     final isPastOrToday =
         selectedDate.isBefore(today) || selectedDate.isAtSameMomentAs(today);
+    ref.read(gameSourceProvider.notifier).state = GameSource.calendar;
 
     if (isPastOrToday) {
+      SudokuDifficulty easy = SudokuDifficulty.easy;
       final randomDifficulty = getRandomDifficulty();
-      ref.read(difficultyProvider.notifier).setDifficulty(randomDifficulty);
+      ref.read(difficultyProvider.notifier).setDifficulty(easy);
 
-      // Navigate to the game screen
       context.push(Routes.gameScreen);
     } else {
-      // Show a message if the selected date is in the future
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          duration: Duration(milliseconds: 500),
-          content:
-              Text("You can only play challenges for today or past dates."),
+          duration: Duration(
+            milliseconds: 700,
+          ),
+          dismissDirection: DismissDirection.up,
+          shape: StadiumBorder(),
+          content: Text("Play challenges for today or past dates."),
+          behavior: SnackBarBehavior.floating,
         ),
       );
     }
@@ -126,10 +132,11 @@ class _DailyChallengesState extends ConsumerState<DailyChallenges> {
 
   @override
   Widget build(BuildContext context) {
+    // dev.log("Is the ui being built?");
     final progress = ref.watch(dailyChallengeProvider);
     final daysInMonth =
         DateUtils.getDaysInMonth(_focusedDay.year, _focusedDay.month);
-
+    // dev.log("Progress: ${progress.completedDays}");
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -139,6 +146,19 @@ class _DailyChallengesState extends ConsumerState<DailyChallenges> {
             fontWeight: FontWeight.normal,
           ),
         ),
+        actionsPadding: EdgeInsets.symmetric(horizontal: 16),
+        actions: [
+          IconButton(
+            onPressed: () {
+              ref.watch(dailyChallengeProvider);
+              setState(() {});
+            },
+            icon: HugeIcon(
+              icon: HugeIcons.strokeRoundedReload,
+              color: TColors.iconDefault,
+            ),
+          ),
+        ],
         backgroundColor: Colors.transparent,
       ),
       body: Column(
@@ -148,34 +168,199 @@ class _DailyChallengesState extends ConsumerState<DailyChallenges> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Container(
-              decoration: BoxDecoration(
-                color: TColors.primaryDefault,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: TableCalendar(
-                daysOfWeekVisible: false,
-                weekNumbersVisible: false,
-                headerVisible: false,
-                firstDay: DateTime.utc(2020, 1, 1),
-                lastDay: DateTime.utc(2030, 12, 31),
-                focusedDay: _focusedDay,
-                onDaySelected: (selectedDay, focusedDay) {
-                  setState(() {
-                    _focusedDay = focusedDay;
-                  });
-
-                  _startGame(selectedDay);
-                },
-                calendarBuilders: CalendarBuilders(
-                  markerBuilder: (context, date, events) {
-                    if (progress.completedDays.containsKey(date)) {
-                      return Icon(Icons.check, color: Colors.green);
-                    }
-                    return null;
-                  },
+                decoration: BoxDecoration(
+                  color: TColors.primaryDefault,
+                  borderRadius: BorderRadius.circular(10),
                 ),
-              ),
-            ),
+                child:
+                    // SfDateRangePicker(
+                    //   view: DateRangePickerView.month,
+                    //   initialSelectedDate: _focusedDay,
+                    //   onSelectionChanged: (DateRangePickerSelectionChangedArgs args) {
+                    //     if (args.value is DateTime) {
+                    //       final selectedDate = args.value as DateTime;
+                    //       setState(() {
+                    //         _focusedDay = selectedDate;
+                    //       });
+                    //       _startGame(selectedDate);
+                    //     }
+                    //   },
+                    //   selectionMode: DateRangePickerSelectionMode.single,
+                    //   initialDisplayDate: _focusedDay,
+                    //   showActionButtons: true,
+                    //   confirmText: "Start",
+                    //   cancelText: "Cancel",
+                    //   cellBuilder: (BuildContext context, details) {
+                    //     final date = details.date;
+                    //     final isCompleted = progress.completedDays.containsKey(date);
+
+                    //     return Container(
+                    //       decoration: BoxDecoration(
+                    //         shape: BoxShape.circle,
+                    //         color: isCompleted
+                    //             ? Colors.green.withOpacity(0.2)
+                    //             : Colors.transparent,
+                    //       ),
+                    //       child: Center(
+                    //         child: Column(
+                    //           mainAxisAlignment: MainAxisAlignment.center,
+                    //           children: [
+                    //             Text(
+                    //               details.date.day.toString(),
+                    //               style: TextStyle(
+                    //                 color: isCompleted ? Colors.green : Colors.black,
+                    //               ),
+                    //             ),
+                    //             if (isCompleted)
+                    //               Icon(Icons.check, size: 12, color: Colors.green),
+                    //           ],
+                    //         ),
+                    //       ),
+                    //     );
+                    //   },
+                    // ),
+                    //     TableCalendar(
+                    //   daysOfWeekVisible: false,
+                    //   weekNumbersVisible: false,
+                    //   headerVisible: false,
+                    //   firstDay: DateTime.utc(2020, 1, 1),
+                    //   lastDay: DateTime.utc(2030, 12, 31),
+                    //   focusedDay: _focusedDay,
+                    //   onDaySelected: (selectedDay, focusedDay) {
+                    //     final normalizedDate = DateTime(
+                    //         selectedDay.year, selectedDay.month, selectedDay.day);
+
+                    //     if (progress.completedDays.containsKey(normalizedDate)) {
+                    //       ScaffoldMessenger.of(context).showSnackBar(
+                    //         SnackBar(
+                    //           duration: Duration(
+                    //             milliseconds: 700,
+                    //           ),
+                    //           dismissDirection: DismissDirection.up,
+                    //           backgroundColor: TColors.buttonDefault,
+                    //           shape: StadiumBorder(),
+                    //           content: Text(
+                    //             textAlign: TextAlign.center,
+                    //             "This day's challenge is already completed.",
+                    //             style: TTextThemes.defaultTextTheme.titleMedium,
+                    //           ),
+                    //           behavior: SnackBarBehavior.floating,
+                    //         ),
+                    //       );
+                    //       return;
+                    //     }
+
+                    //     // Update the focused day and start the game
+                    //     setState(() {
+                    //       _focusedDay = focusedDay;
+                    //     });
+                    //     _startGame(selectedDay);
+                    //   },
+                    //   availableGestures: AvailableGestures.none,
+                    //   calendarStyle: CalendarStyle(
+                    //     isTodayHighlighted: true,
+                    //     todayTextStyle: TTextThemes.defaultTextTheme.headlineSmall!,
+                    //     todayDecoration: BoxDecoration(
+                    //       color: TColors.buttonDefault,
+                    //       shape: BoxShape.circle,
+                    //     ),
+                    //   ),
+                    //   calendarBuilders: CalendarBuilders(
+                    //     markerBuilder: (context, date, events) {
+                    //       // Normalize the date to remove the time component
+                    //       final normalizedDate =
+                    //           DateTime(date.year, date.month, date.day);
+
+                    //       // Check if the normalized date is in the completedDays map
+                    //       if (progress.completedDays.containsKey(normalizedDate)) {
+                    //         dev.log("normalized date: $normalizedDate");
+                    //         return Icon(
+                    //           Icons.check,
+                    //           size: 30,
+                    //           color: Colors.green,
+                    //         );
+                    //       }
+                    //       return null;
+                    //     },
+                    //   ),
+                    // ),
+                    TableCalendar(
+                  daysOfWeekVisible: false,
+                  weekNumbersVisible: false,
+                  headerVisible: false,
+                  firstDay: DateTime.utc(2020, 1, 1),
+                  lastDay: DateTime.utc(2030, 12, 31),
+                  focusedDay: _focusedDay,
+                  onDaySelected: (selectedDay, focusedDay) {
+                    final normalizedDate = DateTime(
+                        selectedDay.year, selectedDay.month, selectedDay.day);
+
+                    if (progress.completedDays.containsKey(normalizedDate)) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          duration: Duration(milliseconds: 700),
+                          dismissDirection: DismissDirection.up,
+                          backgroundColor: TColors.buttonDefault,
+                          shape: StadiumBorder(),
+                          content: Text(
+                            textAlign: TextAlign.center,
+                            "This day's challenge is already completed.",
+                            style: TTextThemes.defaultTextTheme.titleMedium,
+                          ),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                      return;
+                    }
+
+                    // Update the focused day and start the game
+                    setState(() {
+                      _focusedDay = focusedDay;
+                    });
+                    _startGame(selectedDay);
+                  },
+                  availableGestures: AvailableGestures.none,
+                  calendarStyle: CalendarStyle(
+                    isTodayHighlighted: true,
+                    todayTextStyle: TTextThemes.defaultTextTheme.headlineSmall!,
+                    todayDecoration: BoxDecoration(
+                      color: TColors.buttonDefault,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  calendarBuilders: CalendarBuilders(
+                    markerBuilder: (context, date, events) {
+                      final normalizedDate =
+                          DateTime(date.year, date.month, date.day);
+
+                      if (progress.completedDays.containsKey(normalizedDate)) {
+                        return Container(
+                          decoration: BoxDecoration(
+                            color: Colors.green,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: Icon(
+                              Icons.check_circle,
+                              size: 40,
+                              color: TColors.textDefault,
+                            ),
+                          ),
+                        );
+                      }
+
+                      return Center(
+                        child: Text(
+                          '${date.day}',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                )),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -199,7 +384,6 @@ class _DailyChallengesState extends ConsumerState<DailyChallenges> {
               ),
             ),
           ),
-          // Expanded(child: SizedBox()),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
@@ -243,7 +427,9 @@ class _DailyChallengesState extends ConsumerState<DailyChallenges> {
                     iconStyle: IconStyle(
                       fontSize: 25,
                       iconData: Icons.check,
-                      color: TColors.textSecondary,
+                      color: isCompleted
+                          ? TColors.textDefault
+                          : TColors.textSecondary,
                     ),
                   ),
                   startChild: Text(
@@ -252,10 +438,6 @@ class _DailyChallengesState extends ConsumerState<DailyChallenges> {
                       fontSize: 18,
                       color: isCompleted ? Colors.green : TColors.textDefault,
                     ),
-                    // style: TextStyle(
-                    //   color: isCompleted ? Colors.green : Colors.grey,
-                    //   fontWeight: FontWeight.bold,
-                    // ),
                   ),
                 );
               },

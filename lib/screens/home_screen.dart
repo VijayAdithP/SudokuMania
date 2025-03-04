@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:sudokumania/constants/colors.dart';
 import 'package:sudokumania/models/game_progress.dart';
+import 'package:sudokumania/providers/type_game_provider.dart';
 import 'package:sudokumania/service/hive_service.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
 import 'package:sudokumania/utlis/router/routes.dart';
@@ -101,7 +102,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
-    // final gameDataAsync = ref.watch(gameDataProvider);
+    final gameSource = ref.read(gameSourceProvider);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -159,45 +160,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                 ],
               ),
             ],
-          )
-              // Stack(
-              //   children: [
-              //     Positioned(
-              //       top: 80,
-              //       left: 80,
-              //       right: 80,
-              //       child: Image.asset(
-              //         "assets/images/sudoku.png",
-              //       ),
-              //     ),
-              //     Column(
-              //       mainAxisAlignment: MainAxisAlignment.center,
-              //       crossAxisAlignment: CrossAxisAlignment.end,
-              //       children: [
-              //         Text(
-              //           "SUDOKU MANIA",
-              //           style:
-              //               TTextThemes.defaultTextTheme.headlineLarge!.copyWith(
-              //             fontSize: 40,
-              //           ),
-              //         ),
-              //         Text(
-              //           textAlign: TextAlign.end,
-              //           "By Vijay Adith P",
-              //           style: TTextThemes.defaultTextTheme.bodySmall!.copyWith(),
-              //         ),
-              //       ],
-              //     ),
-              //   ],
-              // ),
-              ),
+          )),
           Expanded(
             child: Column(
               children: [
                 Expanded(
                   child: Container(),
                 ),
-                if (lastPlayedGame != null)
+                if (lastPlayedGame != null && gameSource != GameSource.calendar)
                   ContinueButton(
                     gameinfo: lastPlayedGame!,
                   )

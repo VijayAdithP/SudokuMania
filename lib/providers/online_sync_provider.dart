@@ -19,7 +19,7 @@ final onlineSyncProvider = Provider.autoDispose<void>((ref) async {
           await ref
               .read(statsProvider.notifier)
               .syncOfflineData(userId, username);
-          await HiveService.clearOfflineSyncQueue(); // Clear after syncing
+          await HiveService.clearOfflineSyncQueue();
         }
       }
     }

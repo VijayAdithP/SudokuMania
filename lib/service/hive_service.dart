@@ -177,7 +177,7 @@ class HiveService {
   static Future<void> saveDailyChallengeProgress(
       DailyChallengeProgress progress) async {
     var box = await Hive.openBox<DailyChallengeProgress>(_dailyChallengeBox);
-    await box.put('progress', progress);
+    final test = await box.put('progress', progress);
   }
 
   static Future<DailyChallengeProgress?> loadDailyChallengeProgress() async {

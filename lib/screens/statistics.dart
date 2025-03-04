@@ -99,6 +99,7 @@
 //     );
 //   }
 // }
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
@@ -109,6 +110,7 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:sudokumania/constants/colors.dart';
 import 'package:sudokumania/models/user_stats.dart';
 import 'package:sudokumania/providers/auth_provider.dart';
+import 'package:sudokumania/service/firebase_service.dart';
 import 'package:sudokumania/service/hive_service.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
 import 'package:sudokumania/utlis/auth/auth.dart';
@@ -128,8 +130,6 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
   @override
   void initState() {
     super.initState();
-    HiveService.saveUserId("testUser123");
-    // _loadUserStats();
     _loadUserData();
   }
 
@@ -151,15 +151,19 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
   }
 
   bool _isReloading = false;
+  Timer? _timer;
+
   Future<void> _saveUserStats(UserStats stats) async {
     await HiveService.saveUserStats(stats);
+    final authState = ref.watch(authProvider);
   }
 
   void _fetchPlayerStats() async {
+    final authState = ref.watch(authProvider);
     try {
       DocumentSnapshot snapshot = await FirebaseFirestore.instance
           .collection('users')
-          .doc("testUser123")
+          .doc(authState.user!.email)
           .get();
       if (snapshot.exists) {
         setState(() {

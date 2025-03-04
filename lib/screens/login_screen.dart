@@ -5,6 +5,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:sudokumania/constants/colors.dart';
 import 'package:sudokumania/providers/auth_provider.dart';
+import 'package:sudokumania/service/hive_service.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
 import 'package:sudokumania/utlis/auth/auth.dart';
 
@@ -34,6 +35,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     setState(() {
       isLoading = false;
     });
+    final authState = ref.watch(authProvider);
+    await HiveService.saveUserId(authState.user!.email!);
+    await HiveService.saveUsername(authState.user!.displayName!);
   }
 
   void _signOut() async {

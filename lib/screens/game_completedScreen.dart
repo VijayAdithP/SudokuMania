@@ -11,8 +11,10 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:sudokumania/constants/colors.dart';
 import 'package:sudokumania/models/game_progress.dart';
 import 'package:sudokumania/models/user_stats.dart';
+import 'package:sudokumania/providers/daily_challenges_provider.dart';
 import 'package:sudokumania/providers/gameProgressProviders/gameProgressProviders.dart';
 import 'package:sudokumania/providers/newGameProviders/game_generation.dart';
+import 'package:sudokumania/providers/type_game_provider.dart';
 import 'package:sudokumania/service/hive_service.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
 import 'package:sudokumania/utlis/router/routes.dart';
@@ -27,25 +29,22 @@ class GameCompletedscreen extends ConsumerStatefulWidget {
 }
 
 class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
-  // @override
-  // void initState() {
-  //   _loadGame();
-  //   _saveScore();
-  //   scoreValue();
-  //   _loadUserStats();
-  //   super.initState();
-  // }
-
   @override
   void initState() {
     super.initState();
+    _checkGameSource();
     _initializeGameData();
   }
 
   Future<void> _initializeGameData() async {
+    final gameSorce = ref.read(gameSourceProvider);
+
     await _loadGame();
     await scoreValue();
     await _saveScore();
+    // if (gameSorce == GameSource.calendar) {
+    //   _updateDailyChallenges();
+    // }
     await _loadUserStats();
   }
 
@@ -53,6 +52,8 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
   int? bestTime;
   int score = 0;
   GameProgress? game;
+  GameSource? gameSource;
+  double dailyScore = 0;
 
   // late ConfettiController _confettiController;
 
@@ -153,6 +154,10 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
     await HiveService.saveUserStats(updatedStats);
   }
 
+  void _checkGameSource() {
+    gameSource = ref.read(gameSourceProvider);
+  }
+
   Future<void> scoreValue() async {
     final difficulty =
         ref.read(difficultyProvider.notifier).getDifficultyString();
@@ -191,23 +196,25 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
     return "$minutes:${seconds.toString().padLeft(2, '0')}";
   }
 
-  // void updateAvgTime(int totalTime, int gamesCompleted) async {
-  //   UserStats currentStats = await HiveService.loadUserStats() ?? UserStats();
-  //   UserStats.calculateAvgTime(currentStats.time, gamesCompleted);
-  //   UserStats.calculateAvgTime(currentStats., easyGamesCompleted);
-
-  //   UserStats.calculateAvgTime(mediumTotalTime, mediumGamesCompleted);
-  //   UserStats.calculateAvgTime(hardTotalTime, hardGamesCompleted);
-
-  //   UserStats.calculateAvgTime(expertTotalTime, expertGamesCompleted);
-
-  //   UserStats.calculateAvgTime(nightmareTotalTime, nightmareGamesCompleted);
-  // }
-
   Future<void> _saveScore() async {
     final difficulty =
         ref.read(difficultyProvider.notifier).getDifficultyString();
     UserStats currentStats = await HiveService.loadUserStats() ?? UserStats();
+
+    //this the score for daily challenge
+    final date = DateTime.now();
+    final baseScore = score;
+    final multiplier = ref.read(dailyChallengeProvider).multiplier;
+
+    dailyScore = baseScore * multiplier;
+    ref
+        .read(dailyChallengeProvider.notifier)
+        .completeChallenge(date, dailyScore);
+
+    // Reset the game source
+    ref.read(gameSourceProvider.notifier).state = null;
+
+    //till here
 
     switch (difficulty) {
       case 'Easy':
@@ -267,6 +274,20 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
     await HiveService.saveUserStats(currentStats);
   }
 
+  // _updateDailyChallenges() {
+  //   final date = DateTime.now();
+  //   final baseScore = score;
+  //   final multiplier = ref.read(dailyChallengeProvider).multiplier;
+
+  //   dailyScore = baseScore * multiplier;
+  //   ref
+  //       .read(dailyChallengeProvider.notifier)
+  //       .completeChallenge(date, dailyScore);
+
+  //   // Reset the game source
+  //   ref.read(gameSourceProvider.notifier).state = null;
+  // }
+
   void _clearGame() async {
     await HiveService.clearSavedGame();
   }
@@ -274,8 +295,6 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
   @override
   Widget build(BuildContext context) {
     final elapsedTime = ref.read(timeProvider.notifier).getElapsedTime();
-    // final minutes = elapsedTime ~/ 60;
-    // final seconds = elapsedTime % 60;
 
     final int totalSeconds = elapsedTime ~/ 1000;
     final int minutes = (totalSeconds % 3600) ~/ 60;
@@ -297,26 +316,16 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
           crossAxisAlignment: CrossAxisAlignment.center,
           spacing: 16,
           children: [
-            // Text("Completed in $minutes:${seconds.toString().padLeft(2, '0')}"),
-            // ElevatedButton(
-            //   onPressed: () {
-            //     context.go(Routes.homePage);
-            //   },
-            //   child: const Text("Back to Main Menu"),
-            // ),
             Text(
               "Your Score!",
               style: TTextThemes.defaultTextTheme.headlineLarge!.copyWith(
                 fontWeight: FontWeight.normal,
                 fontSize: 40,
                 letterSpacing: 1.5,
-                // color: TColors.textSecondary,
               ),
             ),
-            Container(
-              // height: 80,
+            SizedBox(
               width: MediaQuery.of(context).size.width,
-              // color: Colors.blue,
               child: Row(
                 spacing: 10,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -373,13 +382,6 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
                       TColors.accentDefault,
                     ),
                     seperator(),
-                    // tiles(
-                    //   "Best Time",
-                    //   formatTime(bestTime!),
-                    //   // "filler",
-                    //   HugeIcons.strokeRoundedAward01,
-                    //   Colors.red,
-                    // ),
                     FutureBuilder<String>(
                       future: bestTime != null
                           ? formatTime(bestTime!)
@@ -449,6 +451,7 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
             ),
             GestureDetector(
               onTap: () {
+                // _updateDailyChallenges();
                 _clearGame();
                 context.go(Routes.homePage);
               },
@@ -456,7 +459,6 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
                 width: MediaQuery.of(context).size.width,
                 decoration: BoxDecoration(
                   color: TColors.buttonDefault.withRed(10),
-                  // color: TColors.primaryDefault,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Padding(
@@ -466,7 +468,6 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
                       "Main Menu",
                       style:
                           TTextThemes.defaultTextTheme.headlineSmall!.copyWith(
-                        // color: TColors.buttonDefault.withRed(0),
                         fontSize: 20,
                       ),
                     ),
@@ -474,9 +475,10 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
                 ),
               ),
             ),
-            StartButton(
-              lable: "New Game",
-            ),
+            if (gameSource != GameSource.calendar)
+              StartButton(
+                lable: "New Game",
+              ),
             SizedBox(
               height: MediaQuery.of(context).size.height * 0.001,
             ),

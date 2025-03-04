@@ -13,6 +13,7 @@ import 'package:sudokumania/models/sudoku_board.dart';
 import 'package:sudokumania/models/user_stats.dart';
 import 'package:sudokumania/providers/gameProgressProviders/gameProgressProviders.dart';
 import 'package:sudokumania/providers/newGameProviders/game_generation.dart';
+import 'package:sudokumania/providers/type_game_provider.dart';
 import 'package:sudokumania/screens/max_mistakes_screen.dart';
 import 'package:sudokumania/service/hive_service.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
@@ -280,6 +281,10 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
     );
 
     await HiveService.saveUserStats(updatedStats);
+  }
+
+  int calculateBaseScore() {
+    return (_board.maxMistakes - _board.mistakes) * 10;
   }
 
   void _selectCell(int row, int col) {
@@ -661,13 +666,18 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
         : '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
 
     final maxMistakes = ref.read(maxMistakesProvider);
+    final gameSource = ref.read(gameSourceProvider);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         leading: IconButton(
           onPressed: () {
-            ref.read(timeProvider.notifier).stop();
+            if (gameSource == GameSource.calendar) {
+              ref.read(timeProvider.notifier).reset();
+              HiveService.clearSavedGame();
+            }
             _saveGame();
+            ref.read(timeProvider.notifier).stop();
             context.go(Routes.homePage);
           },
           icon: HugeIcon(
