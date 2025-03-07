@@ -108,6 +108,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:sudokumania/constants/colors.dart';
+import 'package:sudokumania/models/user_cred.dart';
 import 'package:sudokumania/models/user_stats.dart';
 import 'package:sudokumania/providers/auth_provider.dart';
 import 'package:sudokumania/service/firebase_service.dart';
@@ -126,6 +127,7 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
   String? userId;
   String? userName;
   UserStats? currentStats;
+  UserCred? userCred;
 
   @override
   void initState() {
@@ -134,13 +136,17 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
   }
 
   void _loadUserData() async {
-    userId = HiveService.getUserId().toString();
-    userName = await HiveService.getUsername();
+    UserCred? userCred = await HiveService.getUserCred();
+    if (userCred != null) {
+      userId = userCred.email;
+      userName = userCred.displayName;
+      _fetchPlayerStats(); // Fetch player stats from Firestore
+    }
+
     final stats = await HiveService.loadUserStats(); // Reload stats from Hive
     setState(() {
       currentStats = stats; // Update the state with the new data
     });
-    _fetchPlayerStats(); // Fetch player stats from Firestore
   }
 
   Future<void> _loadUserStats() async {
@@ -153,17 +159,12 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
   bool _isReloading = false;
   Timer? _timer;
 
-  Future<void> _saveUserStats(UserStats stats) async {
-    await HiveService.saveUserStats(stats);
-    final authState = ref.watch(authProvider);
-  }
-
   void _fetchPlayerStats() async {
-    final authState = ref.watch(authProvider);
+    userCred = await HiveService.getUserCred();
     try {
       DocumentSnapshot snapshot = await FirebaseFirestore.instance
           .collection('users')
-          .doc(authState.user!.email)
+          .doc(userCred!.email)
           .get();
       if (snapshot.exists) {
         setState(() {
@@ -179,7 +180,6 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
     return Scaffold(
       appBar: AppBar(
         actionsPadding: EdgeInsets.symmetric(
@@ -281,15 +281,15 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage> {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      authState.user == null
+                      userCred == null
                           ? context.push(Routes.loginScreen)
                           : null;
                     },
                     child: Text(
-                      authState.user == null
+                      userCred == null
                           ? "Login to Sync Data"
-                          : "${authState.user!.displayName}",
-                      style: authState.user == null
+                          : "${userCred!.displayName}",
+                      style: userCred == null
                           ? TTextThemes.defaultTextTheme.headlineSmall!
                               .copyWith(
                               fontWeight: FontWeight.normal,

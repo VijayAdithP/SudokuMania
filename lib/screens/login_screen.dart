@@ -4,7 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:sudokumania/constants/colors.dart';
+import 'package:sudokumania/models/user_cred.dart';
+import 'package:sudokumania/models/user_stats.dart';
 import 'package:sudokumania/providers/auth_provider.dart';
+import 'package:sudokumania/service/firebase_service.dart';
 import 'package:sudokumania/service/hive_service.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
 import 'package:sudokumania/utlis/auth/auth.dart';
@@ -37,10 +40,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
     final authState = ref.watch(authProvider);
     await HiveService.saveUserId(authState.user!.email!);
-    await HiveService.saveUsername(authState.user!.displayName!);
+    await HiveService.saveUserCredentials(UserCred(
+      uid: authState.user!.uid,
+      emailVerified: authState.user!.emailVerified,
+      displayName: authState.user!.displayName,
+      email: authState.user!.email,
+      phoneNumber: authState.user!.phoneNumber,
+      photoURL: authState.user!.photoURL,
+    ));
+    UserStats? stats =
+        await FirebaseService.fetchUserStats(authState.user!.email!);
+    await HiveService.saveUserStats(stats!);
   }
 
   void _signOut() async {
+    await authService.googleSignIn.disconnect();
     await authService.signOut();
 
     // Update the auth state using the provider
@@ -58,7 +72,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         leading: InkWell(
           splashColor: Colors.transparent,
           radius: 50,
-          onTap: () => Navigator.pop(context),
+          onTap: () async {
+            Navigator.pop(context);
+            if (authState.user != null) {
+              await HiveService.saveUsername(authState.user!.displayName!);
+              // UserStats? userdata = await HiveService.loadUserStats();
+              // await FirebaseService.updatePlayerStats(authState.user!.email!,
+              //     authState.user!.displayName!, userdata!);
+            }
+          },
           child: HugeIcon(
             icon: HugeIcons.strokeRoundedArrowLeft01,
             size: 30,

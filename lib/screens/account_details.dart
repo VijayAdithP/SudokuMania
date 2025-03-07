@@ -1,10 +1,21 @@
+//
+
+import 'dart:developer';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:sudokumania/constants/colors.dart';
+import 'package:sudokumania/models/user_cred.dart';
+import 'package:sudokumania/models/user_stats.dart';
 import 'package:sudokumania/providers/auth_provider.dart';
+import 'package:sudokumania/service/firebase_service.dart';
+import 'package:sudokumania/service/hive_service.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
 import 'package:sudokumania/utlis/auth/auth.dart';
+import 'package:sudokumania/utlis/router/routes.dart';
 
 class AccountDetails extends ConsumerStatefulWidget {
   const AccountDetails({super.key});
@@ -14,19 +25,40 @@ class AccountDetails extends ConsumerStatefulWidget {
 }
 
 class _AccountDetailsState extends ConsumerState<AccountDetails> {
+  UserCred? userCred;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    getCred();
+  }
+
+  void getCred() async {
+    final cred = await HiveService.getUserCred();
+    setState(() {
+      userCred = cred;
+      isLoading = false;
+    });
+    if (userCred != null) {
+      log("User Display Name: ${userCred!.displayName}");
+    } else {
+      log("No user credentials found in Hive.");
+    }
+  }
+
   final AuthService authService = AuthService();
+
   void _signOut() async {
+    await authService.googleSignIn.disconnect();
+    ref.read(authProvider.notifier).signOut();
     await authService.signOut();
 
     // Update the auth state using the provider
-
-    ref.read(authProvider.notifier).signOut();
-    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
     return Scaffold(
       appBar: AppBar(
         leading: InkWell(
@@ -47,114 +79,123 @@ class _AccountDetailsState extends ConsumerState<AccountDetails> {
         ),
         backgroundColor: Colors.transparent,
       ),
-      body: Padding(
-        padding: EdgeInsets.all(
-          16,
-        ),
-        child: authState.user != null
-            ? Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Container(
-                      height: 70,
-                      width: 70,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            blurRadius: 15,
-                            offset: Offset(0, 0),
-                          )
-                        ],
-                        image: DecorationImage(
-                          image: NetworkImage(authState.user!.photoURL!),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Text(
-                    authState.user!.displayName!,
-                    style: TTextThemes.defaultTextTheme.headlineLarge!.copyWith(
-                      fontWeight: FontWeight.normal,
-                      color: TColors.buttonDefault,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 16,
-                    ),
-                    child: Column(
-                      spacing: 16,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(16),
+              child: userCred != null
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        dullContainer(Padding(
-                          padding: const EdgeInsets.all(8.0),
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: CircleAvatar(
+                            radius: 35,
+                            backgroundImage: userCred!.photoURL != null
+                                ? NetworkImage(userCred!.photoURL!)
+                                : null,
+                            child: userCred!.photoURL == null
+                                ? const Icon(Icons.person, size: 40)
+                                : null,
+                          ),
+                        ),
+                        Text(
+                          userCred!.displayName ?? "No Display Name",
+                          style: TTextThemes.defaultTextTheme.headlineLarge!
+                              .copyWith(
+                            fontWeight: FontWeight.normal,
+                            color: TColors.buttonDefault,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
                           child: Column(
                             children: [
-                              tiles(
-                                authState.user!.email!,
-                                HugeIcons.strokeRoundedMail01,
-                                Colors.green,
-                                () {},
+                              dullContainer(
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                    children: [
+                                      tiles(
+                                        userCred!.email ?? "No Email",
+                                        HugeIcons.strokeRoundedMail01,
+                                        Colors.green,
+                                        () {},
+                                      ),
+                                      seperator(),
+                                      tiles(
+                                        "Sync Offline Data",
+                                        HugeIcons.strokeRoundedFolderSync,
+                                        TColors.accentDefault,
+                                        () async {
+                                          if (userCred != null) {
+                                            await HiveService.saveUsername(
+                                                userCred!.displayName!);
+                                            UserStats? userdata =
+                                                await HiveService
+                                                    .loadUserStats();
+                                            if (userdata != null) {
+                                              await FirebaseService
+                                                  .updatePlayerStats(
+                                                userCred!.email!,
+                                                userCred!.displayName!,
+                                                userdata,
+                                              );
+                                            }
+                                          }
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
-                              seperator(),
-                              tiles(
-                                "Sync Offline Data",
-                                HugeIcons.strokeRoundedFolderSync,
-                                TColors.accentDefault,
-                                () {},
+                              const SizedBox(height: 16),
+                              dullContainer(
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                    children: [
+                                      tiles(
+                                        "Logout",
+                                        HugeIcons.strokeRoundedLogout04,
+                                        Colors.red,
+                                        resetData,
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
                             ],
                           ),
-                        )),
-                        dullContainer(
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Column(
-                              children: [
-                                tiles(
-                                  "Logout",
-                                  HugeIcons.strokeRoundedLogout04,
-                                  Colors.red,
-                                  () {
-                                    resetData();
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
                         ),
                       ],
+                    )
+                  : Center(
+                      child: Text(
+                        "Login to Sync Data",
+                        style: TTextThemes.defaultTextTheme.headlineLarge!
+                            .copyWith(
+                          fontWeight: FontWeight.normal,
+                          color: TColors.textSecondary,
+                        ),
+                      ),
                     ),
-                  )
-                ],
-              )
-            : Center(
-                child: Text("Login to Sync Data",
-                    style: TTextThemes.defaultTextTheme.headlineLarge!.copyWith(
-                      fontWeight: FontWeight.normal,
-                      color: TColors.textSecondary,
-                    )),
-              ),
-      ),
+            ),
     );
   }
 
-  resetData() {
+  void resetData() {
     showDialog(
       context: context,
       builder: (context) {
         return Dialog(
           elevation: 1,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
           child: Container(
             width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height / 4.8,
+            height: MediaQuery.of(context).size.height / 4.6,
             decoration: BoxDecoration(
               color: TColors.dullBackground,
               borderRadius: BorderRadius.circular(15.0),
@@ -172,20 +213,20 @@ class _AccountDetailsState extends ConsumerState<AccountDetails> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Text(
-                      "Are you sure you want to log out of you account?",
+                      "Are you sure you want to log out of your account?",
                       textAlign: TextAlign.center,
                       style:
                           TTextThemes.defaultTextTheme.bodyMedium!.copyWith(),
                     ),
                   ),
-                  Expanded(
-                    child: const SizedBox(height: 15),
-                  ),
+                  const SizedBox(height: 15),
                   GestureDetector(
                     onTap: () {
                       _signOut();
-                      Navigator.pop(context);
-                      setState(() {});
+                      context.go(Routes.homePage);
+                      setState(() {
+                        userCred = null; // Clear the user credentials
+                      });
                     },
                     child: Container(
                       width: MediaQuery.of(context).size.width,
@@ -219,13 +260,9 @@ class _AccountDetailsState extends ConsumerState<AccountDetails> {
 
   Widget seperator() {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 20,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Divider(
-        color: TColors.textSecondary.withValues(
-          alpha: 0.3,
-        ),
+        color: TColors.textSecondary.withValues(alpha: 0.3),
       ),
     );
   }

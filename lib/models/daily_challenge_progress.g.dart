@@ -9,7 +9,7 @@ part of 'daily_challenge_progress.dart';
 class DailyChallengeProgressAdapter
     extends TypeAdapter<DailyChallengeProgress> {
   @override
-  final int typeId = 7;
+  final int typeId = 20;
 
   @override
   DailyChallengeProgress read(BinaryReader reader) {

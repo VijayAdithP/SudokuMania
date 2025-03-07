@@ -14,11 +14,6 @@ import 'package:sudokumania/widgets/continue_button.dart';
 import 'package:sudokumania/widgets/start_game_button.dart';
 
 final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
-// final gameDataProvider = FutureProvider.autoDispose<GameProgress?>((ref) async {
-//   ref.keepAlive();
-//   log("Loading game data from provider");
-//   return await HiveService.loadGame();
-// });
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -46,8 +41,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
 
   Future<void> _loadGameData() async {
     final gameData = await HiveService.loadGame();
-    // log("Im loaded");
-    // log(gameData!.difficulty.toString());
+
     if (mounted) {
       setState(() {
         lastPlayedGame = gameData;
@@ -60,45 +54,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
     _timer?.cancel();
     super.dispose();
   }
-
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   WidgetsBinding.instance.addPostFrameCallback((_) {
-  //     log("Forcing provider refresh on page load");
-  //     ref.refresh(gameDataProvider);
-  //   });
-  // }
-
-  // void _refreshData() {
-  //   // Force refresh the provider
-  //   // ref.invalidate(gameDataProvider);
-  //   ref.refresh(gameDataProvider);
-  // }
-
-  // @override
-  // void didChangeDependencies() {
-  //   super.didChangeDependencies();
-  //   // Subscribe to route changes
-  //   final route = ModalRoute.of(context);
-  //   if (route is PageRoute) {
-  //     routeObserver.subscribe(this, route);
-  //   }
-  // }
-
-  // @override
-  // void didPopNext() {
-  //   log("didPopNext called, refreshing data");
-  //   // This is called when user returns to this page from another page
-  //   _refreshData();
-  //   super.didPopNext();
-  // }
-
-  // @override
-  // void dispose() {
-  //   routeObserver.unsubscribe(this);
-  //   super.dispose();
-  // }
 
   @override
   Widget build(BuildContext context) {

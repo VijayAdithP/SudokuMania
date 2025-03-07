@@ -2,7 +2,7 @@ import 'package:hive_ce_flutter/hive_flutter.dart';
 
 part 'daily_challenge_progress.g.dart';
 
-@HiveType(typeId: 2)
+@HiveType(typeId: 20)
 class DailyChallengeProgress {
   @HiveField(0)
   final Map<DateTime, bool> completedDays; // Maps date to completion status

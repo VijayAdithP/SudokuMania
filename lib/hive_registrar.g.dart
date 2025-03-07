@@ -7,6 +7,7 @@ import 'package:sudokumania/models/daily_challenge_progress.dart';
 import 'package:sudokumania/models/game_progress.dart';
 import 'package:sudokumania/models/sudoku_board.dart';
 import 'package:sudokumania/models/userModel.dart';
+import 'package:sudokumania/models/user_cred.dart';
 import 'package:sudokumania/models/user_stats.dart';
 
 extension HiveRegistrar on HiveInterface {
@@ -17,6 +18,7 @@ extension HiveRegistrar on HiveInterface {
     registerAdapter(GameHistoryAdapter());
     registerAdapter(GameProgressAdapter());
     registerAdapter(SudokuBoardAdapter());
+    registerAdapter(UserCredAdapter());
     registerAdapter(UserDataAdapter());
     registerAdapter(UserStatsAdapter());
   }

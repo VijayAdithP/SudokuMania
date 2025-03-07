@@ -4,9 +4,13 @@ import 'package:hive_ce/hive.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:restart_app/restart_app.dart';
 import 'package:sudokumania/constants/colors.dart';
+import 'package:sudokumania/models/user_cred.dart';
+import 'package:sudokumania/providers/auth_provider.dart';
 import 'package:sudokumania/providers/daily_challenges_provider.dart';
 import 'package:sudokumania/screens/max_mistakes_screen.dart';
+import 'package:sudokumania/service/hive_service.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
+import 'package:sudokumania/utlis/auth/auth.dart';
 import 'package:sudokumania/utlis/router/routes.dart';
 
 // class SettingsPage extends StatefulWidget {
@@ -427,6 +431,19 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
+  final AuthService authService = AuthService();
+
+  void _signOut() async {
+    UserCred? userCred = await HiveService.getUserCred();
+    if (userCred != null) {
+      await authService.signOut();
+      await authService.googleSignIn.disconnect();
+    }
+
+    // Update the auth state using the provider
+    ref.read(authProvider.notifier).signOut();
+  }
+
   resetData() {
     showDialog(
       context: context,
@@ -469,6 +486,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       Hive.deleteFromDisk();
                       Navigator.pop(context);
                       ref.invalidate(dailyChallengeProvider);
+                      ref.invalidate(maxMistakesProvider);
+                      ref.invalidate(switchStateProvider);
+                      _signOut();
+                      // ref.invalidate();
                     },
                     child: Container(
                       width: MediaQuery.of(context).size.width,

@@ -230,10 +230,16 @@ class _StartButtonState extends ConsumerState<StartButton> {
     await HiveService.saveUserStats(currentStats);
   }
 
+  void getUserId() async {
+    final username = await HiveService.getUserId();
+    log("Still here $username");
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
+        getUserId();
         showModalBottomSheet<dynamic>(
           isScrollControlled: true,
           useRootNavigator: true,

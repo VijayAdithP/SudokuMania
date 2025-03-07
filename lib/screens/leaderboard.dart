@@ -360,7 +360,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:sudokumania/constants/colors.dart';
+import 'package:sudokumania/models/user_cred.dart';
 import 'package:sudokumania/providers/auth_provider.dart';
+import 'package:sudokumania/service/hive_service.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
 
 // class LeaderboardPage extends StatefulWidget {
@@ -699,11 +701,17 @@ class _LeaderboardPageState extends ConsumerState<LeaderboardPage>
     with SingleTickerProviderStateMixin {
   String selectedDifficulty = 'easy';
   late TabController _tabController;
+  UserCred? userCred;
 
   @override
   void initState() {
+    _getUserCred();
     super.initState();
     _tabController = TabController(length: 5, vsync: this);
+  }
+
+  void _getUserCred() async {
+    userCred = await HiveService.getUserCred();
   }
 
   @override
@@ -768,7 +776,7 @@ class _LeaderboardPageState extends ConsumerState<LeaderboardPage>
                 )
               : null,
         ),
-        body: authState.isSignedIn
+        body: userCred != null
             ? TabBarView(
                 physics: const NeverScrollableScrollPhysics(),
                 controller: _tabController,
@@ -944,14 +952,22 @@ class _LeaderboardPageState extends ConsumerState<LeaderboardPage>
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     (player != null)
-                        ? Text(
-                            player['username'],
-                            textAlign: TextAlign.center,
-                            style: TTextThemes.defaultTextTheme.bodyLarge!
-                                .copyWith(
-                              fontSize: 18,
-                              letterSpacing: 1.5,
-                              color: TColors.textDefault.withValues(alpha: 0.8),
+                        ? FittedBox(
+                            fit: BoxFit.contain,
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
+                              child: Text(
+                                player['username'],
+                                textAlign: TextAlign.center,
+                                style: TTextThemes.defaultTextTheme.bodyLarge!
+                                    .copyWith(
+                                  fontSize: 20,
+                                  letterSpacing: 1.5,
+                                  color: TColors.textDefault
+                                      .withValues(alpha: 0.8),
+                                ),
+                              ),
                             ),
                           )
                         : Text(

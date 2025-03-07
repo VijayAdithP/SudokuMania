@@ -1,7 +1,9 @@
 import 'dart:developer';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:sudokumania/models/daily_challenge_progress.dart';
+import 'package:sudokumania/models/user_cred.dart';
 import 'package:sudokumania/models/user_stats.dart';
 import '../models/game_progress.dart';
 
@@ -10,6 +12,7 @@ class HiveService {
   static const String _historyBox = 'gameHistory';
   static const String _statsBox = 'userStats';
   static const String _userBox = 'userData';
+  static const String _userCredBox = 'userCred';
   static const String _offlineSyncBox = 'offlineSync';
   static const String _dailyChallengeBox = 'dailyChallengeBox';
 
@@ -60,11 +63,23 @@ class HiveService {
     // log("✅ User ID saved: $userId");
   }
 
+  static Future<void> saveUserCredentials(UserCred user) async {
+    var box = await Hive.openBox<UserCred>(_userCredBox);
+    await box.put('userCred', user);
+    // log("✅ User ID saved: $userId");
+  }
+
   /// 🔹 Retrieve user ID from Hive
   static Future<String?> getUserId() async {
     // log("🗑️ Getting Offline UserId");
     var box = await Hive.openBox<String>(_userBox);
     return box.get('userId');
+  }
+
+  static Future<UserCred?> getUserCred() async {
+    // log("🗑️ Getting Offline UserId");
+    var box = await Hive.openBox<UserCred>(_userCredBox);
+    return box.get('userCred');
   }
 
   /// 🔹 Clear offline sync queue
