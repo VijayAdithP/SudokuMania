@@ -51,7 +51,10 @@ class _AccountDetailsState extends ConsumerState<AccountDetails> {
 
   void _signOut() async {
     await authService.googleSignIn.disconnect();
-    ref.read(authProvider.notifier).signOut();
+    if (mounted) {
+      ref.read(authProvider.notifier).signOut();
+    }
+
     await authService.signOut();
 
     // Update the auth state using the provider

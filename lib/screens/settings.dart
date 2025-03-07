@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_ce/hive.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:restart_app/restart_app.dart';
 import 'package:sudokumania/constants/colors.dart';
@@ -445,6 +446,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   resetData() {
+    const String _gameBox = 'sudokuGame';
+    const String _historyBox = 'gameHistory';
+    const String _statsBox = 'userStats';
+    const String _userBox = 'userData';
+    const String _userCredBox = 'userCred';
+    const String _offlineSyncBox = 'offlineSync';
+    const String _dailyChallengeBox = 'dailyChallengeBox';
     showDialog(
       context: context,
       builder: (context) {
@@ -482,13 +490,27 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     child: const SizedBox(height: 15),
                   ),
                   GestureDetector(
-                    onTap: () {
-                      Hive.deleteFromDisk();
-                      Navigator.pop(context);
+                    onTap: () async {
+                      _signOut();
                       ref.invalidate(dailyChallengeProvider);
                       ref.invalidate(maxMistakesProvider);
                       ref.invalidate(switchStateProvider);
-                      _signOut();
+                      // var box = await Hive.openBox<UserCred>('userCred');
+                      // box.deleteFromDisk();
+                      // Hive.close();
+                      // Hive.box(_gameBox).clear();
+                      // Hive.box(_historyBox).clear();
+                      // Hive.box(_statsBox).clear();
+                      // Hive.box(_userBox).clear();
+                      // Hive.box(_userCredBox).clear();
+                      // Hive.box(_offlineSyncBox).clear();
+                      // Hive.box(_dailyChallengeBox).clear();
+
+                      // box.get('userCred');
+                      // await Hive.initFlutter();
+                      // await Hive.openBox<UserCred>('userCred');
+                      Hive.deleteFromDisk();
+                      Navigator.pop(context);
                       // ref.invalidate();
                     },
                     child: Container(

@@ -65,7 +65,7 @@ class HiveService {
 
   static Future<void> saveUserCredentials(UserCred user) async {
     var box = await Hive.openBox<UserCred>(_userCredBox);
-    await box.put('userCred', user);
+    await box.put('userCredentials', user);
     // log("✅ User ID saved: $userId");
   }
 
@@ -79,7 +79,7 @@ class HiveService {
   static Future<UserCred?> getUserCred() async {
     // log("🗑️ Getting Offline UserId");
     var box = await Hive.openBox<UserCred>(_userCredBox);
-    return box.get('userCred');
+    return box.get('userCredentials');
   }
 
   /// 🔹 Clear offline sync queue

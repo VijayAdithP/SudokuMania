@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sudokumania/constants/colors.dart';
 import 'package:sudokumania/models/game_progress.dart';
+import 'package:sudokumania/models/user_cred.dart';
 import 'package:sudokumania/models/user_stats.dart';
 import 'package:sudokumania/providers/gameProgressProviders/gameProgressProviders.dart';
 import 'package:sudokumania/providers/newGameProviders/game_generation.dart';
+import 'package:sudokumania/service/firebase_service.dart';
 import 'package:sudokumania/service/hive_service.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
 
@@ -92,6 +94,8 @@ class _GameOverDialogState extends ConsumerState<GameOverDialog> {
   GameProgress? lastPlayedGame;
 
   Future<void> _loadGameData() async {
+    UserCred? userCred = await HiveService.getUserCred();
+
     final gameData = await HiveService.loadGame();
     setState(() {
       lastPlayedGame = gameData;
@@ -102,6 +106,10 @@ class _GameOverDialogState extends ConsumerState<GameOverDialog> {
       currentWinStreak: 0,
     );
     await HiveService.saveUserStats(updatedStats);
+    if (userCred != null) {
+      await FirebaseService.updatePlayerStats(
+          userCred.email!, userCred.displayName!, updatedStats);
+    }
   }
 
   @override
@@ -111,12 +119,18 @@ class _GameOverDialogState extends ConsumerState<GameOverDialog> {
   }
 
   void _clearGame() async {
+    UserCred? userCred = await HiveService.getUserCred();
+
     await HiveService.clearSavedGame();
     UserStats? currentStats = await HiveService.loadUserStats() ?? UserStats();
     final updatedStats = currentStats.copyWith(
       currentWinStreak: 0,
     );
     await HiveService.saveUserStats(updatedStats);
+    if (userCred != null) {
+      await FirebaseService.updatePlayerStats(
+          userCred.email!, userCred.displayName!, updatedStats);
+    }
   }
 
   @override
@@ -211,10 +225,16 @@ class _GameOverDialogState extends ConsumerState<GameOverDialog> {
                   }
                   UserStats? currentStats =
                       await HiveService.loadUserStats() ?? UserStats();
+                  UserCred? userCred = await HiveService.getUserCred();
+
                   final updatedStats = currentStats.copyWith(
                     currentWinStreak: 0,
                   );
                   await HiveService.saveUserStats(updatedStats);
+                  if (userCred != null) {
+                    await FirebaseService.updatePlayerStats(
+                        userCred.email!, userCred.displayName!, updatedStats);
+                  }
                 },
                 child: Container(
                   width: MediaQuery.of(context).size.width,

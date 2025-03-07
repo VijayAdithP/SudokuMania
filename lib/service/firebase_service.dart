@@ -85,16 +85,62 @@ class FirebaseService {
   }
 
   /// Helper method to update a specific leaderboard
+  // static Future<void> _updateLeaderboard(
+  //     String difficulty, String userId, String username, int points) async {
+  //   DocumentReference leaderboardRef =
+  //       _db.collection('leaderboards').doc(difficulty);
+
+  //   await leaderboardRef.set({
+  //     'players': FieldValue.arrayUnion([
+  //       {'userId': userId, 'username': username, 'points': points}
+  //     ])
+  //   }, SetOptions(merge: true));
+  // }
+
   static Future<void> _updateLeaderboard(
       String difficulty, String userId, String username, int points) async {
-    DocumentReference leaderboardRef =
+    final DocumentReference leaderboardRef =
         _db.collection('leaderboards').doc(difficulty);
 
-    await leaderboardRef.set({
-      'players': FieldValue.arrayUnion([
-        {'userId': userId, 'username': username, 'points': points}
-      ])
-    }, SetOptions(merge: true));
+    // Fetch the current leaderboard data
+    final DocumentSnapshot leaderboardSnapshot = await leaderboardRef.get();
+    final Map<String, dynamic>? leaderboardData =
+        leaderboardSnapshot.data() as Map<String, dynamic>?;
+
+    if (leaderboardData != null && leaderboardData.containsKey('players')) {
+      // Get the current players array
+      final List<dynamic> players = leaderboardData['players'];
+
+      // Check if the user already exists in the players array
+      final int userIndex = players.indexWhere(
+        (player) => player['userId'] == userId,
+      );
+
+      if (userIndex != -1) {
+        // If the user exists, update their points
+        final Map<String, dynamic> userData =
+            Map<String, dynamic>.from(players[userIndex]);
+        userData['points'] = (userData['points'] as int) + points;
+        players[userIndex] = userData;
+      } else {
+        // If the user does not exist, add them to the array
+        players.add({
+          'userId': userId,
+          'username': username,
+          'points': points,
+        });
+      }
+
+      // Save the updated players array back to Firestore
+      await leaderboardRef.update({'players': players});
+    } else {
+      // If the leaderboard document or players array does not exist, create it
+      await leaderboardRef.set({
+        'players': [
+          {'userId': userId, 'username': username, 'points': points}
+        ]
+      });
+    }
   }
 
   /// Fetch leaderboard data (sorted by points)

@@ -353,11 +353,12 @@
 //   }
 // }
 
+// import 'dart:nativewrappers/_internal/vm/lib/math_patch.dart';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:sudokumania/constants/colors.dart';
 import 'package:sudokumania/models/user_cred.dart';
@@ -706,8 +707,8 @@ class _LeaderboardPageState extends ConsumerState<LeaderboardPage>
   @override
   void initState() {
     _getUserCred();
-    super.initState();
     _tabController = TabController(length: 5, vsync: this);
+    super.initState();
   }
 
   void _getUserCred() async {
@@ -720,9 +721,11 @@ class _LeaderboardPageState extends ConsumerState<LeaderboardPage>
     super.dispose();
   }
 
+  int _currIndex = 0;
+  bool _isReloading = false;
+
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
     return Scaffold(
         appBar: AppBar(
           title: Text(
@@ -734,7 +737,44 @@ class _LeaderboardPageState extends ConsumerState<LeaderboardPage>
           centerTitle: true,
           toolbarHeight: 100,
           backgroundColor: Colors.transparent,
-          bottom: authState.isSignedIn
+          actions: [
+            IconButton(
+              icon: AnimatedSwitcher(
+                duration: const Duration(seconds: 1),
+                transitionBuilder: (child, anim) => RotationTransition(
+                  turns: child.key == ValueKey('icon1')
+                      ? Tween<double>(begin: -1, end: 1).animate(anim)
+                      : Tween<double>(begin: 1, end: -1).animate(anim),
+                  child: FadeTransition(opacity: anim, child: child),
+                ),
+                child: _currIndex == 0
+                    ? Icon(
+                        HugeIcons.strokeRoundedRefresh,
+                        color: TColors.iconDefault,
+                        key: const ValueKey('icon1'),
+                        size: 20,
+                      )
+                    : Icon(
+                        HugeIcons.strokeRoundedRefresh,
+                        color: TColors.iconDefault,
+                        key: const ValueKey('icon2'),
+                        size: 20,
+                      ),
+              ),
+              onPressed: () async {
+                if (_isReloading) return; // Prevent multiple reloads
+                setState(() {
+                  _isReloading = true;
+                });
+                _getUserCred();
+                setState(() {
+                  _currIndex = _currIndex == 0 ? 1 : 0;
+                  _isReloading = false;
+                });
+              },
+            ),
+          ],
+          bottom: userCred != null
               ? PreferredSize(
                   preferredSize: const Size.fromHeight(40),
                   child: ClipRRect(

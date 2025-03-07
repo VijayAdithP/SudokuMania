@@ -165,10 +165,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sudokumania/constants/colors.dart';
+import 'package:sudokumania/models/user_cred.dart';
 import 'package:sudokumania/models/user_stats.dart';
 import 'package:sudokumania/providers/gameProgressProviders/gameProgressProviders.dart';
 import 'package:sudokumania/providers/newGameProviders/game_generation.dart';
 import 'package:sudokumania/providers/type_game_provider.dart';
+import 'package:sudokumania/service/firebase_service.dart';
 import 'package:sudokumania/service/hive_service.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
 import 'package:sudokumania/utlis/router/routes.dart';
@@ -197,6 +199,7 @@ class _StartButtonState extends ConsumerState<StartButton> {
 
   Future<void> updateStatsForGameStart(String difficulty) async {
     UserStats currentStats = await HiveService.loadUserStats() ?? UserStats();
+    UserCred? userCred = await HiveService.getUserCred();
 
     switch (difficulty) {
       case "Easy":
@@ -228,6 +231,10 @@ class _StartButtonState extends ConsumerState<StartButton> {
     log("lets see ${currentStats.gamesStarted.toString()}");
 
     await HiveService.saveUserStats(currentStats);
+    if (userCred != null) {
+      await FirebaseService.updatePlayerStats(
+          userCred.email!, userCred.displayName!, currentStats);
+    }
   }
 
   void getUserId() async {

@@ -10,11 +10,13 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:sudokumania/constants/colors.dart';
 import 'package:sudokumania/models/game_progress.dart';
 import 'package:sudokumania/models/sudoku_board.dart';
+import 'package:sudokumania/models/user_cred.dart';
 import 'package:sudokumania/models/user_stats.dart';
 import 'package:sudokumania/providers/gameProgressProviders/gameProgressProviders.dart';
 import 'package:sudokumania/providers/newGameProviders/game_generation.dart';
 import 'package:sudokumania/providers/type_game_provider.dart';
 import 'package:sudokumania/screens/max_mistakes_screen.dart';
+import 'package:sudokumania/service/firebase_service.dart';
 import 'package:sudokumania/service/hive_service.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
 import 'package:sudokumania/utlis/router/routes.dart';
@@ -122,6 +124,8 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
 
   void _saveGame() async {
     final time = ref.read(timeProvider.notifier).getElapsedTime();
+    UserCred? userCred = await HiveService.getUserCred();
+
     final difficultyString =
         ref.read(difficultyProvider.notifier).getDifficultyString();
     final stats = await HiveService.loadUserStats() ?? UserStats();
@@ -157,6 +161,10 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
 
     // Save the updated stats
     await HiveService.saveUserStats(updatedStats);
+    if (userCred != null) {
+      await FirebaseService.updatePlayerStats(
+          userCred.email!, userCred.displayName!, updatedStats);
+    }
 
     // Log the results
     log("plus the difficulty $difficultyString");
@@ -261,6 +269,8 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
   }
 
   void _onGameOver() async {
+    UserCred? userCred = await HiveService.getUserCred();
+
     UserStats? currentStats = await HiveService.loadUserStats() ?? UserStats();
     ref.read(timeProvider.notifier).stop();
 
@@ -281,6 +291,10 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
     );
 
     await HiveService.saveUserStats(updatedStats);
+    if (userCred != null) {
+      await FirebaseService.updatePlayerStats(
+          userCred.email!, userCred.displayName!, updatedStats);
+    }
   }
 
   int calculateBaseScore() {
