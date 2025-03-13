@@ -3,12 +3,13 @@
 // Check in to version control
 
 import 'package:hive_ce/hive.dart';
-import 'package:sudokumania/models/daily_challenge_progress.dart';
-import 'package:sudokumania/models/game_progress.dart';
-import 'package:sudokumania/models/sudoku_board.dart';
-import 'package:sudokumania/models/userModel.dart';
-import 'package:sudokumania/models/user_cred.dart';
-import 'package:sudokumania/models/user_stats.dart';
+import 'package:sudokumania/models/dailyChallenges%20Models/daily_challenge_progress.dart';
+import 'package:sudokumania/models/gameProgress%20Models/game_progress.dart';
+import 'package:sudokumania/models/sudokuBoardModels/sudoku_board.dart';
+import 'package:sudokumania/models/themeSwitch%20Models/themeModel.dart';
+import 'package:sudokumania/models/userCredential%20Models/user_cred.dart';
+import 'package:sudokumania/models/userStats%20Models/userModel.dart';
+import 'package:sudokumania/models/userStats%20Models/user_stats.dart';
 
 extension HiveRegistrar on HiveInterface {
   void registerAdapters() {
@@ -18,6 +19,7 @@ extension HiveRegistrar on HiveInterface {
     registerAdapter(GameHistoryAdapter());
     registerAdapter(GameProgressAdapter());
     registerAdapter(SudokuBoardAdapter());
+    registerAdapter(ThemePreferenceAdapter());
     registerAdapter(UserCredAdapter());
     registerAdapter(UserDataAdapter());
     registerAdapter(UserStatsAdapter());

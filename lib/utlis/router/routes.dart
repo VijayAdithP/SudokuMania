@@ -12,4 +12,5 @@ class Routes {
   static const String loginScreen = '/loginScreen';
   static const String accountDetails = '/accountDetails';
   static const String dailyChallenges = '/dailyChallenges';
+  static const String themeSelection = '/themeSelection';
 }

@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:sudokumania/screens/account_details.dart';
-import 'package:sudokumania/screens/daily_challenges_screen.dart';
-import 'package:sudokumania/screens/game_completedScreen.dart';
-import 'package:sudokumania/screens/game_screen.dart';
+import 'package:sudokumania/screens/settingsScreen/account_details.dart';
+import 'package:sudokumania/screens/mainScreens/daily_challenges_screen.dart';
+import 'package:sudokumania/screens/gameScreens/game_completedScreen.dart';
+import 'package:sudokumania/screens/gameScreens/game_screen.dart';
 import 'package:sudokumania/screens/login_screen.dart';
-import 'package:sudokumania/screens/max_mistakes_screen.dart';
+import 'package:sudokumania/screens/settingsScreen/max_mistakes_screen.dart';
+import 'package:sudokumania/screens/settingsScreen/theme_selection.dart';
 import '../../screens/const_test.dart';
-import '../../screens/leaderboard.dart';
+import '../../screens/mainScreens/leaderboard.dart';
 import '../../screens/history.dart';
-import '../../screens/home_screen.dart';
-import '../../screens/settings.dart';
-import '../../screens/statistics.dart';
+import '../../screens/mainScreens/home_screen.dart';
+import '../../screens/settingsScreen/settings.dart';
+import '../../screens/mainScreens/statistics.dart';
 import '../../screens/layout/layout.dart';
 import '../router/routes.dart';
 
@@ -51,6 +52,11 @@ final router = GoRouter(
       path: Routes.accountDetails,
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => AccountDetails(),
+    ),
+    GoRoute(
+      path: Routes.themeSelection,
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => ThemeSelection(),
     ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) => LayoutScaffold(

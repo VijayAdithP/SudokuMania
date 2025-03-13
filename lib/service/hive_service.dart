@@ -1,11 +1,11 @@
-import 'dart:developer';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hive_ce/hive.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:sudokumania/models/daily_challenge_progress.dart';
-import 'package:sudokumania/models/user_cred.dart';
-import 'package:sudokumania/models/user_stats.dart';
-import '../models/game_progress.dart';
+import 'package:sudokumania/models/dailyChallenges%20Models/daily_challenge_progress.dart';
+import 'package:sudokumania/models/themeSwitch%20Models/themeModel.dart';
+import 'package:sudokumania/models/userCredential%20Models/user_cred.dart';
+import 'package:sudokumania/models/userStats%20Models/user_stats.dart';
+import '../models/gameProgress Models/game_progress.dart';
 
 class HiveService {
   static const String _gameBox = 'sudokuGame';
@@ -15,6 +15,17 @@ class HiveService {
   static const String _userCredBox = 'userCred';
   static const String _offlineSyncBox = 'offlineSync';
   static const String _dailyChallengeBox = 'dailyChallengeBox';
+  static const String _notificationBox = 'notificationBox';
+
+  static Future<void> saveNotificationPreference(bool isEnabled) async {
+    var box = await Hive.openBox<bool>(_notificationBox);
+    await box.put('isEnabled', isEnabled);
+  }
+
+  static Future<bool> getNotificationPreference() async {
+    var box = await Hive.openBox<bool>(_notificationBox);
+    return box.get('isEnabled', defaultValue: false) ?? false;
+  }
 
   /// Save the current game state (for "Continue" button)
   static Future<void> saveGame(GameProgress game) async {
@@ -76,8 +87,16 @@ class HiveService {
     return box.get('userId');
   }
 
+  // static Future<UserCred?> getUserCred() async {
+  //   // log("🗑️ Getting Offline UserId");
+  //   var box = await Hive.openBox<UserCred>(_userCredBox);
+  //   return box.get('userCredentials');
+  // }
+
   static Future<UserCred?> getUserCred() async {
-    // log("🗑️ Getting Offline UserId");
+    if (!Hive.isBoxOpen(_gameBox)) {
+      await Hive.initFlutter();
+    }
     var box = await Hive.openBox<UserCred>(_userCredBox);
     return box.get('userCredentials');
   }
@@ -198,5 +217,9 @@ class HiveService {
   static Future<DailyChallengeProgress?> loadDailyChallengeProgress() async {
     var box = await Hive.openBox<DailyChallengeProgress>(_dailyChallengeBox);
     return box.get('progress');
+  }
+
+  static Future<DailyChallengeProgress?> loadTheme() async {
+    await Hive.openBox<ThemePreference>('themeBox');
   }
 }

@@ -30,3 +30,34 @@ class TColors {
   static Color g1Color = const Color(0xff4338CA);
   static Color g2Color = const Color(0xff6D28D9);
 }
+
+class LColor {
+  // App basic colors
+  static Color primaryDefault = HexColor("#87CEEB"); // Sky blue
+  static Color secondaryDefault = HexColor("#6CB4EE"); // Lighter blue
+  static Color accentDefault = HexColor("#FFD700"); // Gold
+
+  // Background Colors
+  static Color backgroundPrimary = HexColor("#F0F8FF"); // Alice blue
+  static Color backgroundSecondary = HexColor("#E6F0FF"); // Lighter alice blue
+  static Color backgroundAccent =
+      HexColor("#6CB4EE").withOpacity(0.5); // Semi-transparent lighter blue
+
+  // Text Colors
+  static Color textDefault = HexColor("#000000"); // Black
+  static Color textSecondary = HexColor("#4A4A4A"); // Dark gray
+
+  // Icon Colors
+  static Color iconDefault = HexColor("#000000"); // Black
+  static Color iconSecondary = HexColor("#666666"); // Gray
+
+  // Button Colors
+  static Color buttonDefault = HexColor("#87CEEB"); // Sky blue
+  static Color darkContrast = HexColor("#000080"); // Navy blue
+  static Color dullBackground = HexColor("#E0E0E0"); // Light gray
+  static Color majorHighlight = HexColor("#1E90FF"); // Dodger blue
+
+  // Gradient
+  static Color g1Color = const Color(0xff87CEEB); // Sky blue
+  static Color g2Color = const Color(0xff6CB4EE); // Lighter blue
+}

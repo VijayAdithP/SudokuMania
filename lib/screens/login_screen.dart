@@ -5,9 +5,9 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get_utils/src/extensions/dynamic_extensions.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:sudokumania/constants/colors.dart';
-import 'package:sudokumania/models/user_cred.dart';
-import 'package:sudokumania/models/user_stats.dart';
-import 'package:sudokumania/providers/auth_provider.dart';
+import 'package:sudokumania/models/userCredential%20Models/user_cred.dart';
+import 'package:sudokumania/models/userStats%20Models/user_stats.dart';
+import 'package:sudokumania/providers/authProviders/auth_provider.dart';
 import 'package:sudokumania/service/firebase_service.dart';
 import 'package:sudokumania/service/hive_service.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
@@ -23,6 +23,7 @@ class LoginScreen extends ConsumerStatefulWidget {
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final AuthService authService = AuthService();
   bool isLoading = false;
+  UserStats? updatedState;
 
   void _signIn() async {
     setState(() {
@@ -52,7 +53,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     UserStats? firebaseStats =
         await FirebaseService.fetchUserStats(authState.user!.email!);
     UserStats? localStats = await HiveService.loadUserStats();
-    await HiveService.saveUserStats(UserStats(
+
+    updatedState = UserStats(
       currentWinStreak:
           localStats!.currentWinStreak + firebaseStats!.currentWinStreak,
       gamesStarted: localStats.gamesStarted + firebaseStats.gamesStarted,
@@ -112,7 +114,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       bestTime: localStats.bestTime + firebaseStats.bestTime,
       totalTime: localStats.totalTime + firebaseStats.totalTime,
       winRate: localStats.winRate + firebaseStats.winRate,
-    ));
+    );
+    await HiveService.saveUserStats(updatedState!);
   }
 
   void _signOut() async {
@@ -138,9 +141,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             Navigator.pop(context);
             if (authState.user != null) {
               await HiveService.saveUsername(authState.user!.displayName!);
-              // UserStats? userdata = await HiveService.loadUserStats();
-              // await FirebaseService.updatePlayerStats(authState.user!.email!,
-              //     authState.user!.displayName!, userdata!);
+              await FirebaseService.updatePlayerStats(authState.user!.email!,
+                  authState.user!.displayName!, updatedState!);
             }
           },
           child: HugeIcon(

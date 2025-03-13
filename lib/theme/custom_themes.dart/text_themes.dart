@@ -73,6 +73,10 @@ class TTextThemes {
     //Lable Text
     labelLarge: const TextStyle().copyWith(
         fontSize: 12, fontWeight: FontWeight.normal, color: Colors.black),
+    labelSmall: const TextStyle().copyWith(
+        fontSize: 12,
+        fontWeight: FontWeight.w500,
+        color: Colors.black.withValues(alpha: 0.5)),
     labelMedium: const TextStyle().copyWith(
         fontSize: 12,
         fontWeight: FontWeight.w400,
