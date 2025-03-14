@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:hive_ce/hive.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
@@ -204,22 +206,21 @@ class HiveService {
     return box.get('username');
   }
 
-  static Future<void> init() async {
-    await Hive.openBox<DailyChallengeProgress>(_dailyChallengeBox);
-  }
-
   static Future<void> saveDailyChallengeProgress(
       DailyChallengeProgress progress) async {
     var box = await Hive.openBox<DailyChallengeProgress>(_dailyChallengeBox);
-    final test = await box.put('progress', progress);
+    await box.put('progress', progress);
+    log("Saved progress to Hive: ${progress.completedDays}"); // Log the saved progress
   }
 
   static Future<DailyChallengeProgress?> loadDailyChallengeProgress() async {
     var box = await Hive.openBox<DailyChallengeProgress>(_dailyChallengeBox);
-    return box.get('progress');
+    final progress = box.get('progress');
+    log("Loaded progress from Hive: ${progress?.completedDays}"); // Log the loaded progress
+    return progress;
   }
 
-  static Future<DailyChallengeProgress?> loadTheme() async {
+  static Future<ThemePreference?> loadTheme() async {
     await Hive.openBox<ThemePreference>('themeBox');
   }
 }

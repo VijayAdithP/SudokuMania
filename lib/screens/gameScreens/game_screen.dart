@@ -284,8 +284,29 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
     });
   }
 
-  void _onGameComplete() {
+  // void _onGameComplete() {
+
+  //   ref.read(timeProvider.notifier).stop();
+  //   context.go(Routes.gameCompleteScreen);
+  // }
+
+  DateTime normalizeDate(DateTime date) {
+    return DateTime(date.year, date.month, date.day);
+  }
+
+  void _onGameComplete() async {
     ref.read(timeProvider.notifier).stop();
+    final selectedDate = ref.read(selectedDateProvider);
+
+    // Check if the game source is calendar
+    final gameSource = ref.read(gameSourceProvider);
+    if (gameSource == GameSource.calendar) {
+      final normalizedDate = normalizeDate(selectedDate!); // Normalize the date
+      log("Completing game for date: $normalizedDate"); // Log the date being completed
+      await ref
+          .read(dailyChallengeProvider.notifier)
+          .completeChallenge(normalizedDate, calculateBaseScore());
+    }
     context.go(Routes.gameCompleteScreen);
   }
 
@@ -318,7 +339,7 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
     }
   }
 
-  int calculateBaseScore() {
+  double calculateBaseScore() {
     return (_board.maxMistakes - _board.mistakes) * 10;
   }
 

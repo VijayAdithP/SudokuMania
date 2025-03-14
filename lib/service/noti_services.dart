@@ -76,19 +76,19 @@
 //     _isInitialized = true;
 //   }
 
-//   NotificationDetails notificationDetails() {
-//     return const NotificationDetails(
-//       android: AndroidNotificationDetails(
-//         "channelId",
-//         "channelName",
-//         channelDescription: "channelDescription",
-//         icon: "@mipmap/sudoku",
-//         importance: Importance.max,
-//         priority: Priority.high,
-//       ),
-//       iOS: DarwinNotificationDetails(),
-//     );
-//   }
+// NotificationDetails notificationDetails() {
+//   return const NotificationDetails(
+//     android: AndroidNotificationDetails(
+//       "channelId",
+//       "channelName",
+//       channelDescription: "channelDescription",
+//       icon: "@mipmap/sudoku",
+//       importance: Importance.max,
+//       priority: Priority.high,
+//     ),
+//     iOS: DarwinNotificationDetails(),
+//   );
+// }
 
 //   Future<void> showNotification({
 //     int id = 0,
@@ -343,8 +343,10 @@ class NotiServices {
     final String currentTimeZone = await FlutterTimezone.getLocalTimezone();
     tz.setLocalLocation(tz.getLocation(currentTimeZone));
 
-    const initSettingsAndroid = AndroidInitializationSettings("@mipmap/sudoku");
-    const initSettingsIOS = DarwinInitializationSettings(
+    const AndroidInitializationSettings initSettingsAndroid =
+        AndroidInitializationSettings("@mipmap/sudoku");
+    const DarwinInitializationSettings initSettingsIOS =
+        DarwinInitializationSettings(
       requestSoundPermission: false,
       requestBadgePermission: false,
       requestAlertPermission: false,
@@ -366,8 +368,8 @@ class NotiServices {
     await scheduleDailyNotification(
       title: "Daily Reminder",
       body: "Don't forget to play Sudoku today!",
-      hour: 23,
-      minute: 37,
+      hour: 18,
+      minute: 15,
     );
   }
 
@@ -380,7 +382,22 @@ class NotiServices {
     return await HiveService.getNotificationPreference();
   }
 
+  NotificationDetails notificationDetails() {
+    return const NotificationDetails(
+      android: AndroidNotificationDetails(
+        "channelId",
+        "channelName",
+        channelDescription: "channelDescription",
+        icon: "@mipmap/sudoku",
+        importance: Importance.max,
+        priority: Priority.high,
+      ),
+      iOS: DarwinNotificationDetails(),
+    );
+  }
+
   Future<void> scheduleDailyNotification({
+    int id = 1,
     required String title,
     required String body,
     required int hour,
@@ -388,17 +405,6 @@ class NotiServices {
   }) async {
     final isEnabled = await areNotificationsEnabled();
     if (!isEnabled) return;
-
-    final androidDetails = const AndroidNotificationDetails(
-      "channelId",
-      "channelName",
-      channelDescription: "channelDescription",
-      icon: "@mipmap/sudoku",
-      importance: Importance.max,
-      priority: Priority.high,
-    );
-
-    final notificationDetails = NotificationDetails(android: androidDetails);
 
     final now = tz.TZDateTime.now(tz.local);
     var scheduledDate = tz.TZDateTime(
@@ -413,15 +419,16 @@ class NotiServices {
     // If the scheduled time is in the past, schedule it for the next day
     if (scheduledDate.isBefore(now)) {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
-    } // Log the scheduled time
+    }
+    // Log the scheduled time
     log("Scheduled notification for: $scheduledDate");
 
     await notificationsPlugin.zonedSchedule(
-      0,
+      id,
       title,
       body,
       scheduledDate,
-      notificationDetails,
+      notificationDetails(),
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,

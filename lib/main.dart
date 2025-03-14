@@ -27,8 +27,8 @@ void main() async {
   await notiServices.scheduleDailyNotification(
     title: "Daily Reminder",
     body: "Don't forget to play Sudoku today!",
-    hour: 23,
-    minute: 48,
+    hour: 18,
+    minute: 15,
   );
   runApp(ProviderScope(child: const SudukoSolver()));
 }

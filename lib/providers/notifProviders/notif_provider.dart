@@ -46,7 +46,7 @@ class NotificationNotifier extends Notifier<bool> {
   bool build() {
     // Initialize with a default value (e.g., false)
     _loadNotificationPreference();
-    return false;
+    return true;
   }
 
   Future<void> _loadNotificationPreference() async {
