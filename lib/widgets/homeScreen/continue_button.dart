@@ -92,6 +92,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sudokumania/constants/colors.dart';
 import 'package:sudokumania/models/gameProgress%20Models/game_progress.dart';
+import 'package:sudokumania/providers/enum/type_of_game_enum.dart';
 import 'package:sudokumania/providers/gameStateProviders/gameDifficultyProvider.dart';
 import 'package:sudokumania/providers/dailyChallengesProviders/type_game_provider.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';

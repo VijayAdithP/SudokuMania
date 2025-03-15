@@ -1,0 +1,4 @@
+enum GameSource {
+  calendar,
+  normal,
+}

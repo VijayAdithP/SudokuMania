@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:sudokumania/models/themeSwitch%20Models/themeModel.dart';
+import 'package:sudokumania/service/hive_service.dart';
 
 final themeProvider =
     StateNotifierProvider<ThemeNotifier, ThemePreference>((ref) {
@@ -9,6 +10,7 @@ final themeProvider =
 
 class ThemeNotifier extends StateNotifier<ThemePreference> {
   ThemeNotifier() : super(ThemePreference.dark) {
+    HiveService.loadTheme();
     _loadTheme();
   }
 
@@ -18,13 +20,11 @@ class ThemeNotifier extends StateNotifier<ThemePreference> {
     state = themeBox.get('theme', defaultValue: ThemePreference.dark)!;
   }
 
-  int? a; 
+  int? a;
 
   // Toggle between light and dark themes
-  void toggleTheme() {
-    state = state == ThemePreference.light
-        ? ThemePreference.dark
-        : ThemePreference.light;
+  void toggleTheme(ThemePreference themePreference) {
+    state = themePreference; // Set the theme to the provided preference
     _saveTheme();
   }
 

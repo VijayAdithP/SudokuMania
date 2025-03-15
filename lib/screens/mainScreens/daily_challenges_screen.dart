@@ -1,5 +1,5 @@
-import 'dart:math';
 import 'dart:developer' as dev;
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,8 +8,9 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:intl/intl.dart';
 import 'package:sudokumania/constants/colors.dart';
 import 'package:sudokumania/providers/dailyChallengesProviders/daily_challenges_provider.dart';
-import 'package:sudokumania/providers/gameStateProviders/gameDifficultyProvider.dart';
 import 'package:sudokumania/providers/dailyChallengesProviders/type_game_provider.dart';
+import 'package:sudokumania/providers/enum/type_of_game_enum.dart';
+import 'package:sudokumania/providers/gameStateProviders/gameDifficultyProvider.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
 import 'package:sudokumania/utlis/router/routes.dart';
 import 'package:table_calendar/table_calendar.dart';

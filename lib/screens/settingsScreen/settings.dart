@@ -1,238 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hive_ce/hive.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:hugeicons/hugeicons.dart';
-import 'package:restart_app/restart_app.dart';
 import 'package:sudokumania/constants/colors.dart';
 import 'package:sudokumania/models/dailyChallenges%20Models/daily_challenge_progress.dart';
 import 'package:sudokumania/models/gameProgress%20Models/game_progress.dart';
+import 'package:sudokumania/models/themeSwitch%20Models/themeModel.dart';
 import 'package:sudokumania/models/userCredential%20Models/user_cred.dart';
 import 'package:sudokumania/models/userStats%20Models/user_stats.dart';
 import 'package:sudokumania/providers/authProviders/auth_provider.dart';
 import 'package:sudokumania/providers/dailyChallengesProviders/daily_challenges_provider.dart';
 import 'package:sudokumania/providers/notifProviders/notif_provider.dart';
+import 'package:sudokumania/providers/themeProviders/themeProvider.dart';
 import 'package:sudokumania/screens/settingsScreen/max_mistakes_screen.dart';
 import 'package:sudokumania/service/hive_service.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
 import 'package:sudokumania/utlis/auth/auth.dart';
 import 'package:sudokumania/utlis/router/routes.dart';
-
-// class SettingsPage extends StatefulWidget {
-//   const SettingsPage({super.key});
-
-//   @override
-//   State<SettingsPage> createState() => _SettingsPageState();
-// }
-
-// class _SettingsPageState extends State<SettingsPage> {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         leading: InkWell(
-//           onTap: () => Navigator.pop(context),
-//           child: HugeIcon(
-//             icon: HugeIcons.strokeRoundedArrowLeft01,
-//             size: 24,
-//             color: TColors.iconDefault,
-//           ),
-//         ),
-//         title: Text(
-//           "Settings",
-//           style: TTextThemes.defaultTextTheme.headlineMedium!.copyWith(
-//             fontWeight: FontWeight.normal,
-//           ),
-//         ),
-//         backgroundColor: Colors.transparent,
-//       ),
-//       body: SingleChildScrollView(
-//         child: Padding(
-//           padding: const EdgeInsets.all(16.0),
-//           child: Column(
-//             spacing: 16,
-//             crossAxisAlignment: CrossAxisAlignment.center,
-//             children: [
-//               // Row(
-//               //   spacing: 16,
-//               //   mainAxisAlignment: MainAxisAlignment.center,
-//               //   children: [
-//               //     CircleAvatar(
-//               //       radius: 30,
-//               //       backgroundColor: TColors.iconDefault.withValues(alpha: 0.2),
-//               //       child: HugeIcon(
-//               //         icon: HugeIcons.strokeRoundedUser,
-//               //         size: 24,
-//               //         color: TColors.iconDefault,
-//               //       ),
-//               //     ),
-//               //     Text(
-//               //       "Log in to sync you data",
-//               //       style: TTextThemes.defaultTextTheme.bodyLarge!.copyWith(
-//               //         fontSize: 20,
-//               //       ),
-//               //     ),
-//               //   ],
-//               // ),
-//               dullContainer(
-//                 Padding(
-//                   padding: const EdgeInsets.all(8.0),
-//                   child: Column(
-//                     children: [
-//                       tiles("Sounds", "on", HugeIcons.strokeRoundedMusicNote01,
-//                           const Color.fromARGB(255, 230, 123, 116), true, null),
-//                       seperator(),
-//                       tiles("Vibtation", "on", HugeIcons.strokeRoundedVoice,
-//                           Colors.green, true, null),
-//                     ],
-//                   ),
-//                 ),
-//               ),
-//               dullContainer(
-//                 Padding(
-//                   padding: const EdgeInsets.all(8.0),
-//                   child: Column(
-//                     children: [
-//                       tiles(
-//                           "Mistakes Limit",
-//                           "on",
-//                           HugeIcons.strokeRoundedCancel01,
-//                           const Color.fromARGB(255, 230, 123, 116),
-//                           false,
-//                           push),
-//                     ],
-//                   ),
-//                 ),
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-
-//   void push() {
-//     context.push(Routes.maxMistakesScreen);
-//   }
-
-//   Widget dullContainer(Widget child) {
-//     return Container(
-//       width: MediaQuery.of(context).size.width,
-//       decoration: BoxDecoration(
-//         color: TColors.primaryDefault,
-//         borderRadius: BorderRadius.circular(20),
-//       ),
-//       child: child,
-//     );
-//   }
-
-//   bool test = false;
-//   Widget tiles(String title, String value, IconData icon, Color iconColor,
-//       bool isChangable, Function? nav) {
-//     final selectedMistakes = ref.watch(maxMistakesProvider);
-//     return Padding(
-//       padding: const EdgeInsets.all(8.0),
-//       child: Container(
-//         color: Colors.transparent,
-//         width: MediaQuery.of(context).size.width,
-//         child: Column(
-//           mainAxisSize: MainAxisSize.min,
-//           children: [
-//             Row(
-//               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//               children: [
-//                 Row(
-//                   children: [
-//                     Container(
-//                       decoration: BoxDecoration(
-//                         color: iconColor.withValues(alpha: 0.1),
-//                         borderRadius: BorderRadius.circular(10),
-//                       ),
-//                       child: Padding(
-//                         padding: const EdgeInsets.all(8.0),
-//                         child: HugeIcon(
-//                           size: 24,
-//                           icon: icon,
-//                           color: iconColor,
-//                         ),
-//                       ),
-//                     ),
-//                     const SizedBox(width: 10),
-//                     Text(
-//                       title,
-//                       style: TTextThemes.defaultTextTheme.bodyLarge!.copyWith(
-//                         fontSize: 18,
-//                         letterSpacing: 1.5,
-//                         color: TColors.textDefault.withValues(alpha: 0.8),
-//                       ),
-//                     ),
-//                   ],
-//                 ),
-//                 Switch(
-//                   activeTrackColor: TColors.iconDefault,
-//                   inactiveThumbColor: TColors.backgroundSecondary,
-//                   trackOutlineColor: const WidgetStatePropertyAll(
-//                     Colors.transparent,
-//                   ),
-//                   trackColor: WidgetStatePropertyAll(
-//                     TColors.majorHighlight,
-//                   ),
-//                   value: test,
-//                   onChanged: (x) {
-//                     setState(() {
-//                       test = !test;
-//                     });
-//                   },
-//                 ),
-//               ],
-//             ),
-//             if (!isChangable)
-//               Padding(
-//                 padding: const EdgeInsets.only(
-//                   top: 16,
-//                 ),
-//                 child: GestureDetector(
-//                   onTap: () => nav != null ? nav() : null,
-//                   child: Row(
-//                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                     children: [
-//                       Text(
-//                         "Mistakes limit number",
-//                         style:
-//                             TTextThemes.defaultTextTheme.labelLarge!.copyWith(
-//                           fontSize: 15,
-//                         ),
-//                       ),
-//                       HugeIcon(
-//                         icon: HugeIcons.strokeRoundedArrowRight01,
-//                         size: 24,
-//                         color: TColors.iconDefault,
-//                       )
-//                     ],
-//                   ),
-//                 ),
-//               ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-
-//   Widget seperator() {
-//     return Padding(
-//       padding: const EdgeInsets.symmetric(
-//         horizontal: 20,
-//       ),
-//       child: Divider(
-//         color: TColors.textSecondary.withValues(
-//           alpha: 0.3,
-//         ),
-//       ),
-//     );
-//   }
-// }
-
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
@@ -278,6 +63,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final themePreference = ref.watch(themeProvider);
+    final isLightTheme = themePreference == ThemePreference.light;
+    final textTheme = isLightTheme
+        ? TTextThemes.lightTextTheme
+        : TTextThemes.defaultTextTheme;
     return Scaffold(
       appBar: AppBar(
         leading: InkWell(
@@ -287,12 +77,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           child: HugeIcon(
             icon: HugeIcons.strokeRoundedArrowLeft01,
             size: 30,
-            color: TColors.iconDefault,
+            color: isLightTheme ? LColor.iconDefault : TColors.iconDefault,
           ),
         ),
         title: Text(
           "Settings",
-          style: TTextThemes.defaultTextTheme.headlineMedium!.copyWith(
+          style: textTheme.headlineMedium!.copyWith(
             fontWeight: FontWeight.normal,
           ),
         ),
@@ -314,7 +104,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                         "Themes",
                         "on",
                         HugeIcons.strokeRoundedPaintBoard,
-                        Colors.white,
+                        isLightTheme ? LColor.iconDefault : TColors.iconDefault,
                         true,
                         true,
                         () => {
@@ -341,7 +131,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                           "Sounds",
                           "on",
                           HugeIcons.strokeRoundedMusicNote01,
-                          TColors.buttonDefault,
+                          isLightTheme
+                              ? LColor.buttonDefault
+                              : TColors.buttonDefault,
                           true,
                           false,
                           null,
@@ -434,7 +226,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                         "Account",
                         "on",
                         HugeIcons.strokeRoundedUser,
-                        TColors.accentDefault,
+                        isLightTheme
+                            ? LColor.accentDefault
+                            : TColors.accentDefault,
                         true,
                         true,
                         () => {
@@ -483,10 +277,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   Widget dullContainer(Widget child) {
+    final themePreference = ref.watch(themeProvider);
+    final isLightTheme = themePreference == ThemePreference.light;
     return Container(
       width: MediaQuery.of(context).size.width,
       decoration: BoxDecoration(
-        color: TColors.primaryDefault,
+        color: isLightTheme ? LColor.primaryDefault : TColors.primaryDefault,
         borderRadius: BorderRadius.circular(20),
       ),
       child: child,
@@ -507,13 +303,18 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   resetData() {
-    const String _gameBox = 'sudokuGame';
-    const String _historyBox = 'gameHistory';
-    const String _statsBox = 'userStats';
-    const String _userBox = 'userData';
-    const String _userCredBox = 'userCred';
-    const String _offlineSyncBox = 'offlineSync';
-    const String _dailyChallengeBox = 'dailyChallengeBox';
+    const String gameBox = 'sudokuGame';
+    const String historyBox = 'gameHistory';
+    const String statsBox = 'userStats';
+    const String userBox = 'userData';
+    const String userCredBox = 'userCred';
+    const String offlineSyncBox = 'offlineSync';
+    const String dailyChallengeBox = 'dailyChallengeBox';
+    final themePreference = ref.watch(themeProvider);
+    final isLightTheme = themePreference == ThemePreference.light;
+    final textTheme = isLightTheme
+        ? TTextThemes.lightTextTheme
+        : TTextThemes.defaultTextTheme;
     showDialog(
       context: context,
       builder: (context) {
@@ -525,7 +326,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height / 4.8,
             decoration: BoxDecoration(
-              color: TColors.dullBackground,
+              color:
+                  isLightTheme ? LColor.dullBackground : TColors.dullBackground,
               borderRadius: BorderRadius.circular(15.0),
             ),
             child: Padding(
@@ -535,7 +337,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 children: [
                   Text(
                     "Reset Data",
-                    style: TTextThemes.defaultTextTheme.headlineMedium,
+                    style: textTheme.headlineMedium,
                   ),
                   const SizedBox(height: 10),
                   Padding(
@@ -543,8 +345,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     child: Text(
                       "Are you sure you want to reset your data?",
                       textAlign: TextAlign.center,
-                      style:
-                          TTextThemes.defaultTextTheme.bodyMedium!.copyWith(),
+                      style: textTheme.bodyMedium!.copyWith(),
                     ),
                   ),
                   Expanded(
@@ -557,14 +358,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       ref.invalidate(maxMistakesProvider);
                       ref.invalidate(switchStateProvider);
                       await Hive.initFlutter(); // Re-initialize Hive
-                      await Hive.openBox<GameProgress>(_gameBox);
-                      await Hive.openBox<GameProgress>(_historyBox);
-                      await Hive.openBox<UserStats>(_statsBox);
-                      await Hive.openBox<String>(_userBox);
-                      await Hive.openBox<UserCred>(_userCredBox);
-                      await Hive.openBox<UserStats>(_offlineSyncBox);
+                      await Hive.openBox<GameProgress>(gameBox);
+                      await Hive.openBox<GameProgress>(historyBox);
+                      await Hive.openBox<UserStats>(statsBox);
+                      await Hive.openBox<String>(userBox);
+                      await Hive.openBox<UserCred>(userCredBox);
+                      await Hive.openBox<UserStats>(offlineSyncBox);
                       await Hive.openBox<DailyChallengeProgress>(
-                          _dailyChallengeBox);
+                          dailyChallengeBox);
 
                       Hive.deleteFromDisk();
                       Navigator.pop(context);
@@ -580,8 +381,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                         child: Center(
                           child: Text(
                             "Reset",
-                            style: TTextThemes.defaultTextTheme.headlineSmall!
-                                .copyWith(
+                            style: textTheme.headlineSmall!.copyWith(
                               color: Colors.red,
                               fontSize: 20,
                             ),
@@ -613,6 +413,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       bool switchState,
       Function(bool) onSwitchChanged) {
     final selectedMistakes = ref.watch(maxMistakesProvider);
+    final themePreference = ref.watch(themeProvider);
+    final isLightTheme = themePreference == ThemePreference.light;
+    final textTheme = isLightTheme
+        ? TTextThemes.lightTextTheme
+        : TTextThemes.defaultTextTheme;
 
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -646,10 +451,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       const SizedBox(width: 10),
                       Text(
                         title,
-                        style: TTextThemes.defaultTextTheme.bodyLarge!.copyWith(
+                        style: textTheme.bodyLarge!.copyWith(
                           fontSize: 18,
                           letterSpacing: 1.5,
-                          color: TColors.textDefault.withValues(alpha: 0.8),
+                          color: isLightTheme
+                              ? LColor.textDefault.withValues(alpha: 0.8)
+                              : TColors.textDefault.withValues(alpha: 0.8),
                         ),
                       ),
                     ],
@@ -658,17 +465,25 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     HugeIcon(
                       icon: HugeIcons.strokeRoundedArrowRight01,
                       size: 24,
-                      color: TColors.iconDefault,
+                      color: isLightTheme
+                          ? LColor.iconDefault
+                          : TColors.iconDefault,
                     ),
                   if (!isTappable)
                     Switch(
-                      activeTrackColor: TColors.iconDefault,
-                      inactiveThumbColor: TColors.backgroundSecondary,
+                      activeTrackColor: isLightTheme
+                          ? LColor.iconDefault
+                          : TColors.iconDefault,
+                      inactiveThumbColor: isLightTheme
+                          ? LColor.backgroundSecondary
+                          : TColors.backgroundSecondary,
                       trackOutlineColor: const WidgetStatePropertyAll(
                         Colors.transparent,
                       ),
                       trackColor: WidgetStatePropertyAll(
-                        TColors.majorHighlight,
+                        isLightTheme
+                            ? LColor.majorHighlight
+                            : TColors.majorHighlight,
                       ),
                       value: switchState,
                       onChanged: onSwitchChanged,
@@ -687,15 +502,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       children: [
                         Text(
                           "$selectedMistakes Mistakes limit number",
-                          style:
-                              TTextThemes.defaultTextTheme.labelLarge!.copyWith(
+                          style: textTheme.labelLarge!.copyWith(
                             fontSize: 15,
                           ),
                         ),
                         HugeIcon(
                           icon: HugeIcons.strokeRoundedArrowRight01,
                           size: 24,
-                          color: TColors.iconDefault,
+                          color: isLightTheme
+                              ? LColor.iconDefault
+                              : TColors.iconDefault,
                         )
                       ],
                     ),
@@ -709,14 +525,24 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   Widget seperator() {
+    final themePreference = ref.watch(themeProvider);
+    final isLightTheme = themePreference == ThemePreference.light;
+
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: 20,
       ),
       child: Divider(
-        color: TColors.textSecondary.withValues(
-          alpha: 0.3,
-        ),
+        color: isLightTheme
+            ? LColor.textSecondary.withValues(
+                alpha: 0.3,
+              )
+            : TColors.textSecondary.withValues(
+                alpha: 0.3,
+              ),
+        // TColors.textSecondary.withValues(
+        //   alpha: 0.3,
+        // ),
       ),
     );
   }

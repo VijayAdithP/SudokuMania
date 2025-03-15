@@ -167,9 +167,10 @@ import 'package:go_router/go_router.dart';
 import 'package:sudokumania/constants/colors.dart';
 import 'package:sudokumania/models/userCredential%20Models/user_cred.dart';
 import 'package:sudokumania/models/userStats%20Models/user_stats.dart';
-import 'package:sudokumania/providers/gameStateProviders/gameTimeStateProvider.dart';
-import 'package:sudokumania/providers/gameStateProviders/gameDifficultyProvider.dart';
 import 'package:sudokumania/providers/dailyChallengesProviders/type_game_provider.dart';
+import 'package:sudokumania/providers/enum/type_of_game_enum.dart';
+import 'package:sudokumania/providers/gameStateProviders/gameDifficultyProvider.dart';
+import 'package:sudokumania/providers/gameStateProviders/gameTimeStateProvider.dart';
 import 'package:sudokumania/service/firebase_service.dart';
 import 'package:sudokumania/service/hive_service.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
@@ -297,7 +298,7 @@ class _StartButtonState extends ConsumerState<StartButton> {
                                 ref.read(timeProvider.notifier).reset();
                                 updateStatsForGameStart(
                                     difficultyLevels[index]);
-                                log("${difficultyLevels[index]}");
+                                log(difficultyLevels[index]);
                                 ref.read(gameSourceProvider.notifier).state =
                                     GameSource.normal;
                                 Navigator.of(context).pop();

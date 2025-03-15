@@ -13,9 +13,10 @@ import 'package:sudokumania/models/sudokuBoardModels/sudoku_board.dart';
 import 'package:sudokumania/models/userCredential%20Models/user_cred.dart';
 import 'package:sudokumania/models/userStats%20Models/user_stats.dart';
 import 'package:sudokumania/providers/dailyChallengesProviders/daily_challenges_provider.dart';
-import 'package:sudokumania/providers/gameStateProviders/gameTimeStateProvider.dart';
-import 'package:sudokumania/providers/gameStateProviders/gameDifficultyProvider.dart';
 import 'package:sudokumania/providers/dailyChallengesProviders/type_game_provider.dart';
+import 'package:sudokumania/providers/enum/type_of_game_enum.dart';
+import 'package:sudokumania/providers/gameStateProviders/gameDifficultyProvider.dart';
+import 'package:sudokumania/providers/gameStateProviders/gameTimeStateProvider.dart';
 import 'package:sudokumania/screens/settingsScreen/max_mistakes_screen.dart';
 import 'package:sudokumania/service/firebase_service.dart';
 import 'package:sudokumania/service/hive_service.dart';
@@ -42,7 +43,7 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
   late SudokuBoard _board;
   bool paused = false;
   final DateTime lastPlayed = DateTime.now();
-  List<Map<String, dynamic>> _moveHistory = [];
+  final List<Map<String, dynamic>> _moveHistory = [];
 
   @override
   void initState() {
