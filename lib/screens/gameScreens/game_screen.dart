@@ -10,6 +10,7 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:sudokumania/constants/colors.dart';
 import 'package:sudokumania/models/gameProgress%20Models/game_progress.dart';
 import 'package:sudokumania/models/sudokuBoardModels/sudoku_board.dart';
+import 'package:sudokumania/models/themeSwitch%20Models/themeModel.dart';
 import 'package:sudokumania/models/userCredential%20Models/user_cred.dart';
 import 'package:sudokumania/models/userStats%20Models/user_stats.dart';
 import 'package:sudokumania/providers/dailyChallengesProviders/daily_challenges_provider.dart';
@@ -17,6 +18,7 @@ import 'package:sudokumania/providers/dailyChallengesProviders/type_game_provide
 import 'package:sudokumania/providers/enum/type_of_game_enum.dart';
 import 'package:sudokumania/providers/gameStateProviders/gameDifficultyProvider.dart';
 import 'package:sudokumania/providers/gameStateProviders/gameTimeStateProvider.dart';
+import 'package:sudokumania/providers/themeProviders/themeProvider.dart';
 import 'package:sudokumania/screens/settingsScreen/max_mistakes_screen.dart';
 import 'package:sudokumania/service/firebase_service.dart';
 import 'package:sudokumania/service/hive_service.dart';
@@ -405,6 +407,18 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
   }
 
   Widget _buildGrid() {
+    final themePreference = ref.watch(themeProvider);
+    final isLightTheme = themePreference == ThemePreference.light;
+    final iconColor = isLightTheme ? LColor.iconDefault : TColors.iconDefault;
+    final buttonColor =
+        isLightTheme ? LColor.buttonDefault : TColors.buttonDefault;
+    final highlightColor =
+        isLightTheme ? LColor.majorHighlight : TColors.majorHighlight;
+    final secondaryTextColor =
+        isLightTheme ? LColor.textSecondary : TColors.textSecondary;
+    final textTheme = isLightTheme
+        ? TTextThemes.lightTextTheme
+        : TTextThemes.defaultTextTheme;
     return AspectRatio(
       aspectRatio: 1,
       child: ClipPath(
@@ -422,14 +436,17 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
                 int row = index ~/ 9;
                 int col = index % 9;
 
-                // Color cellColor = const Color.fromARGB(255, 51, 46, 72);
-                Color cellColor = const Color.fromARGB(255, 51, 46, 72);
+                Color cellColor = isLightTheme
+                    ? const Color.fromARGB(255, 198, 199, 238)
+                    : const Color.fromARGB(255, 51, 46, 72);
 
                 if (isLongPressMode) {
                   // In long press mode, only highlight matching numbers
                   if (_board.grid[row][col] != null &&
                       _board.grid[row][col] == lockedNumber) {
-                    cellColor = TColors.majorHighlight;
+                    cellColor = isLightTheme
+                        ? LColor.majorHighlight
+                        : TColors.majorHighlight;
                   }
                 } else {
                   // Normal mode highlighting
@@ -453,15 +470,23 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
                   } else if (isSelected && isError) {
                     cellColor = Colors.red.withValues(alpha: 0.3);
                   } else if (isSelected) {
-                    cellColor = TColors.majorHighlight;
+                    cellColor = isLightTheme
+                        ? LColor.majorHighlight
+                        : TColors.majorHighlight;
                     // cellColor = TColors.buttonDefault;
                   } else if (hasSameNumber) {
-                    cellColor = const Color.fromARGB(255, 51, 46, 72)
-                        .withValues(alpha: 0.3);
+                    cellColor = isLightTheme
+                        ? LColor.majorHighlight.withValues(alpha: 0.5)
+                        : const Color.fromARGB(255, 51, 46, 72)
+                            .withValues(alpha: 0.3);
                   } else if (isInSameRow || isInSameCol || isInSame3x3) {
-                    cellColor = HexColor("#363e79").withValues(
-                      alpha: 0.7,
-                    );
+                    cellColor = isLightTheme
+                        ? LColor.buttonDefault.withValues(
+                            alpha: 0.3,
+                          )
+                        : HexColor("#363e79").withValues(
+                            alpha: 0.7,
+                          );
                   }
                 }
                 bool isError = _board.invalidCells[row][col];
@@ -504,7 +529,10 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
                         fontSize: 20,
                         fontWeight: FontWeight.normal,
                         color: _board.givenNumbers[row][col]
-                            ? (cellColor == TColors.majorHighlight)
+                            ? (cellColor ==
+                                    (isLightTheme
+                                        ? LColor.majorHighlight
+                                        : TColors.majorHighlight))
                                 ? Colors.white
                                 : TColors.textSecondary
                             : isError
@@ -520,16 +548,23 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
               BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
                 child: Container(
-                  color: Color.fromARGB(180, 51, 46, 72),
+                  color: isLightTheme
+                      ? Color.fromARGB(56, 51, 46, 72)
+                      : Color.fromARGB(180, 51, 46, 72),
                   child: Center(
                     child: Container(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
                           width: 2,
-                          color: TColors.majorHighlight,
+                          color: isLightTheme
+                              ? LColor.majorHighlight
+                              : TColors.majorHighlight,
                         ),
-                        color: const Color.fromARGB(255, 51, 46, 72),
+                        color: isLightTheme
+                            // ? HexColor("#F2F8FC")
+                            ? Colors.transparent
+                            : const Color.fromARGB(255, 51, 46, 72),
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(16),
@@ -544,7 +579,9 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
                           icon: HugeIcon(
                             size: 38,
                             icon: HugeIcons.strokeRoundedPlay,
-                            color: TColors.majorHighlight,
+                            color: isLightTheme
+                                ? LColor.majorHighlight
+                                : TColors.majorHighlight,
                           ),
                         ),
                       ),
@@ -613,6 +650,11 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
   }
 
   Widget _buildAccButtons(int row, int col) {
+    final themePreference = ref.watch(themeProvider);
+    final isLightTheme = themePreference == ThemePreference.light;
+    final secondaryTextColor =
+        isLightTheme ? LColor.textSecondary : TColors.textSecondary;
+
     return Row(
       spacing: 16,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -621,59 +663,59 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
         accButton(
           50,
           50,
-          TColors.backgroundPrimary,
-          TColors.dullBackground,
+          isLightTheme ? LColor.backgroundPrimary : TColors.backgroundPrimary,
+          isLightTheme ? LColor.dullBackground : TColors.dullBackground,
           () {
             _onUndo();
           },
-          TColors.textSecondary,
+          secondaryTextColor,
           24,
           HugeIcons.strokeRoundedReload,
         ),
         accButton(
           60,
           60,
-          TColors.backgroundPrimary,
+          isLightTheme ? LColor.backgroundPrimary : TColors.backgroundPrimary,
           const Color.fromARGB(255, 230, 123, 116),
           () {
             erase(row, col);
           },
-          TColors.textSecondary,
+          secondaryTextColor,
           30,
           HugeIcons.strokeRoundedEraser,
         ),
         accButton(
           75,
           75,
-          TColors.majorHighlight,
-          TColors.majorHighlight,
+          isLightTheme ? LColor.majorHighlight : TColors.majorHighlight,
+          isLightTheme ? LColor.majorHighlight : TColors.majorHighlight,
           () {},
-          TColors.iconDefault,
+          isLightTheme ? LColor.iconDefault : TColors.iconDefault,
           35,
           HugeIcons.strokeRoundedGoogleGemini,
         ),
         accButton(
           60,
           60,
-          TColors.backgroundPrimary,
-          TColors.buttonDefault,
+          isLightTheme ? LColor.backgroundPrimary : TColors.backgroundPrimary,
+          isLightTheme ? LColor.buttonDefault : TColors.buttonDefault,
           () {
             showDialog(context: context, builder: (context) => HowToDialog());
           },
-          TColors.textSecondary,
+          isLightTheme ? LColor.textSecondary : TColors.textSecondary,
           30,
           HugeIcons.strokeRoundedBubbleChatQuestion,
         ),
         accButton(
           50,
           50,
-          TColors.backgroundPrimary,
-          TColors.accentDefault,
+          isLightTheme ? LColor.backgroundPrimary : TColors.backgroundPrimary,
+          isLightTheme ? LColor.accentDefault : TColors.accentDefault,
           () {
             showDialog(
                 context: context, builder: (context) => GameRestartDialog());
           },
-          TColors.textSecondary,
+          isLightTheme ? LColor.textSecondary : TColors.textSecondary,
           24,
           HugeIcons.strokeRoundedClean,
         ),
@@ -683,20 +725,28 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
 
   Widget accButton(double h, double w, Color bg, Color border, Function() onTap,
       Color iconColor, double iconSize, IconData icon) {
+    final themePreference = ref.watch(themeProvider);
+    final isLightTheme = themePreference == ThemePreference.light;
+
     return InkWell(
       borderRadius: BorderRadius.circular(50),
-      splashColor: TColors.textSecondary.withValues(alpha: 0.2),
+      splashColor: isLightTheme
+          ? LColor.textSecondary.withValues(alpha: 0.2)
+          : TColors.textSecondary.withValues(alpha: 0.2),
       onTap: onTap,
       child: Container(
         height: h,
         width: w,
         decoration: BoxDecoration(
-            border: Border.all(
-              width: 2,
-              color: border,
-            ),
-            shape: BoxShape.circle,
-            color: Colors.transparent),
+          border: Border.all(
+            width: 2,
+            color: border,
+          ),
+          shape: BoxShape.circle,
+          color: isLightTheme
+              ? LColor.buttonDefault.withValues(alpha: 0.2)
+              : Colors.transparent,
+        ),
         child: Center(
           child: HugeIcon(
             icon: icon,
@@ -710,6 +760,11 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
 
   @override
   Widget build(BuildContext context) {
+    final themePreference = ref.watch(themeProvider);
+    final isLightTheme = themePreference == ThemePreference.light;
+    final textTheme = isLightTheme
+        ? TTextThemes.lightTextTheme
+        : TTextThemes.defaultTextTheme;
     final timeState = ref.watch(timeProvider);
     final elapsedMilliseconds = timeState.elapsedMilliseconds;
     final difficultyString =
@@ -742,7 +797,7 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
           icon: HugeIcon(
             icon: HugeIcons.strokeRoundedArrowLeft01,
             size: 30,
-            color: TColors.iconDefault,
+            color: isLightTheme ? LColor.iconDefault : TColors.iconDefault,
           ),
         ),
         title: Row(
@@ -751,17 +806,21 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
             HugeIcon(
               icon: HugeIcons.strokeRoundedGoogleGemini,
               size: 24,
-              color: TColors.majorHighlight,
+              color:
+                  isLightTheme ? LColor.majorHighlight : TColors.majorHighlight,
             ),
             Text(
               difficultyString,
               style: TextStyle(
-                color: TColors.textDefault,
+                color: isLightTheme ? LColor.textDefault : TColors.textDefault,
                 fontSize: 20,
                 fontWeight: FontWeight.normal,
               ),
             ),
           ],
+        ),
+        actionsPadding: EdgeInsets.symmetric(
+          horizontal: 8,
         ),
         actions: [
           IconButton(
@@ -771,7 +830,7 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
             icon: HugeIcon(
               icon: HugeIcons.strokeRoundedSetting07,
               size: 30,
-              color: TColors.iconDefault,
+              color: isLightTheme ? LColor.iconDefault : TColors.iconDefault,
             ),
           ),
         ],
@@ -787,11 +846,13 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
                 Row(
                   children: [
                     SizedBox(
-                      // color: Colors.amber,
                       width: MediaQuery.of(context).size.width * 0.22,
                       child: Text(
                         displayTime,
                         style: TextStyle(
+                          color: isLightTheme
+                              ? LColor.textDefault
+                              : TColors.textDefault,
                           fontSize: 30,
                           fontWeight: FontWeight.normal,
                         ),
@@ -799,12 +860,15 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
                     ),
                     if (!paused)
                       CircleAvatar(
-                        backgroundColor:
-                            TColors.backgroundAccent.withValues(alpha: 0.2),
+                        backgroundColor: isLightTheme
+                            ? LColor.backgroundAccent.withValues(alpha: .2)
+                            : TColors.backgroundAccent.withValues(alpha: 0.2),
                         child: IconButton(
                           icon: Icon(
                             Icons.pause,
-                            color: TColors.backgroundAccent,
+                            color: isLightTheme
+                                ? LColor.backgroundAccent.withRed(1)
+                                : TColors.backgroundAccent,
                           ),
                           onPressed: _onPause,
                         ),
@@ -815,6 +879,9 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
                     ? Text(
                         "Mistakes: ${_board.mistakes}/$maxMistakes",
                         style: TextStyle(
+                          color: isLightTheme
+                              ? LColor.textDefault
+                              : TColors.textDefault,
                           fontSize: 15,
                           fontWeight: FontWeight.normal,
                         ),

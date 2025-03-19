@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:sudokumania/constants/colors.dart';
 import 'package:sudokumania/models/gameProgress%20Models/game_progress.dart';
+import 'package:sudokumania/models/themeSwitch%20Models/themeModel.dart';
 import 'package:sudokumania/models/userCredential%20Models/user_cred.dart';
 import 'package:sudokumania/models/userStats%20Models/user_stats.dart';
 import 'package:sudokumania/providers/dailyChallengesProviders/daily_challenges_provider.dart';
@@ -17,6 +18,7 @@ import 'package:sudokumania/providers/dailyChallengesProviders/type_game_provide
 import 'package:sudokumania/providers/enum/type_of_game_enum.dart';
 import 'package:sudokumania/providers/gameStateProviders/gameDifficultyProvider.dart';
 import 'package:sudokumania/providers/gameStateProviders/gameTimeStateProvider.dart';
+import 'package:sudokumania/providers/themeProviders/themeProvider.dart';
 import 'package:sudokumania/service/firebase_service.dart';
 import 'package:sudokumania/service/hive_service.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
@@ -38,19 +40,6 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
     _checkGameSource();
     _initializeGameData();
   }
-
-  // Future<void> _initializeGameData() async {
-  //   await _loadGame();
-  //   await scoreValue();
-  //   await _saveScore();
-  //   // if (gameSorce == GameSource.calendar) {
-  //   //   _updateDailyChallenges();
-  //   // }
-  //   await _updateBestTime();
-  //   await _updateGameStreaksAndWonCount();
-  //   await _updateWinRate();
-  //   await _loadUserStats();
-  // }
 
   Future<void> _initializeGameData() async {
     await _loadGame();
@@ -320,6 +309,11 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themePreference = ref.watch(themeProvider);
+    final isLightTheme = themePreference == ThemePreference.light;
+    final textTheme = isLightTheme
+        ? TTextThemes.lightTextTheme
+        : TTextThemes.defaultTextTheme;
     final elapsedTime = ref.read(timeProvider.notifier).getElapsedTime();
 
     final int totalSeconds = elapsedTime ~/ 1000;
@@ -344,7 +338,7 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
           children: [
             Text(
               "Your Score!",
-              style: TTextThemes.defaultTextTheme.headlineLarge!.copyWith(
+              style: textTheme.headlineLarge!.copyWith(
                 fontWeight: FontWeight.normal,
                 fontSize: 40,
                 letterSpacing: 1.5,
@@ -364,17 +358,17 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
                   Text.rich(
                     TextSpan(
                         text: "+ ",
-                        style: TTextThemes.defaultTextTheme.headlineSmall!
-                            .copyWith(
-                          color: TColors.buttonDefault,
+                        style: textTheme.headlineSmall!.copyWith(
+                          color: isLightTheme
+                              ? LColor.buttonDefault
+                              : TColors.buttonDefault,
                           fontWeight: FontWeight.normal,
                           fontSize: 20,
                         ),
                         children: [
                           TextSpan(
                             text: score.toString(),
-                            style: TTextThemes.defaultTextTheme.headlineSmall!
-                                .copyWith(
+                            style: textTheme.headlineSmall!.copyWith(
                               fontWeight: FontWeight.normal,
                               fontSize: 20,
                             ),
@@ -387,7 +381,9 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
             Container(
               width: MediaQuery.of(context).size.width,
               decoration: BoxDecoration(
-                color: TColors.primaryDefault,
+                color: isLightTheme
+                    ? LColor.primaryDefault
+                    : TColors.primaryDefault,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Padding(
@@ -398,14 +394,18 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
                       "Level",
                       diffuculty,
                       HugeIcons.strokeRoundedStar,
-                      TColors.buttonDefault,
+                      isLightTheme
+                          ? LColor.buttonDefault
+                          : TColors.buttonDefault,
                     ),
                     seperator(),
                     tiles(
                       "Time",
                       "$minutes:${seconds.toString().padLeft(2, '0')}",
                       HugeIcons.strokeRoundedClock01,
-                      TColors.accentDefault,
+                      isLightTheme
+                          ? LColor.accentDefault
+                          : TColors.accentDefault,
                     ),
                     seperator(),
                     FutureBuilder<String>(
@@ -448,7 +448,9 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
                   Container(
                     width: MediaQuery.of(context).size.width,
                     decoration: BoxDecoration(
-                      color: TColors.primaryDefault,
+                      color: isLightTheme
+                          ? LColor.primaryDefault
+                          : TColors.primaryDefault,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Padding(
@@ -466,7 +468,9 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
                             "GenHints",
                             mistakes.toString(),
                             HugeIcons.strokeRoundedGoogleGemini,
-                            TColors.majorHighlight,
+                            isLightTheme
+                                ? LColor.majorHighlight
+                                : TColors.majorHighlight,
                           ),
                         ],
                       ),
@@ -484,7 +488,9 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
               child: Container(
                 width: MediaQuery.of(context).size.width,
                 decoration: BoxDecoration(
-                  color: TColors.buttonDefault.withRed(10),
+                  color: isLightTheme
+                      ? LColor.buttonDefault
+                      : TColors.buttonDefault.withRed(10),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Padding(
@@ -492,8 +498,7 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
                   child: Center(
                     child: Text(
                       "Main Menu",
-                      style:
-                          TTextThemes.defaultTextTheme.headlineSmall!.copyWith(
+                      style: textTheme.headlineSmall!.copyWith(
                         fontSize: 20,
                       ),
                     ),
@@ -515,6 +520,11 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
   }
 
   Widget tiles(String title, String value, IconData icon, Color iconColor) {
+    final themePreference = ref.watch(themeProvider);
+    final isLightTheme = themePreference == ThemePreference.light;
+    final textTheme = isLightTheme
+        ? TTextThemes.lightTextTheme
+        : TTextThemes.defaultTextTheme;
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Container(
@@ -536,10 +546,12 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
                 Text(
                   textAlign: TextAlign.center,
                   title,
-                  style: TTextThemes.defaultTextTheme.bodyLarge!.copyWith(
+                  style: textTheme.bodyLarge!.copyWith(
                     fontSize: 18,
                     letterSpacing: 1.5,
-                    color: TColors.textDefault.withValues(alpha: 0.8),
+                    color: isLightTheme
+                        ? LColor.textDefault.withValues(alpha: .8)
+                        : TColors.textDefault.withValues(alpha: 0.8),
                   ),
                 ),
               ],
@@ -547,10 +559,12 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
             Text(
               value,
               textAlign: TextAlign.center,
-              style: TTextThemes.defaultTextTheme.bodyLarge!.copyWith(
+              style: textTheme.bodyLarge!.copyWith(
                 fontSize: 18,
                 letterSpacing: 1.5,
-                color: TColors.textDefault.withValues(alpha: 0.8),
+                color: isLightTheme
+                    ? LColor.textDefault.withValues(alpha: 0.8)
+                    : TColors.textDefault.withValues(alpha: 0.8),
               ),
             ),
           ],
@@ -560,14 +574,19 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
   }
 
   Widget seperator() {
+    final themePreference = ref.watch(themeProvider);
+    final isLightTheme = themePreference == ThemePreference.light;
+
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: 20,
       ),
       child: Divider(
-        color: TColors.textSecondary.withValues(
-          alpha: 0.3,
-        ),
+        color: isLightTheme
+            ? LColor.textSecondary.withValues(alpha: 0.3)
+            : TColors.textSecondary.withValues(
+                alpha: 0.3,
+              ),
       ),
     );
   }

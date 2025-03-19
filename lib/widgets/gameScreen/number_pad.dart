@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sudokumania/constants/colors.dart';
+import 'package:sudokumania/models/themeSwitch%20Models/themeModel.dart';
+import 'package:sudokumania/providers/themeProviders/themeProvider.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
 
-class NumberPad extends StatefulWidget {
+class NumberPad extends ConsumerStatefulWidget {
   final bool isLongPressMode;
   final int? lockedNumber;
   final Function(int) onNumberTap;
@@ -16,11 +19,16 @@ class NumberPad extends StatefulWidget {
       super.key});
 
   @override
-  State<NumberPad> createState() => _NumberPadState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _NumberPadState();
 }
 
-class _NumberPadState extends State<NumberPad> {
+class _NumberPadState extends ConsumerState<NumberPad> {
   Widget _buildGridItem(int number) {
+    final themePreference = ref.watch(themeProvider);
+    final isLightTheme = themePreference == ThemePreference.light;
+    final textTheme = isLightTheme
+        ? TTextThemes.lightTextTheme
+        : TTextThemes.defaultTextTheme;
     bool isHighlighted =
         widget.isLongPressMode && widget.lockedNumber == number;
     return GestureDetector(
@@ -30,19 +38,34 @@ class _NumberPadState extends State<NumberPad> {
         height: 65,
         width: 65,
         decoration: BoxDecoration(
-          color:
-              isHighlighted ? TColors.majorHighlight : TColors.dullBackground,
+          color: isHighlighted
+              ? isLightTheme
+                  ? LColor.majorHighlight
+                  : TColors.majorHighlight
+              : isLightTheme
+                  ? LColor.buttonDefault.withValues(alpha: 0.3)
+                  : TColors.dullBackground,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Center(
           child: Text(
             "$number",
-            style: TTextThemes.defaultTextTheme.bodyMedium!.copyWith(
+            style: textTheme.bodyMedium!.copyWith(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: TColors.iconDefault.withValues(
-                alpha: 0.7,
-              ),
+              color: isHighlighted
+                  ? isLightTheme
+                      ? Colors.white
+                      : TColors.iconDefault.withValues(
+                          alpha: 0.7,
+                        )
+                  : isLightTheme
+                      ? LColor.iconDefault.withValues(
+                          alpha: 0.7,
+                        )
+                      : TColors.iconDefault.withValues(
+                          alpha: 0.7,
+                        ),
             ),
           ),
         ),

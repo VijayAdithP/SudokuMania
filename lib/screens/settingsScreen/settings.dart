@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hexcolor/hexcolor.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:sudokumania/constants/colors.dart';
@@ -9,14 +10,13 @@ import 'package:sudokumania/models/gameProgress%20Models/game_progress.dart';
 import 'package:sudokumania/models/themeSwitch%20Models/themeModel.dart';
 import 'package:sudokumania/models/userCredential%20Models/user_cred.dart';
 import 'package:sudokumania/models/userStats%20Models/user_stats.dart';
-import 'package:sudokumania/providers/authProviders/auth_provider.dart';
 import 'package:sudokumania/providers/dailyChallengesProviders/daily_challenges_provider.dart';
 import 'package:sudokumania/providers/notifProviders/notif_provider.dart';
 import 'package:sudokumania/providers/themeProviders/themeProvider.dart';
 import 'package:sudokumania/screens/settingsScreen/max_mistakes_screen.dart';
+import 'package:sudokumania/service/firebase_service.dart';
 import 'package:sudokumania/service/hive_service.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
-import 'package:sudokumania/utlis/auth/auth.dart';
 import 'package:sudokumania/utlis/router/routes.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
@@ -132,7 +132,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                           "on",
                           HugeIcons.strokeRoundedMusicNote01,
                           isLightTheme
-                              ? LColor.buttonDefault
+                              ? LColor.darkContrast
                               : TColors.buttonDefault,
                           true,
                           false,
@@ -148,7 +148,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                         "Vibtation",
                         "on",
                         HugeIcons.strokeRoundedVoice,
-                        Colors.green,
+                        isLightTheme
+                            ? HexColor("#af4e4c")
+                            : const Color.fromRGBO(76, 175, 80, 1),
                         true,
                         false,
                         null,
@@ -205,7 +207,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                         "Notifications",
                         "on",
                         HugeIcons.strokeRoundedNotification01,
-                        Colors.lime,
+                        isLightTheme ? HexColor("#dc39c9") : Colors.lime,
                         true,
                         false,
                         null,
@@ -227,7 +229,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                         "on",
                         HugeIcons.strokeRoundedUser,
                         isLightTheme
-                            ? LColor.accentDefault
+                            ? HexColor("#ae00ff")
                             : TColors.accentDefault,
                         true,
                         true,
@@ -289,19 +291,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-  final AuthService authService = AuthService();
-
-  void _signOut() async {
-    UserCred? userCred = await HiveService.getUserCred();
-    if (userCred != null) {
-      await authService.googleSignIn.disconnect();
-      await authService.signOut();
-    }
-
-    // Update the auth state using the provider
-    ref.read(authProvider.notifier).signOut();
-  }
-
   resetData() {
     const String gameBox = 'sudokuGame';
     const String historyBox = 'gameHistory';
@@ -337,13 +326,17 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 children: [
                   Text(
                     "Reset Data",
-                    style: textTheme.headlineMedium,
+                    style: textTheme.headlineMedium!.copyWith(
+                      color: isLightTheme
+                          ? LColor.majorHighlight
+                          : TColors.textDefault,
+                    ),
                   ),
                   const SizedBox(height: 10),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Text(
-                      "Are you sure you want to reset your data?",
+                      "This clears all the data in you account\nAre you sure to clear all data?",
                       textAlign: TextAlign.center,
                       style: textTheme.bodyMedium!.copyWith(),
                     ),
@@ -353,7 +346,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   ),
                   GestureDetector(
                     onTap: () async {
-                      _signOut();
+                      final userId = HiveService.getUserId();
+                      final userName = HiveService.getUsername();
+                      FirebaseService.clearUserStatData(
+                        userId.toString(),
+                        userName.toString(),
+                      );
                       ref.invalidate(dailyChallengeProvider);
                       ref.invalidate(maxMistakesProvider);
                       ref.invalidate(switchStateProvider);
@@ -373,7 +371,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     child: Container(
                       width: MediaQuery.of(context).size.width,
                       decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 127, 74, 70),
+                        color: isLightTheme
+                            ? const Color.fromARGB(255, 250, 132, 126)
+                            : const Color.fromARGB(255, 127, 74, 70),
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Padding(
@@ -436,7 +436,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          color: iconColor.withValues(alpha: 0.1),
+                          color: isLightTheme
+                              ? iconColor.withValues(alpha: 0.2)
+                              : iconColor.withValues(alpha: 0.1),
+                          // iconColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Padding(

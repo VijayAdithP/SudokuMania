@@ -357,14 +357,15 @@
 
 import 'dart:developer';
 
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:sudokumania/constants/colors.dart';
+import 'package:sudokumania/models/themeSwitch%20Models/themeModel.dart';
 import 'package:sudokumania/models/userCredential%20Models/user_cred.dart';
-import 'package:sudokumania/providers/authProviders/auth_provider.dart';
+import 'package:sudokumania/providers/themeProviders/themeProvider.dart';
 import 'package:sudokumania/service/hive_service.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
 
@@ -705,7 +706,7 @@ class _LeaderboardPageState extends ConsumerState<LeaderboardPage>
   String selectedDifficulty = 'easy';
   late TabController _tabController;
   UserCred? userCred;
-  int _reloadTrigger = 0;
+  final int _reloadTrigger = 0;
 
   @override
   void initState() {
@@ -729,11 +730,16 @@ class _LeaderboardPageState extends ConsumerState<LeaderboardPage>
 
   @override
   Widget build(BuildContext context) {
+    final themePreference = ref.watch(themeProvider);
+    final isLightTheme = themePreference == ThemePreference.light;
+    final textTheme = isLightTheme
+        ? TTextThemes.lightTextTheme
+        : TTextThemes.defaultTextTheme;
     return Scaffold(
         appBar: AppBar(
           title: Text(
             "Leaderboard",
-            style: TTextThemes.defaultTextTheme.headlineMedium!.copyWith(
+            style: textTheme.headlineMedium!.copyWith(
               fontWeight: FontWeight.normal,
             ),
           ),
@@ -754,13 +760,17 @@ class _LeaderboardPageState extends ConsumerState<LeaderboardPage>
                 child: _currIndex == 0
                     ? Icon(
                         HugeIcons.strokeRoundedRefresh,
-                        color: TColors.iconDefault,
+                        color: isLightTheme
+                            ? LColor.iconDefault
+                            : TColors.iconDefault,
                         key: const ValueKey('icon1'),
                         size: 20,
                       )
                     : Icon(
                         HugeIcons.strokeRoundedRefresh,
-                        color: TColors.iconDefault,
+                        color: isLightTheme
+                            ? LColor.iconDefault
+                            : TColors.iconDefault,
                         key: const ValueKey('icon2'),
                         size: 20,
                       ),
@@ -789,7 +799,9 @@ class _LeaderboardPageState extends ConsumerState<LeaderboardPage>
                         borderRadius: BorderRadius.all(
                           Radius.circular(10),
                         ),
-                        color: TColors.primaryDefault,
+                        color: isLightTheme
+                            ? LColor.primaryDefault
+                            : TColors.primaryDefault,
                       ),
                       child: TabBar(
                         isScrollable: true,
@@ -798,14 +810,17 @@ class _LeaderboardPageState extends ConsumerState<LeaderboardPage>
                         indicatorSize: TabBarIndicatorSize.tab,
                         dividerColor: Colors.transparent,
                         indicator: BoxDecoration(
-                          color: TColors.backgroundAccent,
+                          color: isLightTheme
+                              ? LColor.backgroundAccent
+                              : TColors.backgroundAccent,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         labelColor: Colors.white,
-                        labelStyle: TTextThemes.defaultTextTheme.titleMedium,
-                        unselectedLabelStyle:
-                            TTextThemes.defaultTextTheme.titleSmall,
-                        unselectedLabelColor: TColors.textSecondary,
+                        labelStyle: textTheme.titleMedium,
+                        unselectedLabelStyle: textTheme.titleSmall,
+                        unselectedLabelColor: isLightTheme
+                            ? LColor.textSecondary
+                            : TColors.textSecondary,
                         tabAlignment: TabAlignment.start,
                         tabs: [
                           Tab(text: 'Overall'),
@@ -835,15 +850,22 @@ class _LeaderboardPageState extends ConsumerState<LeaderboardPage>
             : Center(
                 child: Text(
                   "Login to see the leaderboards",
-                  style: TTextThemes.defaultTextTheme.headlineMedium!.copyWith(
+                  style: textTheme.headlineMedium!.copyWith(
                     fontWeight: FontWeight.normal,
-                    color: TColors.textSecondary,
+                    color: isLightTheme
+                        ? LColor.textSecondary
+                        : TColors.textSecondary,
                   ),
                 ),
               ));
   }
 
   Widget _buildContent(String difficulty) {
+    final themePreference = ref.watch(themeProvider);
+    final isLightTheme = themePreference == ThemePreference.light;
+    final textTheme = isLightTheme
+        ? TTextThemes.lightTextTheme
+        : TTextThemes.defaultTextTheme;
     return StreamBuilder<DocumentSnapshot>(
       stream: FirebaseFirestore.instance
           .collection('leaderboards')
@@ -870,7 +892,7 @@ class _LeaderboardPageState extends ConsumerState<LeaderboardPage>
               height: 40,
               "assets/images/crown.svg",
               colorFilter: ColorFilter.mode(
-                TColors.accentDefault,
+                isLightTheme ? LColor.accentDefault : TColors.accentDefault,
                 BlendMode.srcIn,
               ),
             ),
@@ -882,7 +904,9 @@ class _LeaderboardPageState extends ConsumerState<LeaderboardPage>
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     _podiumStands(
-                      colorTheme: TColors.buttonDefault,
+                      colorTheme: isLightTheme
+                          ? LColor.buttonDefault
+                          : TColors.buttonDefault,
                       flex: 1,
                       height: MediaQuery.of(context).size.height * 0.2,
                       bottomRight: 0,
@@ -890,13 +914,16 @@ class _LeaderboardPageState extends ConsumerState<LeaderboardPage>
                       topRight: 10,
                       topLeft: 10,
                       bottomPos: 140,
-                      backGroundColor:
-                          TColors.primaryDefault.withValues(alpha: 0.7),
+                      backGroundColor: isLightTheme
+                          ? LColor.primaryDefault.withValues(alpha: 0.7)
+                          : TColors.primaryDefault.withValues(alpha: 0.7),
                       player: players.length > 1 ? players[1] : null,
                       rank: 2,
                     ),
                     _podiumStands(
-                      colorTheme: TColors.accentDefault,
+                      colorTheme: isLightTheme
+                          ? LColor.accentDefault
+                          : TColors.accentDefault,
                       flex: 2,
                       height: MediaQuery.of(context).size.height * 0.26,
                       bottomRight: 0,
@@ -904,12 +931,16 @@ class _LeaderboardPageState extends ConsumerState<LeaderboardPage>
                       topRight: 10,
                       topLeft: 10,
                       bottomPos: 200,
-                      backGroundColor: TColors.primaryDefault,
+                      backGroundColor: isLightTheme
+                          ? LColor.primaryDefault
+                          : TColors.primaryDefault,
                       player: players.isNotEmpty ? players[0] : null,
                       rank: 1,
                     ),
                     _podiumStands(
-                      colorTheme: TColors.iconSecondary,
+                      colorTheme: isLightTheme
+                          ? LColor.iconSecondary
+                          : TColors.iconSecondary,
                       flex: 1,
                       height: MediaQuery.of(context).size.height * 0.2,
                       bottomRight: 10,
@@ -917,8 +948,9 @@ class _LeaderboardPageState extends ConsumerState<LeaderboardPage>
                       topRight: 10,
                       topLeft: 10,
                       bottomPos: 140,
-                      backGroundColor:
-                          TColors.primaryDefault.withValues(alpha: 0.7),
+                      backGroundColor: isLightTheme
+                          ? LColor.primaryDefault.withValues(alpha: 0.7)
+                          : TColors.primaryDefault.withValues(alpha: 0.7),
                       player: players.length > 2 ? players[2] : null,
                       rank: 3,
                     ),
@@ -932,7 +964,9 @@ class _LeaderboardPageState extends ConsumerState<LeaderboardPage>
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                  color: TColors.primaryDefault.withValues(alpha: 0.7),
+                  color: isLightTheme
+                      ? LColor.primaryDefault.withValues(alpha: 0.7)
+                      : TColors.primaryDefault.withValues(alpha: 0.7),
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(20),
                     topRight: Radius.circular(20),
@@ -951,7 +985,7 @@ class _LeaderboardPageState extends ConsumerState<LeaderboardPage>
                       : Center(
                           child: Text(
                             "No more players to display",
-                            style: TTextThemes.defaultTextTheme.bodyLarge,
+                            style: textTheme.bodyLarge,
                           ),
                         ),
                 ),
@@ -976,6 +1010,11 @@ class _LeaderboardPageState extends ConsumerState<LeaderboardPage>
     required Map<String, dynamic>? player,
     required int rank,
   }) {
+    final themePreference = ref.watch(themeProvider);
+    final isLightTheme = themePreference == ThemePreference.light;
+    final textTheme = isLightTheme
+        ? TTextThemes.lightTextTheme
+        : TTextThemes.defaultTextTheme;
     return Expanded(
       flex: flex,
       child: Stack(
@@ -1006,12 +1045,14 @@ class _LeaderboardPageState extends ConsumerState<LeaderboardPage>
                               child: Text(
                                 player['username'],
                                 textAlign: TextAlign.center,
-                                style: TTextThemes.defaultTextTheme.bodyLarge!
-                                    .copyWith(
+                                style: textTheme.bodyLarge!.copyWith(
                                   fontSize: 20,
                                   letterSpacing: 1.5,
-                                  color: TColors.textDefault
-                                      .withValues(alpha: 0.8),
+                                  color: isLightTheme
+                                      ? LColor.textDefault
+                                          .withValues(alpha: 0.8)
+                                      : TColors.textDefault
+                                          .withValues(alpha: 0.8),
                                 ),
                               ),
                             ),
@@ -1019,16 +1060,17 @@ class _LeaderboardPageState extends ConsumerState<LeaderboardPage>
                         : Text(
                             "no ones here yet",
                             textAlign: TextAlign.center,
-                            style: TTextThemes.defaultTextTheme.bodyLarge!
-                                .copyWith(
+                            style: textTheme.bodyLarge!.copyWith(
                               letterSpacing: 1.5,
-                              color: TColors.textDefault.withValues(alpha: 0.8),
+                              color: isLightTheme
+                                  ? LColor.textDefault.withValues(alpha: 0.8)
+                                  : TColors.textDefault.withValues(alpha: 0.8),
                             ),
                           ),
                     if (player != null)
                       Text(
                         "${player['points']} pts",
-                        style: TTextThemes.defaultTextTheme.bodyLarge!.copyWith(
+                        style: textTheme.bodyLarge!.copyWith(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 1.5,
@@ -1049,7 +1091,7 @@ class _LeaderboardPageState extends ConsumerState<LeaderboardPage>
               width: 100,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: TColors.iconDefault,
+                color: isLightTheme ? Colors.white : TColors.iconDefault,
                 border: Border.all(
                   width: 5,
                   color: colorTheme,
@@ -1072,11 +1114,15 @@ class _LeaderboardPageState extends ConsumerState<LeaderboardPage>
   }
 
   Widget _buildListPlayer(Map<String, dynamic> player, int rank) {
+    final themePreference = ref.watch(themeProvider);
+    final isLightTheme = themePreference == ThemePreference.light;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16),
       child: Container(
         decoration: BoxDecoration(
-          color: TColors.backgroundAccent,
+          color:
+              isLightTheme ? LColor.backgroundAccent : TColors.backgroundAccent,
           borderRadius: BorderRadius.circular(10),
         ),
         child: ListTile(

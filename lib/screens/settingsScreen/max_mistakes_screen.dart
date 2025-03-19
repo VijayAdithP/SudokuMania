@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:sudokumania/constants/colors.dart';
+import 'package:sudokumania/models/themeSwitch%20Models/themeModel.dart';
+import 'package:sudokumania/providers/themeProviders/themeProvider.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
 
 class MaxMistakesScreen extends ConsumerStatefulWidget {
@@ -16,6 +18,12 @@ class _MaxMistakesScreenState extends ConsumerState<MaxMistakesScreen> {
   int selectedIndex = 0;
   @override
   Widget build(BuildContext context) {
+    final themePreference = ref.watch(themeProvider);
+    final isLightTheme = themePreference == ThemePreference.light;
+    final textTheme = isLightTheme
+        ? TTextThemes.lightTextTheme
+        : TTextThemes.defaultTextTheme;
+
     return Scaffold(
       appBar: AppBar(
         leading: InkWell(
@@ -25,12 +33,12 @@ class _MaxMistakesScreenState extends ConsumerState<MaxMistakesScreen> {
           child: HugeIcon(
             icon: HugeIcons.strokeRoundedArrowLeft01,
             size: 30,
-            color: TColors.iconDefault,
+            color: isLightTheme ? LColor.iconDefault : TColors.iconDefault,
           ),
         ),
         title: Text(
           "Mistakes Limit",
-          style: TTextThemes.defaultTextTheme.headlineMedium!.copyWith(
+          style: textTheme.headlineMedium!.copyWith(
             fontWeight: FontWeight.normal,
           ),
         ),
@@ -43,7 +51,9 @@ class _MaxMistakesScreenState extends ConsumerState<MaxMistakesScreen> {
             child: Container(
               width: MediaQuery.of(context).size.width,
               decoration: BoxDecoration(
-                color: TColors.primaryDefault,
+                color: isLightTheme
+                    ? LColor.primaryDefault
+                    : TColors.primaryDefault,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Padding(
@@ -68,6 +78,12 @@ class _MaxMistakesScreenState extends ConsumerState<MaxMistakesScreen> {
   }
 
   Widget selectableOption(int value, String text) {
+    final themePreference = ref.watch(themeProvider);
+    final isLightTheme = themePreference == ThemePreference.light;
+    final textTheme = isLightTheme
+        ? TTextThemes.lightTextTheme
+        : TTextThemes.defaultTextTheme;
+
     final selectedMistakes = ref.watch(maxMistakesProvider);
     return InkWell(
       onTap: () {
@@ -82,7 +98,7 @@ class _MaxMistakesScreenState extends ConsumerState<MaxMistakesScreen> {
           children: [
             Text(
               text,
-              style: TTextThemes.defaultTextTheme.headlineSmall!.copyWith(
+              style: textTheme.headlineSmall!.copyWith(
                 fontWeight: FontWeight.normal,
               ),
             ),
@@ -90,7 +106,8 @@ class _MaxMistakesScreenState extends ConsumerState<MaxMistakesScreen> {
               HugeIcon(
                 size: 24,
                 icon: HugeIcons.strokeRoundedTick02,
-                color: TColors.buttonDefault,
+                color:
+                    isLightTheme ? LColor.buttonDefault : TColors.buttonDefault,
               ),
           ],
         ),

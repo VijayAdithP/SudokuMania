@@ -63,14 +63,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
     final themePreference = ref.watch(themeProvider);
     final isLightTheme = themePreference == ThemePreference.light;
 
-    // Define colors and text styles based on the selected theme
+    // Define colors based on the theme
     final iconColor = isLightTheme ? LColor.iconDefault : TColors.iconDefault;
     final textColor = isLightTheme ? LColor.textDefault : TColors.textDefault;
+    final backgroundColor = isLightTheme
+        ? LColor.backgroundPrimary
+        : TColors.backgroundPrimary;
     final textTheme = isLightTheme
         ? TTextThemes.lightTextTheme
         : TTextThemes.defaultTextTheme;
+
     final gameSource = ref.read(gameSourceProvider);
     return Scaffold(
+      backgroundColor: backgroundColor, // Set background color dynamically
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         leading: GestureDetector(
@@ -78,7 +83,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
             context.push(Routes.settingsPage);
           },
           child: Icon(
-            color: iconColor,
+            color: iconColor, // Set icon color dynamically
             size: 30,
             HugeIcons.strokeRoundedSetting07,
           ),
@@ -87,38 +92,39 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
       body: Column(
         children: [
           Expanded(
-              child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.asset(
-                height: 80,
-                width: 80,
-                opacity: const AlwaysStoppedAnimation(.7),
-                "assets/images/sudoku.png",
-              ),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    "SUDOKU MANIA",
-                    style: textTheme.headlineLarge!.copyWith(
-                      color: textColor,
-                      fontSize: 40,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(
+                  height: 80,
+                  width: 80,
+                  opacity: const AlwaysStoppedAnimation(.7),
+                  "assets/images/sudoku.png",
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      "SUDOKU MANIA",
+                      style: textTheme.headlineLarge!.copyWith(
+                        color: textColor, // Set text color dynamically
+                        fontSize: 40,
+                      ),
                     ),
-                  ),
-                  Text(
-                    textAlign: TextAlign.end,
-                    "By Vijay Adith P",
-                    style: textTheme.bodySmall!.copyWith(
-                      color: textColor,
+                    Text(
+                      textAlign: TextAlign.end,
+                      "By Vijay Adith P",
+                      style: textTheme.bodySmall!.copyWith(
+                        color: textColor, // Set text color dynamically
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
-          )),
+                  ],
+                ),
+              ],
+            ),
+          ),
           Expanded(
             child: Column(
               children: [

@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../models/userStats Models/user_stats.dart';
 
 class FirebaseService {
@@ -83,19 +84,6 @@ class FirebaseService {
     await _updateLeaderboard(
         'nightmare', userId, username, stats.nightmarePoints);
   }
-
-  /// Helper method to update a specific leaderboard
-  // static Future<void> _updateLeaderboard(
-  //     String difficulty, String userId, String username, int points) async {
-  //   DocumentReference leaderboardRef =
-  //       _db.collection('leaderboards').doc(difficulty);
-
-  //   await leaderboardRef.set({
-  //     'players': FieldValue.arrayUnion([
-  //       {'userId': userId, 'username': username, 'points': points}
-  //     ])
-  //   }, SetOptions(merge: true));
-  // }
 
   static Future<void> _updateLeaderboard(
       String difficulty, String userId, String username, int points) async {
@@ -224,5 +212,63 @@ class FirebaseService {
       }
       return [];
     });
+  }
+
+  static Future<void> clearUserStatData(String userId, String username) async {
+    DocumentReference userRef = _db.collection('users').doc(userId);
+    await userRef.set({
+      'username': username,
+      'gamesStarted': 0,
+      'gamesWon': 0,
+      'winRate': 0,
+      'bestTime': 0,
+      'avgTime': 0,
+      'currentWinStreak': 0,
+      'longestWinStreak': 0,
+      'totalPoints': 0,
+      //easy,
+      'easygamesStarted': 0,
+      'easygamesWon': 0,
+      'easyWinRate': 0,
+      'easyBestTime': 0,
+      'easyAvgTime': 0,
+      //medium,
+      'mediumgamesStarted': 0,
+      'mediumgamesWon': 0,
+      'mediumWinRate': 0,
+      'mediumBestTime': 0,
+      'mediumAvgTime': 0,
+      //hard ,
+      'hardgamesStarted': 0,
+      'hardgamesWon': 0,
+      'hardWinRate': 0,
+      'hardBestTime': 0,
+      'hardAvgTime': 0,
+      //nightmare ,
+      'nightmaregamesStarted': 0,
+      'nightmaregamesWon': 0,
+      'nightmareWinRate': 0,
+      'nightmareBestTime': 0,
+      'nightmareAvgTime': 0,
+      'leaderboard': {
+        'easy': {'points': 0},
+        'medium': {'points': 0},
+        'hard': {'points': 0},
+        'expert': {'points': 0},
+        'nightmare': {'points': 0},
+      },
+    }, SetOptions(merge: true));
+    // Update overall and difficulty-based leaderboards with 0 points
+    await _updateLeaderboards(
+        userId,
+        username,
+        UserStats(
+          totalPoints: 0,
+          easyPoints: 0,
+          mediumPoints: 0,
+          hardPoints: 0,
+          expertPoints: 0,
+          nightmarePoints: 0,
+        ));
   }
 }

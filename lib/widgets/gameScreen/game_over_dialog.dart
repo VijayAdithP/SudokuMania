@@ -1,15 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:sudokumania/constants/colors.dart';
-import 'package:sudokumania/models/gameProgress%20Models/game_progress.dart';
-import 'package:sudokumania/models/userCredential%20Models/user_cred.dart';
-import 'package:sudokumania/models/userStats%20Models/user_stats.dart';
-import 'package:sudokumania/providers/gameStateProviders/gameTimeStateProvider.dart';
-import 'package:sudokumania/providers/gameStateProviders/gameDifficultyProvider.dart';
-import 'package:sudokumania/service/firebase_service.dart';
-import 'package:sudokumania/service/hive_service.dart';
-import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
-
 // class DialogFb3 extends StatelessWidget {
 //   const DialogFb3({super.key});
 
@@ -75,6 +64,18 @@ import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
 // }
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:sudokumania/constants/colors.dart';
+import 'package:sudokumania/models/gameProgress%20Models/game_progress.dart';
+import 'package:sudokumania/models/themeSwitch%20Models/themeModel.dart';
+import 'package:sudokumania/models/userCredential%20Models/user_cred.dart';
+import 'package:sudokumania/models/userStats%20Models/user_stats.dart';
+import 'package:sudokumania/providers/gameStateProviders/gameDifficultyProvider.dart';
+import 'package:sudokumania/providers/gameStateProviders/gameTimeStateProvider.dart';
+import 'package:sudokumania/providers/themeProviders/themeProvider.dart';
+import 'package:sudokumania/service/firebase_service.dart';
+import 'package:sudokumania/service/hive_service.dart';
+import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
 import 'package:sudokumania/utlis/router/routes.dart';
 
 class GameOverDialog extends ConsumerStatefulWidget {
@@ -135,6 +136,11 @@ class _GameOverDialogState extends ConsumerState<GameOverDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final themePreference = ref.watch(themeProvider);
+    final isLightTheme = themePreference == ThemePreference.light;
+    final textTheme = isLightTheme
+        ? TTextThemes.lightTextTheme
+        : TTextThemes.defaultTextTheme;
     return Dialog(
       elevation: 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
@@ -142,7 +148,7 @@ class _GameOverDialogState extends ConsumerState<GameOverDialog> {
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height / 3.5,
         decoration: BoxDecoration(
-          color: TColors.dullBackground,
+          color: isLightTheme ? LColor.dullBackground : TColors.dullBackground,
           borderRadius: BorderRadius.circular(15.0),
         ),
         child: Padding(
@@ -152,7 +158,7 @@ class _GameOverDialogState extends ConsumerState<GameOverDialog> {
             children: [
               Text(
                 "Game Over",
-                style: TTextThemes.defaultTextTheme.headlineMedium,
+                style: textTheme.headlineMedium,
               ),
               const SizedBox(
                 height: 10,
@@ -162,7 +168,7 @@ class _GameOverDialogState extends ConsumerState<GameOverDialog> {
                 child: Text(
                   "You lost the game because you made mistake",
                   textAlign: TextAlign.center,
-                  style: TTextThemes.defaultTextTheme.bodyMedium!.copyWith(),
+                  style: textTheme.bodyMedium!.copyWith(),
                 ),
               ),
               Expanded(
@@ -239,7 +245,9 @@ class _GameOverDialogState extends ConsumerState<GameOverDialog> {
                 child: Container(
                   width: MediaQuery.of(context).size.width,
                   decoration: BoxDecoration(
-                    color: TColors.primaryDefault,
+                    color: isLightTheme
+                        ? LColor.primaryDefault
+                        : TColors.primaryDefault,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Padding(
@@ -247,9 +255,10 @@ class _GameOverDialogState extends ConsumerState<GameOverDialog> {
                     child: Center(
                       child: Text(
                         "Restart",
-                        style: TTextThemes.defaultTextTheme.headlineSmall!
-                            .copyWith(
-                          color: TColors.buttonDefault.withRed(0),
+                        style: textTheme.headlineSmall!.copyWith(
+                          color: isLightTheme
+                              ? LColor.buttonDefault
+                              : TColors.buttonDefault.withRed(0),
                           fontSize: 20,
                         ),
                       ),
@@ -268,7 +277,9 @@ class _GameOverDialogState extends ConsumerState<GameOverDialog> {
                 child: Container(
                   width: MediaQuery.of(context).size.width,
                   decoration: BoxDecoration(
-                    color: TColors.buttonDefault.withRed(10),
+                    color: isLightTheme
+                        ? LColor.buttonDefault
+                        : TColors.buttonDefault.withRed(10),
                     // color: TColors.primaryDefault,
                     borderRadius: BorderRadius.circular(16),
                   ),
@@ -277,8 +288,9 @@ class _GameOverDialogState extends ConsumerState<GameOverDialog> {
                     child: Center(
                       child: Text(
                         "Main Menu",
-                        style: TTextThemes.defaultTextTheme.headlineSmall!
-                            .copyWith(
+                        style: textTheme.headlineSmall!.copyWith(
+                          color:
+                              isLightTheme ? Colors.white : TColors.textDefault,
                           // color: TColors.buttonDefault.withRed(0),
                           fontSize: 20,
                         ),

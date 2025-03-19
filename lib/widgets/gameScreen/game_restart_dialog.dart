@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sudokumania/constants/colors.dart';
 import 'package:sudokumania/models/gameProgress%20Models/game_progress.dart';
-import 'package:sudokumania/providers/gameStateProviders/gameTimeStateProvider.dart';
+import 'package:sudokumania/models/themeSwitch%20Models/themeModel.dart';
 import 'package:sudokumania/providers/gameStateProviders/gameDifficultyProvider.dart';
+import 'package:sudokumania/providers/gameStateProviders/gameTimeStateProvider.dart';
+import 'package:sudokumania/providers/themeProviders/themeProvider.dart';
 import 'package:sudokumania/service/hive_service.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
-
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sudokumania/utlis/router/routes.dart';
 
 class GameRestartDialog extends ConsumerStatefulWidget {
@@ -19,12 +20,6 @@ class GameRestartDialog extends ConsumerStatefulWidget {
 }
 
 class _GameRestartDialogState extends ConsumerState<GameRestartDialog> {
-  final primaryColor = const Color(0xff4338CA);
-  final secondaryColor = const Color(0xff6D28D9);
-  final accentColor = const Color(0xffffffff);
-  final backgroundColor = const Color(0xffffffff);
-  final errorColor = const Color(0xffEF4444);
-
   GameProgress? lastPlayedGame;
 
   Future<void> _loadGameData() async {
@@ -43,6 +38,11 @@ class _GameRestartDialogState extends ConsumerState<GameRestartDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final themePreference = ref.watch(themeProvider);
+    final isLightTheme = themePreference == ThemePreference.light;
+    final textTheme = isLightTheme
+        ? TTextThemes.lightTextTheme
+        : TTextThemes.defaultTextTheme;
     return Dialog(
       elevation: 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
@@ -50,7 +50,7 @@ class _GameRestartDialogState extends ConsumerState<GameRestartDialog> {
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height / 4.5,
         decoration: BoxDecoration(
-          color: TColors.dullBackground,
+          color: isLightTheme ? LColor.dullBackground : TColors.dullBackground,
           borderRadius: BorderRadius.circular(15.0),
         ),
         child: Padding(
@@ -60,7 +60,7 @@ class _GameRestartDialogState extends ConsumerState<GameRestartDialog> {
             children: [
               Text(
                 "Still Got a chance",
-                style: TTextThemes.defaultTextTheme.headlineMedium,
+                style: textTheme.headlineMedium,
               ),
               const SizedBox(
                 height: 10,
@@ -70,7 +70,7 @@ class _GameRestartDialogState extends ConsumerState<GameRestartDialog> {
                 child: Text(
                   "Are you sure you want to restart the game?",
                   textAlign: TextAlign.center,
-                  style: TTextThemes.defaultTextTheme.bodyMedium!.copyWith(),
+                  style: textTheme.bodyMedium!.copyWith(),
                 ),
               ),
               Expanded(
@@ -137,7 +137,9 @@ class _GameRestartDialogState extends ConsumerState<GameRestartDialog> {
                 child: Container(
                   width: MediaQuery.of(context).size.width,
                   decoration: BoxDecoration(
-                    color: TColors.primaryDefault,
+                    color: isLightTheme
+                        ? LColor.primaryDefault
+                        : TColors.primaryDefault,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Padding(
@@ -145,9 +147,10 @@ class _GameRestartDialogState extends ConsumerState<GameRestartDialog> {
                     child: Center(
                       child: Text(
                         "Restart",
-                        style: TTextThemes.defaultTextTheme.headlineSmall!
-                            .copyWith(
-                          color: TColors.buttonDefault.withRed(0),
+                        style: textTheme.headlineSmall!.copyWith(
+                          color: isLightTheme
+                              ? LColor.buttonDefault
+                              : TColors.buttonDefault.withRed(0),
                           fontSize: 20,
                         ),
                       ),

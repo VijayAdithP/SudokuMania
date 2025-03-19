@@ -2,12 +2,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:get/get_utils/src/extensions/dynamic_extensions.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:sudokumania/constants/colors.dart';
+import 'package:sudokumania/models/themeSwitch%20Models/themeModel.dart';
 import 'package:sudokumania/models/userCredential%20Models/user_cred.dart';
 import 'package:sudokumania/models/userStats%20Models/user_stats.dart';
 import 'package:sudokumania/providers/authProviders/auth_provider.dart';
+import 'package:sudokumania/providers/themeProviders/themeProvider.dart';
 import 'package:sudokumania/service/firebase_service.dart';
 import 'package:sudokumania/service/hive_service.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
@@ -130,6 +131,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     // Watch the auth state to update the UI
     final authState = ref.watch(authProvider);
+    final themePreference = ref.watch(themeProvider);
+    final isLightTheme = themePreference == ThemePreference.light;
+    final iconColor = isLightTheme ? LColor.iconDefault : TColors.iconDefault;
+    final buttonColor =
+        isLightTheme ? LColor.buttonDefault : TColors.buttonDefault;
+
+    final secondaryTextColor =
+        isLightTheme ? LColor.textSecondary : TColors.textSecondary;
+    final textColor = isLightTheme ? LColor.textDefault : TColors.textDefault;
+    final textTheme = isLightTheme
+        ? TTextThemes.lightTextTheme
+        : TTextThemes.defaultTextTheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -148,12 +161,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           child: HugeIcon(
             icon: HugeIcons.strokeRoundedArrowLeft01,
             size: 30,
-            color: TColors.iconDefault,
+            color: iconColor,
           ),
         ),
         title: Text(
           "Google SignIn",
-          style: TTextThemes.defaultTextTheme.headlineMedium!.copyWith(
+          style: textTheme.headlineMedium!.copyWith(
             fontWeight: FontWeight.normal,
           ),
         ),
@@ -176,16 +189,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             children: [
               Text(
                 "SUDOKU MANIA",
-                style: TTextThemes.defaultTextTheme.headlineLarge!.copyWith(
-                  color: TColors.textDefault,
+                style: textTheme.headlineLarge!.copyWith(
+                  color: textColor,
                   fontSize: 40,
                 ),
               ),
               Text(
                 textAlign: TextAlign.end,
                 "By Vijay Adith P",
-                style: TTextThemes.defaultTextTheme.bodySmall!.copyWith(
-                  color: TColors.textDefault,
+                style: textTheme.bodySmall!.copyWith(
+                  color: textColor,
                 ),
               ),
             ],
@@ -199,10 +212,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               children: [
                 Text(
                   'Sync you current Offline Data to the Firebase cloud',
-                  style: TTextThemes.defaultTextTheme.bodyLarge!.copyWith(
+                  style: textTheme.bodyLarge!.copyWith(
                     fontSize: 18,
                     letterSpacing: 1.5,
-                    color: TColors.textDefault.withValues(alpha: 0.8),
+                    color: textColor.withValues(alpha: 0.8),
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -210,9 +223,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 if (authState.isSignedIn)
                   Text(
                     'Welcome, ${authState.user!.displayName}!',
-                    style: TTextThemes.defaultTextTheme.bodyLarge!.copyWith(
+                    style: textTheme.bodyLarge!.copyWith(
                       fontSize: 18,
-                      color: TColors.textDefault,
+                      color: textColor,
                     ),
                   ),
                 const SizedBox(
@@ -220,7 +233,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 if (!authState.isSignedIn)
                   InkWell(
-                    splashColor: TColors.textSecondary.withValues(alpha: 0.2),
+                    splashColor: secondaryTextColor.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(20),
                     onTap: _signIn,
                     child: Container(
@@ -229,7 +242,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           width: 2,
-                          color: TColors.buttonDefault,
+                          color: buttonColor,
                         ),
                       ),
                       child: Padding(
@@ -246,11 +259,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             const SizedBox(width: 16),
                             Text(
                               'SignIn with Google',
-                              style: TTextThemes.defaultTextTheme.bodyLarge!
-                                  .copyWith(
+                              style: textTheme.bodyLarge!.copyWith(
                                 fontSize: 18,
                                 letterSpacing: 1.5,
-                                color: TColors.textDefault,
+                                color: textColor,
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -261,7 +273,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                 if (authState.isSignedIn)
                   InkWell(
-                    splashColor: TColors.textSecondary.withValues(alpha: 0.2),
+                    splashColor: secondaryTextColor.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(20),
                     onTap: _signOut,
                     child: Container(
@@ -270,7 +282,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           width: 2,
-                          color: TColors.buttonDefault,
+                          color: buttonColor,
                         ),
                       ),
                       child: Padding(
@@ -281,11 +293,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           children: [
                             Text(
                               'Sign Out',
-                              style: TTextThemes.defaultTextTheme.bodyLarge!
-                                  .copyWith(
+                              style: textTheme.bodyLarge!.copyWith(
                                 fontSize: 18,
                                 letterSpacing: 1.5,
-                                color: TColors.textDefault,
+                                color: textColor,
                               ),
                               textAlign: TextAlign.center,
                             ),

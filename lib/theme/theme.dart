@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hexcolor/hexcolor.dart';
 import 'package:sudokumania/constants/colors.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
 
@@ -16,7 +17,7 @@ class TAppTheme {
     brightness: Brightness.light,
     primaryColor: Colors.blue,
     fontFamily: 'Poppins',
-    scaffoldBackgroundColor: Colors.white,
+    scaffoldBackgroundColor: HexColor("#F2F8FC"),
     textTheme: TTextThemes.lightTextTheme,
   );
 }

@@ -2,15 +2,21 @@
 
 import 'dart:developer';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:sudokumania/constants/colors.dart';
+import 'package:sudokumania/models/dailyChallenges%20Models/daily_challenge_progress.dart';
+import 'package:sudokumania/models/gameProgress%20Models/game_progress.dart';
+import 'package:sudokumania/models/themeSwitch%20Models/themeModel.dart';
 import 'package:sudokumania/models/userCredential%20Models/user_cred.dart';
 import 'package:sudokumania/models/userStats%20Models/user_stats.dart';
 import 'package:sudokumania/providers/authProviders/auth_provider.dart';
+import 'package:sudokumania/providers/dailyChallengesProviders/daily_challenges_provider.dart';
+import 'package:sudokumania/providers/themeProviders/themeProvider.dart';
+import 'package:sudokumania/screens/settingsScreen/max_mistakes_screen.dart';
 import 'package:sudokumania/service/firebase_service.dart';
 import 'package:sudokumania/service/hive_service.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
@@ -62,6 +68,12 @@ class _AccountDetailsState extends ConsumerState<AccountDetails> {
 
   @override
   Widget build(BuildContext context) {
+    final themePreference = ref.watch(themeProvider);
+    final isLightTheme = themePreference == ThemePreference.light;
+    final textTheme = isLightTheme
+        ? TTextThemes.lightTextTheme
+        : TTextThemes.defaultTextTheme;
+
     return Scaffold(
       appBar: AppBar(
         leading: InkWell(
@@ -71,12 +83,12 @@ class _AccountDetailsState extends ConsumerState<AccountDetails> {
           child: HugeIcon(
             icon: HugeIcons.strokeRoundedArrowLeft01,
             size: 30,
-            color: TColors.iconDefault,
+            color: isLightTheme ? LColor.iconDefault : TColors.iconDefault,
           ),
         ),
         title: Text(
           "Account",
-          style: TTextThemes.defaultTextTheme.headlineMedium!.copyWith(
+          style: textTheme.headlineMedium!.copyWith(
             fontWeight: FontWeight.normal,
           ),
         ),
@@ -104,10 +116,11 @@ class _AccountDetailsState extends ConsumerState<AccountDetails> {
                         ),
                         Text(
                           userCred!.displayName ?? "No Display Name",
-                          style: TTextThemes.defaultTextTheme.headlineLarge!
-                              .copyWith(
+                          style: textTheme.headlineLarge!.copyWith(
                             fontWeight: FontWeight.normal,
-                            color: TColors.buttonDefault,
+                            color: isLightTheme
+                                ? LColor.buttonDefault
+                                : TColors.buttonDefault,
                           ),
                         ),
                         Padding(
@@ -129,7 +142,9 @@ class _AccountDetailsState extends ConsumerState<AccountDetails> {
                                       tiles(
                                         "Sync Offline Data",
                                         HugeIcons.strokeRoundedFolderSync,
-                                        TColors.accentDefault,
+                                        isLightTheme
+                                            ? LColor.accentDefault
+                                            : TColors.accentDefault,
                                         () async {
                                           if (userCred != null) {
                                             await HiveService.saveUsername(
@@ -179,7 +194,9 @@ class _AccountDetailsState extends ConsumerState<AccountDetails> {
                         style: TTextThemes.defaultTextTheme.headlineLarge!
                             .copyWith(
                           fontWeight: FontWeight.normal,
-                          color: TColors.textSecondary,
+                          color: isLightTheme
+                              ? LColor.textSecondary
+                              : TColors.textSecondary,
                         ),
                       ),
                     ),
@@ -188,9 +205,21 @@ class _AccountDetailsState extends ConsumerState<AccountDetails> {
   }
 
   void resetData() {
+    final themePreference = ref.watch(themeProvider);
+    final isLightTheme = themePreference == ThemePreference.light;
+    final textTheme = isLightTheme
+        ? TTextThemes.lightTextTheme
+        : TTextThemes.defaultTextTheme;
     showDialog(
       context: context,
       builder: (context) {
+        const String gameBox = 'sudokuGame';
+        const String historyBox = 'gameHistory';
+        const String statsBox = 'userStats';
+        const String userBox = 'userData';
+        const String userCredBox = 'userCred';
+        const String offlineSyncBox = 'offlineSync';
+        const String dailyChallengeBox = 'dailyChallengeBox';
         return Dialog(
           elevation: 1,
           shape: RoundedRectangleBorder(
@@ -200,7 +229,8 @@ class _AccountDetailsState extends ConsumerState<AccountDetails> {
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height / 4.6,
             decoration: BoxDecoration(
-              color: TColors.dullBackground,
+              color:
+                  isLightTheme ? LColor.dullBackground : TColors.dullBackground,
               borderRadius: BorderRadius.circular(15.0),
             ),
             child: Padding(
@@ -210,7 +240,7 @@ class _AccountDetailsState extends ConsumerState<AccountDetails> {
                 children: [
                   Text(
                     "Log Out",
-                    style: TTextThemes.defaultTextTheme.headlineMedium,
+                    style: textTheme.headlineMedium,
                   ),
                   const SizedBox(height: 10),
                   Padding(
@@ -218,23 +248,38 @@ class _AccountDetailsState extends ConsumerState<AccountDetails> {
                     child: Text(
                       "Are you sure you want to log out of your account?",
                       textAlign: TextAlign.center,
-                      style:
-                          TTextThemes.defaultTextTheme.bodyMedium!.copyWith(),
+                      style: textTheme.bodyMedium,
                     ),
                   ),
                   const SizedBox(height: 15),
                   GestureDetector(
-                    onTap: () {
+                    onTap: () async {
                       _signOut();
+                      ref.invalidate(dailyChallengeProvider);
+                      ref.invalidate(maxMistakesProvider);
+                      ref.invalidate(switchStateProvider);
+                      await Hive.initFlutter();
+                      await Hive.openBox<GameProgress>(gameBox);
+                      await Hive.openBox<GameProgress>(historyBox);
+                      await Hive.openBox<UserStats>(statsBox);
+                      await Hive.openBox<String>(userBox);
+                      await Hive.openBox<UserCred>(userCredBox);
+                      await Hive.openBox<UserStats>(offlineSyncBox);
+                      await Hive.openBox<DailyChallengeProgress>(
+                          dailyChallengeBox);
+                      Hive.deleteFromDisk();
+                      Navigator.pop(context);
                       context.go(Routes.homePage);
                       setState(() {
-                        userCred = null; // Clear the user credentials
+                        userCred = null;
                       });
                     },
                     child: Container(
                       width: MediaQuery.of(context).size.width,
                       decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 127, 74, 70),
+                        color: isLightTheme
+                            ? const Color.fromARGB(255, 250, 132, 126)
+                            : const Color.fromARGB(255, 127, 74, 70),
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Padding(
@@ -242,8 +287,7 @@ class _AccountDetailsState extends ConsumerState<AccountDetails> {
                         child: Center(
                           child: Text(
                             "Proceed",
-                            style: TTextThemes.defaultTextTheme.headlineSmall!
-                                .copyWith(
+                            style: textTheme.headlineSmall!.copyWith(
                               color: Colors.red,
                               fontSize: 20,
                             ),
@@ -262,15 +306,25 @@ class _AccountDetailsState extends ConsumerState<AccountDetails> {
   }
 
   Widget seperator() {
+    final themePreference = ref.watch(themeProvider);
+    final isLightTheme = themePreference == ThemePreference.light;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Divider(
-        color: TColors.textSecondary.withValues(alpha: 0.3),
+        color: isLightTheme
+            ? LColor.textSecondary.withValues(alpha: 0.3)
+            : TColors.textSecondary.withValues(alpha: 0.3),
       ),
     );
   }
 
   Widget tiles(String value, IconData icon, Color iconColor, Function()? nav) {
+    final themePreference = ref.watch(themeProvider);
+    final isLightTheme = themePreference == ThemePreference.light;
+    final textTheme = isLightTheme
+        ? TTextThemes.lightTextTheme
+        : TTextThemes.defaultTextTheme;
     return GestureDetector(
       onTap: nav,
       child: Padding(
@@ -306,9 +360,11 @@ class _AccountDetailsState extends ConsumerState<AccountDetails> {
                   Text(
                     value,
                     textAlign: TextAlign.center,
-                    style: TTextThemes.defaultTextTheme.bodyLarge!.copyWith(
+                    style: textTheme.bodyLarge!.copyWith(
                       letterSpacing: 1.5,
-                      color: TColors.textDefault,
+                      color: isLightTheme
+                          ? LColor.textDefault
+                          : TColors.textDefault,
                     ),
                   ),
                 ],
@@ -321,10 +377,13 @@ class _AccountDetailsState extends ConsumerState<AccountDetails> {
   }
 
   Widget dullContainer(Widget child) {
+    final themePreference = ref.watch(themeProvider);
+    final isLightTheme = themePreference == ThemePreference.light;
+
     return Container(
       width: MediaQuery.of(context).size.width,
       decoration: BoxDecoration(
-        color: TColors.primaryDefault,
+        color: isLightTheme ? LColor.primaryDefault : TColors.primaryDefault,
         borderRadius: BorderRadius.circular(20),
       ),
       child: child,

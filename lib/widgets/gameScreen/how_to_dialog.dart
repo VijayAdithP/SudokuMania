@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:sudokumania/constants/colors.dart';
-import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sudokumania/constants/colors.dart';
+import 'package:sudokumania/models/themeSwitch%20Models/themeModel.dart';
+import 'package:sudokumania/providers/themeProviders/themeProvider.dart';
+import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HowToDialog extends ConsumerStatefulWidget {
@@ -12,13 +14,8 @@ class HowToDialog extends ConsumerStatefulWidget {
 }
 
 class _HowToDialogState extends ConsumerState<HowToDialog> {
-  final primaryColor = const Color(0xff4338CA);
-  final secondaryColor = const Color(0xff6D28D9);
-  final accentColor = const Color(0xffffffff);
-  final backgroundColor = const Color(0xffffffff);
-  final errorColor = const Color(0xffEF4444);
-
-  final Uri _url = Uri.parse('https://sudoku.com/how-to-play/sudoku-rules-for-complete-beginners/');
+  final Uri _url = Uri.parse(
+      'https://sudoku.com/how-to-play/sudoku-rules-for-complete-beginners/');
 
   Future<void> _launchUrl() async {
     if (!await launchUrl(_url)) {
@@ -28,6 +25,11 @@ class _HowToDialogState extends ConsumerState<HowToDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final themePreference = ref.watch(themeProvider);
+    final isLightTheme = themePreference == ThemePreference.light;
+    final textTheme = isLightTheme
+        ? TTextThemes.lightTextTheme
+        : TTextThemes.defaultTextTheme;
     return Dialog(
       elevation: 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
@@ -35,7 +37,7 @@ class _HowToDialogState extends ConsumerState<HowToDialog> {
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height / 4.5,
         decoration: BoxDecoration(
-          color: TColors.dullBackground,
+          color: isLightTheme ? LColor.dullBackground : TColors.dullBackground,
           borderRadius: BorderRadius.circular(15.0),
         ),
         child: Padding(
@@ -45,7 +47,7 @@ class _HowToDialogState extends ConsumerState<HowToDialog> {
             children: [
               Text(
                 "Need Help?",
-                style: TTextThemes.defaultTextTheme.headlineMedium,
+                style: textTheme.headlineMedium,
               ),
               const SizedBox(
                 height: 10,
@@ -55,7 +57,7 @@ class _HowToDialogState extends ConsumerState<HowToDialog> {
                 child: Text(
                   "This will redirect you to an external site where you can learn how to play Sudoku",
                   textAlign: TextAlign.center,
-                  style: TTextThemes.defaultTextTheme.bodyMedium!.copyWith(),
+                  style: textTheme.bodyMedium!.copyWith(),
                 ),
               ),
               Expanded(
@@ -68,7 +70,9 @@ class _HowToDialogState extends ConsumerState<HowToDialog> {
                 child: Container(
                   width: MediaQuery.of(context).size.width,
                   decoration: BoxDecoration(
-                    color: TColors.primaryDefault,
+                    color: isLightTheme
+                        ? LColor.primaryDefault
+                        : TColors.primaryDefault,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Padding(
@@ -76,9 +80,10 @@ class _HowToDialogState extends ConsumerState<HowToDialog> {
                     child: Center(
                       child: Text(
                         "Go to website",
-                        style: TTextThemes.defaultTextTheme.headlineSmall!
-                            .copyWith(
-                          color: TColors.buttonDefault.withRed(0),
+                        style: textTheme.headlineSmall!.copyWith(
+                          color: isLightTheme
+                              ? LColor.buttonDefault
+                              : TColors.buttonDefault.withRed(0),
                           fontSize: 20,
                         ),
                       ),
