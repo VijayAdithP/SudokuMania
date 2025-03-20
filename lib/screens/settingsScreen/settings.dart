@@ -1,3 +1,5 @@
+import 'dart:developer' as dev;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,10 +10,10 @@ import 'package:sudokumania/constants/colors.dart';
 import 'package:sudokumania/models/dailyChallenges%20Models/daily_challenge_progress.dart';
 import 'package:sudokumania/models/gameProgress%20Models/game_progress.dart';
 import 'package:sudokumania/models/themeSwitch%20Models/themeModel.dart';
-import 'package:sudokumania/models/userCredential%20Models/user_cred.dart';
 import 'package:sudokumania/models/userStats%20Models/user_stats.dart';
 import 'package:sudokumania/providers/dailyChallengesProviders/daily_challenges_provider.dart';
 import 'package:sudokumania/providers/notifProviders/notif_provider.dart';
+import 'package:sudokumania/providers/notifProviders/viberation_provider.dart';
 import 'package:sudokumania/providers/themeProviders/themeProvider.dart';
 import 'package:sudokumania/screens/settingsScreen/max_mistakes_screen.dart';
 import 'package:sudokumania/service/firebase_service.dart';
@@ -35,6 +37,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     "account": false,
     "theme": false,
     "Notifications": true,
+    "Viberation": true,
   };
   @override
   void initState() {
@@ -68,6 +71,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final textTheme = isLightTheme
         ? TTextThemes.lightTextTheme
         : TTextThemes.defaultTextTheme;
+
     return Scaffold(
       appBar: AppBar(
         leading: InkWell(
@@ -155,11 +159,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                         false,
                         null,
                         ref,
-                        _switchStates["Vibration"]!,
+                        _switchStates["Viberation"]!,
                         (value) {
                           setState(() {
-                            _switchStates["Vibration"] = value;
+                            _switchStates["Viberation"] = value;
                           });
+                          if (value) {
+                            ref.watch(vibeProvider.notifier).turnOnVibe();
+                          } else {
+                            ref.watch(vibeProvider.notifier).turnOffVibe();
+                          }
                         },
                       ),
                     ],
@@ -296,7 +305,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     const String historyBox = 'gameHistory';
     const String statsBox = 'userStats';
     const String userBox = 'userData';
-    const String userCredBox = 'userCred';
     const String offlineSyncBox = 'offlineSync';
     const String dailyChallengeBox = 'dailyChallengeBox';
     final themePreference = ref.watch(themeProvider);
@@ -346,8 +354,10 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   ),
                   GestureDetector(
                     onTap: () async {
-                      final userId = HiveService.getUserId();
-                      final userName = HiveService.getUsername();
+                      String? userId = await HiveService.getUserId();
+                      String? userName = await HiveService.getUsername();
+                      dev.log(userName.toString());
+
                       FirebaseService.clearUserStatData(
                         userId.toString(),
                         userName.toString(),
@@ -360,12 +370,17 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       await Hive.openBox<GameProgress>(historyBox);
                       await Hive.openBox<UserStats>(statsBox);
                       await Hive.openBox<String>(userBox);
-                      await Hive.openBox<UserCred>(userCredBox);
+                      // await Hive.openBox<UserCred>(userCredBox);
                       await Hive.openBox<UserStats>(offlineSyncBox);
                       await Hive.openBox<DailyChallengeProgress>(
                           dailyChallengeBox);
+                      await Hive.deleteBoxFromDisk(gameBox);
+                      await Hive.deleteBoxFromDisk(historyBox);
+                      await Hive.deleteBoxFromDisk(statsBox);
+                      await Hive.deleteBoxFromDisk(offlineSyncBox);
+                      await Hive.deleteBoxFromDisk(dailyChallengeBox);
 
-                      Hive.deleteFromDisk();
+                      // Hive.deleteFromDisk();
                       Navigator.pop(context);
                     },
                     child: Container(

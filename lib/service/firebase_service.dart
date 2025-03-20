@@ -12,12 +12,26 @@ class FirebaseService {
       String userId, String username, UserStats stats) async {
     DocumentReference userRef = _db.collection('users').doc(userId);
 
+    final List<int?> bestTimes = [
+      stats.bestTime,
+      stats.easyBestTime,
+      stats.mediumBestTime,
+      stats.hardBestTime,
+      stats.nightmareBestTime,
+    ];
+    final validTimes =
+        bestTimes.where((time) => time != null && time > 0).toList();
+    int? minTime = 0;
+    if (validTimes.isNotEmpty) {
+      minTime = validTimes.reduce((a, b) => a! < b! ? a : b);
+    }
+
     await userRef.set({
       'username': username,
       'gamesStarted': stats.gamesStarted,
       'gamesWon': stats.gamesWon,
       'winRate': stats.winRate,
-      'bestTime': stats.bestTime,
+      'bestTime': minTime,
       'avgTime': stats.avgTime,
       'currentWinStreak': stats.currentWinStreak,
       'longestWinStreak': stats.longestWinStreak,
@@ -105,13 +119,13 @@ class FirebaseService {
       );
 
       if (userIndex != -1) {
-        // If the user exists, update their points
+        // If the user exists, replace their points with the new value
         final Map<String, dynamic> userData =
             Map<String, dynamic>.from(players[userIndex]);
-        userData['points'] = (userData['points'] as int) + points;
+        userData['points'] = points; // Replace points with the new value
         players[userIndex] = userData;
       } else {
-        // If the user does not exist, add them to the array
+        // If the user does not exist, add them to the array with the new points
         players.add({
           'userId': userId,
           'username': username,
@@ -258,6 +272,7 @@ class FirebaseService {
         'nightmare': {'points': 0},
       },
     }, SetOptions(merge: true));
+
     // Update overall and difficulty-based leaderboards with 0 points
     await _updateLeaderboards(
         userId,

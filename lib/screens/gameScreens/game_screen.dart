@@ -18,6 +18,7 @@ import 'package:sudokumania/providers/dailyChallengesProviders/type_game_provide
 import 'package:sudokumania/providers/enum/type_of_game_enum.dart';
 import 'package:sudokumania/providers/gameStateProviders/gameDifficultyProvider.dart';
 import 'package:sudokumania/providers/gameStateProviders/gameTimeStateProvider.dart';
+import 'package:sudokumania/providers/notifProviders/viberation_provider.dart';
 import 'package:sudokumania/providers/themeProviders/themeProvider.dart';
 import 'package:sudokumania/screens/settingsScreen/max_mistakes_screen.dart';
 import 'package:sudokumania/service/firebase_service.dart';
@@ -248,7 +249,10 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
       _recordMove(selectedRow!, selectedCol!,
           _board.grid[selectedRow!][selectedCol!], isValid);
       if (!isValid) {
-        Vibration.vibrate(duration: 200);
+        bool vibe = ref.watch(vibeProvider);
+        if (vibe) {
+          Vibration.vibrate(duration: 200);
+        }
         _board = _board.copyWith(
           mistakes: _board.mistakes + 1,
           gameOver: _board.mistakes + 1 >= _board.maxMistakes,

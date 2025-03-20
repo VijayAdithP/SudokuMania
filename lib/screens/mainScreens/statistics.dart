@@ -831,6 +831,7 @@ import 'package:sudokumania/models/themeSwitch%20Models/themeModel.dart';
 import 'package:sudokumania/models/userCredential%20Models/user_cred.dart';
 import 'package:sudokumania/models/userStats%20Models/user_stats.dart';
 import 'package:sudokumania/providers/themeProviders/themeProvider.dart';
+import 'package:sudokumania/service/firebase_service.dart';
 import 'package:sudokumania/service/hive_service.dart';
 import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
 import 'package:sudokumania/utlis/router/routes.dart';
@@ -883,8 +884,17 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage>
   }
 
   Future<void> _loadUserStats() async {
-    UserCred? userCred = await HiveService.getUserCred();
     final stats = await HiveService.loadUserStats();
+    UserStats? userdata = await HiveService.loadUserStats();
+    UserCred? userCred = await HiveService.getUserCred();
+
+    if (userdata != null) {
+      await FirebaseService.updatePlayerStats(
+        userCred!.email!,
+        userCred.displayName!,
+        userdata,
+      );
+    }
     setState(() {
       currentStats = stats;
     });
@@ -966,7 +976,6 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage>
               });
 
               await _loadUserStats();
-              _loadUserData();
               setState(() {
                 _currIndex = _currIndex == 0 ? 1 : 0;
                 _isReloading = false;

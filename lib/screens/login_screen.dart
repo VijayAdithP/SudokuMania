@@ -42,81 +42,87 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       isLoading = false;
     });
     final authState = ref.watch(authProvider);
-    await HiveService.saveUserId(authState.user!.email!);
-    await HiveService.saveUserCredentials(UserCred(
-      uid: authState.user!.uid,
-      emailVerified: authState.user!.emailVerified,
-      displayName: authState.user!.displayName,
-      email: authState.user!.email,
-      phoneNumber: authState.user!.phoneNumber,
-      photoURL: authState.user!.photoURL,
-    ));
-    UserStats? firebaseStats =
-        await FirebaseService.fetchUserStats(authState.user!.email!);
-    UserStats? localStats = await HiveService.loadUserStats();
+    if (!isLoading && authState.isSignedIn) {
+      await HiveService.saveUserId(authState.user!.email!);
+      await HiveService.saveUserCredentials(UserCred(
+        uid: authState.user!.uid,
+        emailVerified: authState.user!.emailVerified,
+        displayName: authState.user!.displayName,
+        email: authState.user!.email,
+        phoneNumber: authState.user!.phoneNumber,
+        photoURL: authState.user!.photoURL,
+      ));
+      UserStats? firebaseStats =
+          await FirebaseService.fetchUserStats(authState.user!.email!);
+      UserStats? localStats = await HiveService.loadUserStats();
 
-    updatedState = UserStats(
-      currentWinStreak:
-          localStats!.currentWinStreak + firebaseStats!.currentWinStreak,
-      gamesStarted: localStats.gamesStarted + firebaseStats.gamesStarted,
-      gamesWon: localStats.gamesWon + firebaseStats.gamesWon,
-      longestWinStreak:
-          localStats.longestWinStreak + firebaseStats.longestWinStreak,
-      totalPoints: localStats.totalPoints + firebaseStats.totalPoints,
-      easyPoints: localStats.easyPoints + firebaseStats.easyPoints,
-      mediumPoints: localStats.mediumPoints + firebaseStats.mediumPoints,
-      hardPoints: localStats.hardPoints + firebaseStats.hardPoints,
-      expertPoints: localStats.expertPoints + firebaseStats.expertPoints,
-      nightmarePoints:
-          localStats.nightmarePoints + firebaseStats.nightmarePoints,
-      easyAvgTime: localStats.easyAvgTime + firebaseStats.easyAvgTime,
-      easyBestTime: localStats.easyBestTime + firebaseStats.easyBestTime,
-      easyGamesStarted:
-          localStats.easyGamesStarted + firebaseStats.easyGamesStarted,
-      easyGamesWon: localStats.easyGamesWon + firebaseStats.easyGamesWon,
-      easyTotalTime: localStats.easyTotalTime + firebaseStats.easyTotalTime,
-      easyWinRate: localStats.easyWinRate + firebaseStats.easyWinRate,
-      mediumAvgTime: localStats.mediumAvgTime + firebaseStats.mediumAvgTime,
-      mediumBestTime: localStats.mediumBestTime + firebaseStats.mediumBestTime,
-      mediumGamesStarted:
-          localStats.mediumGamesStarted + firebaseStats.mediumGamesStarted,
-      mediumGamesWon: localStats.mediumGamesWon + firebaseStats.mediumGamesWon,
-      mediumTotalTime:
-          localStats.mediumTotalTime + firebaseStats.mediumTotalTime,
-      mediumWinRate: localStats.mediumWinRate + firebaseStats.mediumWinRate,
-      hardAvgTime: localStats.hardAvgTime + firebaseStats.hardAvgTime,
-      hardBestTime: localStats.hardBestTime + firebaseStats.hardBestTime,
-      hardGamesStarted:
-          localStats.hardGamesStarted + firebaseStats.hardGamesStarted,
-      hardGamesWon: localStats.hardGamesWon + firebaseStats.hardGamesWon,
-      hardTotalTime: localStats.hardTotalTime + firebaseStats.hardTotalTime,
-      hardWinRate: localStats.hardWinRate + firebaseStats.hardWinRate,
-      expertAvgTime: localStats.expertAvgTime + firebaseStats.expertAvgTime,
-      expertBestTime: localStats.expertBestTime + firebaseStats.expertBestTime,
-      expertGamesStarted:
-          localStats.expertGamesStarted + firebaseStats.expertGamesStarted,
-      expertGamesWon: localStats.expertGamesWon + firebaseStats.expertGamesWon,
-      expertTotalTime:
-          localStats.expertTotalTime + firebaseStats.expertTotalTime,
-      expertWinRate: localStats.expertWinRate + firebaseStats.expertWinRate,
-      nightmareAvgTime:
-          localStats.nightmareAvgTime + firebaseStats.nightmareAvgTime,
-      nightmareBestTime:
-          localStats.nightmareBestTime + firebaseStats.nightmareBestTime,
-      nightmareGamesStarted: localStats.nightmareGamesStarted +
-          firebaseStats.nightmareGamesStarted,
-      nightmareGamesWon:
-          localStats.nightmareGamesWon + firebaseStats.nightmareGamesWon,
-      nightmareTotalTime:
-          localStats.nightmareTotalTime + firebaseStats.nightmareTotalTime,
-      nightmareWinRate:
-          localStats.nightmareWinRate + firebaseStats.nightmareWinRate,
-      avgTime: localStats.avgTime + firebaseStats.avgTime,
-      bestTime: localStats.bestTime + firebaseStats.bestTime,
-      totalTime: localStats.totalTime + firebaseStats.totalTime,
-      winRate: localStats.winRate + firebaseStats.winRate,
-    );
-    await HiveService.saveUserStats(updatedState!);
+      updatedState = UserStats(
+        currentWinStreak:
+            localStats!.currentWinStreak + firebaseStats!.currentWinStreak,
+        gamesStarted: localStats.gamesStarted + firebaseStats.gamesStarted,
+        gamesWon: localStats.gamesWon + firebaseStats.gamesWon,
+        longestWinStreak:
+            localStats.longestWinStreak + firebaseStats.longestWinStreak,
+        totalPoints: localStats.totalPoints + firebaseStats.totalPoints,
+        easyPoints: localStats.easyPoints + firebaseStats.easyPoints,
+        mediumPoints: localStats.mediumPoints + firebaseStats.mediumPoints,
+        hardPoints: localStats.hardPoints + firebaseStats.hardPoints,
+        expertPoints: localStats.expertPoints + firebaseStats.expertPoints,
+        nightmarePoints:
+            localStats.nightmarePoints + firebaseStats.nightmarePoints,
+        easyAvgTime: localStats.easyAvgTime + firebaseStats.easyAvgTime,
+        easyBestTime: localStats.easyBestTime + firebaseStats.easyBestTime,
+        easyGamesStarted:
+            localStats.easyGamesStarted + firebaseStats.easyGamesStarted,
+        easyGamesWon: localStats.easyGamesWon + firebaseStats.easyGamesWon,
+        easyTotalTime: localStats.easyTotalTime + firebaseStats.easyTotalTime,
+        easyWinRate: localStats.easyWinRate + firebaseStats.easyWinRate,
+        mediumAvgTime: localStats.mediumAvgTime + firebaseStats.mediumAvgTime,
+        mediumBestTime:
+            localStats.mediumBestTime + firebaseStats.mediumBestTime,
+        mediumGamesStarted:
+            localStats.mediumGamesStarted + firebaseStats.mediumGamesStarted,
+        mediumGamesWon:
+            localStats.mediumGamesWon + firebaseStats.mediumGamesWon,
+        mediumTotalTime:
+            localStats.mediumTotalTime + firebaseStats.mediumTotalTime,
+        mediumWinRate: localStats.mediumWinRate + firebaseStats.mediumWinRate,
+        hardAvgTime: localStats.hardAvgTime + firebaseStats.hardAvgTime,
+        hardBestTime: localStats.hardBestTime + firebaseStats.hardBestTime,
+        hardGamesStarted:
+            localStats.hardGamesStarted + firebaseStats.hardGamesStarted,
+        hardGamesWon: localStats.hardGamesWon + firebaseStats.hardGamesWon,
+        hardTotalTime: localStats.hardTotalTime + firebaseStats.hardTotalTime,
+        hardWinRate: localStats.hardWinRate + firebaseStats.hardWinRate,
+        expertAvgTime: localStats.expertAvgTime + firebaseStats.expertAvgTime,
+        expertBestTime:
+            localStats.expertBestTime + firebaseStats.expertBestTime,
+        expertGamesStarted:
+            localStats.expertGamesStarted + firebaseStats.expertGamesStarted,
+        expertGamesWon:
+            localStats.expertGamesWon + firebaseStats.expertGamesWon,
+        expertTotalTime:
+            localStats.expertTotalTime + firebaseStats.expertTotalTime,
+        expertWinRate: localStats.expertWinRate + firebaseStats.expertWinRate,
+        nightmareAvgTime:
+            localStats.nightmareAvgTime + firebaseStats.nightmareAvgTime,
+        nightmareBestTime:
+            localStats.nightmareBestTime + firebaseStats.nightmareBestTime,
+        nightmareGamesStarted: localStats.nightmareGamesStarted +
+            firebaseStats.nightmareGamesStarted,
+        nightmareGamesWon:
+            localStats.nightmareGamesWon + firebaseStats.nightmareGamesWon,
+        nightmareTotalTime:
+            localStats.nightmareTotalTime + firebaseStats.nightmareTotalTime,
+        nightmareWinRate:
+            localStats.nightmareWinRate + firebaseStats.nightmareWinRate,
+        avgTime: localStats.avgTime + firebaseStats.avgTime,
+        bestTime: localStats.bestTime + firebaseStats.bestTime,
+        totalTime: localStats.totalTime + firebaseStats.totalTime,
+        winRate: localStats.winRate + firebaseStats.winRate,
+      );
+      await HiveService.saveUserStats(updatedState!);
+    }
   }
 
   void _signOut() async {

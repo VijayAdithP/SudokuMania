@@ -103,17 +103,39 @@ class _AccountDetailsState extends ConsumerState<AccountDetails> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: CircleAvatar(
-                            radius: 35,
-                            backgroundImage: userCred!.photoURL != null
-                                ? NetworkImage(userCred!.photoURL!)
-                                : null,
-                            child: userCred!.photoURL == null
-                                ? const Icon(Icons.person, size: 40)
-                                : null,
-                          ),
-                        ),
+                            padding: const EdgeInsets.all(16.0),
+                            child: Container(
+                              height: 80,
+                              width: 80,
+                              decoration: BoxDecoration(
+                                  boxShadow: [
+                                    BoxShadow(
+                                      blurRadius: 20,
+                                      spreadRadius: -10,
+                                      color: isLightTheme
+                                          ? Colors.black
+                                          : Colors.white,
+                                    ),
+                                  ],
+                                  borderRadius: BorderRadius.circular(
+                                    20,
+                                  ),
+                                  image: DecorationImage(
+                                    image: NetworkImage(
+                                      userCred!.photoURL!,
+                                    ),
+                                  )),
+                            )
+                            // CircleAvatar(
+                            //   radius: 35,
+                            //   backgroundImage: userCred!.photoURL != null
+                            //       ? NetworkImage(userCred!.photoURL!)
+                            //       : null,
+                            //   child: userCred!.photoURL == null
+                            //       ? const Icon(Icons.person, size: 40)
+                            //       : null,
+                            // ),
+                            ),
                         Text(
                           userCred!.displayName ?? "No Display Name",
                           style: textTheme.headlineLarge!.copyWith(
@@ -267,12 +289,12 @@ class _AccountDetailsState extends ConsumerState<AccountDetails> {
                       await Hive.openBox<UserStats>(offlineSyncBox);
                       await Hive.openBox<DailyChallengeProgress>(
                           dailyChallengeBox);
-                      Hive.deleteFromDisk();
-                      Navigator.pop(context);
-                      context.go(Routes.homePage);
                       setState(() {
                         userCred = null;
                       });
+                      Hive.deleteFromDisk();
+                      Navigator.pop(context);
+                      context.go(Routes.homePage);
                     },
                     child: Container(
                       width: MediaQuery.of(context).size.width,
