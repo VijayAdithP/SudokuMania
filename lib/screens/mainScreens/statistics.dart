@@ -888,9 +888,9 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage>
     UserStats? userdata = await HiveService.loadUserStats();
     UserCred? userCred = await HiveService.getUserCred();
 
-    if (userdata != null) {
+    if (userdata != null && userCred != null) {
       await FirebaseService.updatePlayerStats(
-        userCred!.email!,
+        userCred.email!,
         userCred.displayName!,
         userdata,
       );

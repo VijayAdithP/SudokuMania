@@ -1,14 +1,18 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_gemini/flutter_gemini.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:sudokumania/constants/colors.dart';
 import 'package:sudokumania/models/gameProgress%20Models/game_progress.dart';
+import 'package:sudokumania/models/genContent%20Models/gen_content_model.dart';
 import 'package:sudokumania/models/sudokuBoardModels/sudoku_board.dart';
 import 'package:sudokumania/models/themeSwitch%20Models/themeModel.dart';
 import 'package:sudokumania/models/userCredential%20Models/user_cred.dart';
@@ -27,9 +31,12 @@ import 'package:sudokumania/theme/custom_themes.dart/text_themes.dart';
 import 'package:sudokumania/utlis/router/routes.dart';
 import 'package:sudokumania/widgets/gameScreen/game_over_dialog.dart';
 import 'package:sudokumania/widgets/gameScreen/game_restart_dialog.dart';
+import 'package:sudokumania/widgets/gameScreen/hint_sheet.dart';
 import 'package:sudokumania/widgets/gameScreen/how_to_dialog.dart';
 import 'package:sudokumania/widgets/gameScreen/number_pad.dart';
 import 'package:vibration/vibration.dart';
+
+final hintDataProvider = StateProvider<GenContent?>((ref) => null);
 
 class SudokuGamePage extends ConsumerStatefulWidget {
   const SudokuGamePage({super.key});
@@ -38,7 +45,8 @@ class SudokuGamePage extends ConsumerStatefulWidget {
   ConsumerState<ConsumerStatefulWidget> createState() => _SudokuGamePageState();
 }
 
-class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
+class _SudokuGamePageState extends ConsumerState<SudokuGamePage>
+    with SingleTickerProviderStateMixin {
   int? selectedRow;
   int? selectedCol;
   // late Timer _timer;
@@ -47,6 +55,7 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
   bool paused = false;
   final DateTime lastPlayed = DateTime.now();
   final List<Map<String, dynamic>> _moveHistory = [];
+  late AnimationController _genButtonController;
 
   @override
   void initState() {
@@ -56,6 +65,10 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
     _startTimer();
     _saveGame();
     ref.read(timeProvider.notifier).start();
+    _genButtonController = AnimationController(
+      vsync: this, // 'this' is the SingleTickerProviderStateMixin
+      duration: const Duration(milliseconds: 1500), // Adjust duration
+    );
   }
 
   void _startTimer() {
@@ -67,6 +80,12 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
           ..start();
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _genButtonController.dispose(); // Important to release resources
+    super.dispose();
   }
 
   void _loadBoard() async {
@@ -336,7 +355,7 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
     showDialog(
       barrierDismissible: false,
       context: context,
-      builder: (context) => GameOverDialog(),
+      builder: (context) => Wrap(children: [GameOverDialog()]),
     );
 
     await HiveService.saveUserStats(updatedStats);
@@ -413,16 +432,6 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
   Widget _buildGrid() {
     final themePreference = ref.watch(themeProvider);
     final isLightTheme = themePreference == ThemePreference.light;
-    final iconColor = isLightTheme ? LColor.iconDefault : TColors.iconDefault;
-    final buttonColor =
-        isLightTheme ? LColor.buttonDefault : TColors.buttonDefault;
-    final highlightColor =
-        isLightTheme ? LColor.majorHighlight : TColors.majorHighlight;
-    final secondaryTextColor =
-        isLightTheme ? LColor.textSecondary : TColors.textSecondary;
-    final textTheme = isLightTheme
-        ? TTextThemes.lightTextTheme
-        : TTextThemes.defaultTextTheme;
     return AspectRatio(
       aspectRatio: 1,
       child: ClipPath(
@@ -693,10 +702,13 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
           75,
           isLightTheme ? LColor.majorHighlight : TColors.majorHighlight,
           isLightTheme ? LColor.majorHighlight : TColors.majorHighlight,
-          () {},
+          () {
+            hintGen(ref);
+          },
           isLightTheme ? LColor.iconDefault : TColors.iconDefault,
           35,
           HugeIcons.strokeRoundedGoogleGemini,
+          isGen: true,
         ),
         accButton(
           60,
@@ -727,38 +739,190 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
     );
   }
 
+  GenContent genContent = GenContent();
+
+  Future<GenContent> hintGen(WidgetRef ref) async {
+    final gemini = Gemini.instance;
+    try {
+      ref.read(hintLoadingProvider.notifier).state = true;
+      final value = await gemini.prompt(
+        parts: [
+          Part.text(_board.grid.toString()),
+          Part.text(
+              "This is the data of a sudoko game give me the next best possible move with step by step explanation."),
+          Part.text(
+              "do not complete the sudoku that is not what i am asking give me the row and col index of the next best cell and the number in it"),
+          Part.text("The indexing should be from 0"),
+          Part.text(
+              "I want you to give me the output is a json format(do not give this '```json' and '```' at the end and start of the output)."),
+          Part.text(
+              "And the json data should follow this format {explanation(type String): 'content', possible_number(type int): 'content', row(type int) : 'row index', column(type int): 'column index'} "),
+          Part.text(
+              "The output you are generating will be shown to the user so don't use the index values."),
+          Part.text(
+              "Finally always put all the infomation that i need such as the row and the column index of the cell at the last indes of the json."),
+          Part.text(
+              "Do not generate an acknowledgement just simply generate the neccessary content"),
+          Part.text("Always follow this format never deviate"),
+        ],
+      );
+      setState(() {
+        genContent = GenContent.fromJson(jsonDecode(value!.output!));
+      });
+      ref.read(hintDataProvider.notifier).state = genContent;
+      ref.read(hintLoadingProvider.notifier).state = false;
+      return genContent;
+    } catch (e) {
+      ref.read(hintLoadingProvider.notifier).state = false;
+      rethrow;
+    }
+  }
+
   Widget accButton(double h, double w, Color bg, Color border, Function() onTap,
-      Color iconColor, double iconSize, IconData icon) {
+      Color iconColor, double iconSize, IconData icon,
+      {bool isGen = false}) {
     final themePreference = ref.watch(themeProvider);
     final isLightTheme = themePreference == ThemePreference.light;
+    bool isAnimating = false;
 
-    return InkWell(
-      borderRadius: BorderRadius.circular(50),
-      splashColor: isLightTheme
-          ? LColor.textSecondary.withValues(alpha: 0.2)
-          : TColors.textSecondary.withValues(alpha: 0.2),
-      onTap: onTap,
-      child: Container(
-        height: h,
-        width: w,
-        decoration: BoxDecoration(
-          border: Border.all(
-            width: 2,
-            color: border,
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return InkWell(
+          borderRadius: BorderRadius.circular(50),
+          splashColor: isLightTheme
+              ? LColor.textSecondary.withValues(alpha: 0.2)
+              : TColors.textSecondary.withValues(alpha: 0.2),
+          onTap: () {
+            onTap();
+            if (isGen && !isAnimating) {
+              setState(() {
+                ref.read(hintSheetBooleanProvider.notifier).state = true;
+                isAnimating = true;
+              });
+
+              showModalBottomSheet(
+                  isDismissible: false,
+                  enableDrag: false,
+                  isScrollControlled: true,
+                  context: context,
+                  builder: (context) {
+                    return HintSheet(
+                      genContentFuture: hintGen(ref),
+                      fetchHintData: () => hintGen(ref),
+                      onCancelPressed: () {
+                        ref.read(hintSheetBooleanProvider.notifier).state =
+                            false;
+                      },
+                      onFinishPressed: () {
+                        final row = genContent.row!;
+                        final col = genContent.column!;
+                        final number = genContent.possibleNumber!;
+
+                        if (_board.givenNumbers[row][col]) return;
+
+                        var newInvalidCells = List.generate(
+                            9, (i) => List<bool>.from(_board.invalidCells[i]));
+
+                        setState(() {
+                          bool isValid = _board.isMoveValid(row, col, number);
+                          newInvalidCells[row][col] = !isValid;
+
+                          _board = _board.copyWith(
+                            grid: _board.updateGrid(row, col, number),
+                            invalidCells: newInvalidCells,
+                          );
+
+                          _recordMove(row, col, _board.grid[row][col], isValid);
+
+                          if (!isValid) {
+                            bool vibe = ref.watch(vibeProvider);
+                            if (vibe) Vibration.vibrate(duration: 200);
+
+                            _board = _board.copyWith(
+                              mistakes: _board.mistakes + 1,
+                              gameOver:
+                                  _board.mistakes + 1 >= _board.maxMistakes,
+                            );
+
+                            if (_board.gameOver) _onGameOver();
+                          } else if (_board.isSolved()) {
+                            _onGameComplete();
+                          }
+                        });
+
+                        _saveGame();
+                        ref.read(hintSheetBooleanProvider.notifier).state =
+                            false;
+                      },
+                    );
+                  });
+
+              Future.delayed(2000.ms, () {
+                if (mounted) {
+                  setState(() {
+                    isAnimating = false;
+                  });
+                }
+              });
+            }
+          },
+          child: Container(
+            height: h,
+            width: w,
+            decoration: BoxDecoration(
+              border: Border.all(
+                width: 2,
+                color: border,
+              ),
+              shape: BoxShape.circle,
+              color: isLightTheme
+                  ? LColor.buttonDefault.withValues(alpha: 0.2)
+                  : Colors.transparent,
+            ),
+            child: Center(
+              child: isGen
+                  ? AnimatedBuilder(
+                      animation: AlwaysStoppedAnimation(0.0),
+                      builder: (context, child) {
+                        return HugeIcon(
+                          icon: icon,
+                          color: iconColor,
+                          size: iconSize,
+                        )
+                            .animate(
+                              autoPlay: isAnimating,
+                              onComplete: (controller) {
+                                // Animation completed
+                              },
+                            )
+                            .shake(
+                              hz: 4,
+                              curve: Curves.easeInOutCubic,
+                              duration: 600.ms,
+                            )
+                            .then()
+                            .scale(
+                              begin: const Offset(1, 1),
+                              end: const Offset(1, 1.1),
+                              duration: 600.ms,
+                            )
+                            .then(delay: 300.ms)
+                            .scale(
+                              begin: const Offset(1, 1.1),
+                              end: const Offset(1, 1),
+                              duration: 500.ms,
+                            );
+                      },
+                    )
+                  : HugeIcon(
+                      icon: icon,
+                      color: iconColor,
+                      size: iconSize,
+                    ),
+            ),
           ),
-          shape: BoxShape.circle,
-          color: isLightTheme
-              ? LColor.buttonDefault.withValues(alpha: 0.2)
-              : Colors.transparent,
-        ),
-        child: Center(
-          child: HugeIcon(
-            icon: icon,
-            color: iconColor,
-            size: iconSize,
-          ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -766,9 +930,7 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
   Widget build(BuildContext context) {
     final themePreference = ref.watch(themeProvider);
     final isLightTheme = themePreference == ThemePreference.light;
-    final textTheme = isLightTheme
-        ? TTextThemes.lightTextTheme
-        : TTextThemes.defaultTextTheme;
+
     final timeState = ref.watch(timeProvider);
     final elapsedMilliseconds = timeState.elapsedMilliseconds;
     final difficultyString =
@@ -785,129 +947,143 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage> {
 
     final maxMistakes = ref.read(maxMistakesProvider);
     final gameSource = ref.read(gameSourceProvider);
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        leading: IconButton(
-          onPressed: () {
-            if (gameSource == GameSource.calendar) {
-              ref.read(timeProvider.notifier).reset();
-              HiveService.clearSavedGame();
-            }
-            _saveGame();
-            ref.read(timeProvider.notifier).stop();
-            context.go(Routes.homePage);
-          },
-          icon: HugeIcon(
-            icon: HugeIcons.strokeRoundedArrowLeft01,
-            size: 30,
-            color: isLightTheme ? LColor.iconDefault : TColors.iconDefault,
-          ),
-        ),
-        title: Row(
-          spacing: 16,
-          children: [
-            HugeIcon(
-              icon: HugeIcons.strokeRoundedGoogleGemini,
-              size: 24,
-              color:
-                  isLightTheme ? LColor.majorHighlight : TColors.majorHighlight,
-            ),
-            Text(
-              difficultyString,
-              style: TextStyle(
-                color: isLightTheme ? LColor.textDefault : TColors.textDefault,
-                fontSize: 20,
-                fontWeight: FontWeight.normal,
-              ),
-            ),
-          ],
-        ),
-        actionsPadding: EdgeInsets.symmetric(
-          horizontal: 8,
-        ),
-        actions: [
-          IconButton(
+    final geminiHint = ref.watch(hintSheetBooleanProvider);
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          leading: IconButton(
             onPressed: () {
-              context.push(Routes.settingsPage);
+              if (gameSource == GameSource.calendar) {
+                ref.read(timeProvider.notifier).reset();
+                HiveService.clearSavedGame();
+              }
+              _saveGame();
+              ref.read(timeProvider.notifier).stop();
+              context.go(Routes.homePage);
+              setState(() {
+                ref.read(hintSheetBooleanProvider.notifier).state = false;
+              });
             },
             icon: HugeIcon(
-              icon: HugeIcons.strokeRoundedSetting07,
+              icon: HugeIcons.strokeRoundedArrowLeft01,
               size: 30,
               color: isLightTheme ? LColor.iconDefault : TColors.iconDefault,
             ),
           ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          spacing: 30,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.22,
-                      child: Text(
-                        displayTime,
-                        style: TextStyle(
-                          color: isLightTheme
-                              ? LColor.textDefault
-                              : TColors.textDefault,
-                          fontSize: 30,
-                          fontWeight: FontWeight.normal,
-                        ),
-                      ),
-                    ),
-                    if (!paused)
-                      CircleAvatar(
-                        backgroundColor: isLightTheme
-                            ? LColor.backgroundAccent.withValues(alpha: .2)
-                            : TColors.backgroundAccent.withValues(alpha: 0.2),
-                        child: IconButton(
-                          icon: Icon(
-                            Icons.pause,
-                            color: isLightTheme
-                                ? LColor.backgroundAccent.withRed(1)
-                                : TColors.backgroundAccent,
-                          ),
-                          onPressed: _onPause,
-                        ),
-                      ),
-                  ],
+          title: Row(
+            spacing: 16,
+            children: [
+              HugeIcon(
+                icon: HugeIcons.strokeRoundedGoogleGemini,
+                size: 24,
+                color: isLightTheme
+                    ? LColor.majorHighlight
+                    : TColors.majorHighlight,
+              ),
+              Text(
+                difficultyString,
+                style: TextStyle(
+                  color:
+                      isLightTheme ? LColor.textDefault : TColors.textDefault,
+                  fontSize: 20,
+                  fontWeight: FontWeight.normal,
                 ),
-                (ref.read(switchStateProvider))
-                    ? Text(
-                        "Mistakes: ${_board.mistakes}/$maxMistakes",
-                        style: TextStyle(
-                          color: isLightTheme
-                              ? LColor.textDefault
-                              : TColors.textDefault,
-                          fontSize: 15,
-                          fontWeight: FontWeight.normal,
-                        ),
-                      )
-                    : SizedBox(),
-              ],
-            ),
-            _buildGrid(),
-            NumberPad(
-              isLongPressMode: isLongPressMode,
-              lockedNumber: lockedNumber,
-              onNumberTap: (number) {
-                _onNumberTap(number);
+              ),
+            ],
+          ),
+          actionsPadding: EdgeInsets.symmetric(
+            horizontal: 8,
+          ),
+          actions: [
+            IconButton(
+              onPressed: () {
+                context.push(Routes.settingsPage);
               },
-              onNumberLongPress: (number) {
-                _onNumberLongPress(number);
-              },
-            ),
-            Expanded(
-              child: _buildAccButtons(selectedRow ?? 0, selectedCol ?? 0),
+              icon: HugeIcon(
+                icon: HugeIcons.strokeRoundedSetting07,
+                size: 30,
+                color: isLightTheme ? LColor.iconDefault : TColors.iconDefault,
+              ),
             ),
           ],
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            spacing: 30,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.22,
+                        child: Text(
+                          displayTime,
+                          style: TextStyle(
+                            color: isLightTheme
+                                ? LColor.textDefault
+                                : TColors.textDefault,
+                            fontSize: 30,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                      if (!paused)
+                        CircleAvatar(
+                          backgroundColor: isLightTheme
+                              ? LColor.backgroundAccent.withValues(alpha: .2)
+                              : TColors.backgroundAccent.withValues(alpha: 0.2),
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.pause,
+                              color: isLightTheme
+                                  ? LColor.backgroundAccent.withRed(1)
+                                  : TColors.backgroundAccent,
+                            ),
+                            onPressed: _onPause,
+                          ),
+                        ),
+                    ],
+                  ),
+                  (ref.read(switchStateProvider))
+                      ? Text(
+                          "Mistakes: ${_board.mistakes}/$maxMistakes",
+                          style: TextStyle(
+                            color: isLightTheme
+                                ? LColor.textDefault
+                                : TColors.textDefault,
+                            fontSize: 15,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        )
+                      : SizedBox(),
+                ],
+              ),
+              _buildGrid(),
+              NumberPad(
+                isLongPressMode: isLongPressMode,
+                lockedNumber: lockedNumber,
+                onNumberTap: (number) {
+                  _onNumberTap(number);
+                },
+                onNumberLongPress: (number) {
+                  _onNumberLongPress(number);
+                },
+              ),
+              Expanded(
+                child: _buildAccButtons(selectedRow ?? 0, selectedCol ?? 0),
+              ),
+              if (geminiHint)
+                BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
+                  child: Column(),
+                ),
+            ],
+          ),
         ),
       ),
     );

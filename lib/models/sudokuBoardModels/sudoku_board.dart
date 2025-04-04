@@ -91,8 +91,9 @@
 //   }
 // }
 
-import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'dart:math';
+
+import 'package:hive_ce_flutter/hive_flutter.dart';
 
 part 'sudoku_board.g.dart';
 
@@ -136,8 +137,8 @@ class SudokuBoard {
     final random = Random();
     final Map<String, int> difficultyRemovals = {
       'Easy': 1,
-      'Medium': 40,
-      'Hard': 50,
+      'Medium': 2,
+      'Hard': 1,
       'Nightmare': 60
     };
 

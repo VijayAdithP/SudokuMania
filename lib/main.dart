@@ -2,8 +2,10 @@ import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gemini/flutter_gemini.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
+import 'package:sudokumania/env.dart';
 import 'package:sudokumania/hive_registrar.g.dart';
 import 'package:sudokumania/models/themeSwitch%20Models/themeModel.dart';
 import 'package:sudokumania/providers/dataSyncProviders/app_startup_provider.dart';
@@ -34,6 +36,7 @@ void main() async {
     hour: 18,
     minute: 15,
   );
+  Gemini.init(apiKey: geminiApiKey);
   runApp(ProviderScope(child: const SudukoSolver()));
 }
 

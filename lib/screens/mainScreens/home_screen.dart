@@ -66,9 +66,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
     // Define colors based on the theme
     final iconColor = isLightTheme ? LColor.iconDefault : TColors.iconDefault;
     final textColor = isLightTheme ? LColor.textDefault : TColors.textDefault;
-    final backgroundColor = isLightTheme
-        ? LColor.backgroundPrimary
-        : TColors.backgroundPrimary;
+    final backgroundColor =
+        isLightTheme ? LColor.backgroundPrimary : TColors.backgroundPrimary;
     final textTheme = isLightTheme
         ? TTextThemes.lightTextTheme
         : TTextThemes.defaultTextTheme;

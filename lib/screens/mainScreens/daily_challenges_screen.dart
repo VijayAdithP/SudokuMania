@@ -350,7 +350,11 @@ class _DailyChallengesState extends ConsumerState<DailyChallenges> {
   }
 
   SudokuDifficulty getRandomDifficulty() {
-    final difficulties = SudokuDifficulty.values;
+    final difficulties = [
+      SudokuDifficulty.easy,
+      SudokuDifficulty.medium,
+      SudokuDifficulty.hard,
+    ];
     final random = Random();
     return difficulties[random.nextInt(difficulties.length)];
   }
@@ -362,12 +366,12 @@ class _DailyChallengesState extends ConsumerState<DailyChallenges> {
     ref.read(gameSourceProvider.notifier).state = GameSource.calendar;
 
     if (isPastOrToday) {
-      SudokuDifficulty easy = SudokuDifficulty.easy;
+      // SudokuDifficulty easy = SudokuDifficulty.easy;
 
       // for testing
-      const int SometingToGetMyAttentionHere = 0;
-      // final randomDifficulty = getRandomDifficulty();
-      ref.read(difficultyProvider.notifier).setDifficulty(easy);
+      // const int SometingToGetMyAttentionHere = 0;
+      final randomDifficulty = getRandomDifficulty();
+      ref.read(difficultyProvider.notifier).setDifficulty(randomDifficulty);
 
       context.push(Routes.gameScreen);
     } else {
@@ -484,6 +488,9 @@ class _DailyChallengesState extends ConsumerState<DailyChallenges> {
                 borderRadius: BorderRadius.circular(10),
               ),
               child: TableCalendar(
+                // sixWeekMonthsEnforced: true,
+                // shouldFillViewport: true,
+
                 daysOfWeekVisible: false,
                 weekNumbersVisible: false,
                 headerVisible: false,
@@ -521,6 +528,7 @@ class _DailyChallengesState extends ConsumerState<DailyChallenges> {
                 },
                 availableGestures: AvailableGestures.none,
                 calendarStyle: CalendarStyle(
+                  outsideDaysVisible: false,
                   isTodayHighlighted: true,
                   todayTextStyle: textTheme.headlineSmall!,
                   todayDecoration: BoxDecoration(
@@ -534,16 +542,19 @@ class _DailyChallengesState extends ConsumerState<DailyChallenges> {
                         DateTime(date.year, date.month, date.day);
 
                     if (progress.completedDays.containsKey(normalizedDate)) {
-                      return Container(
-                        decoration: BoxDecoration(
-                          color: Colors.green,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: Icon(
-                            Icons.check_circle,
-                            size: 40,
-                            color: textColor, // Use textColor dynamically
+                      return Padding(
+                        padding: const EdgeInsets.all(5),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.green,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: Icon(
+                              Icons.check_circle,
+                              size: 35,
+                              color: textColor, // Use textColor dynamically
+                            ),
                           ),
                         ),
                       );

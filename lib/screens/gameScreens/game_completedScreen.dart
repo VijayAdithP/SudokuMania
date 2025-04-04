@@ -1,8 +1,8 @@
 // import 'dart:developer';
 
-// import 'package:confetti/confetti.dart';
 import 'dart:developer';
 
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
@@ -34,11 +34,22 @@ class GameCompletedscreen extends ConsumerStatefulWidget {
 }
 
 class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
+  final ConfettiController _confettiController = ConfettiController();
   @override
   void initState() {
     super.initState();
     _checkGameSource();
     _initializeGameData();
+    _confettiController.play();
+    Future.delayed(Duration(milliseconds: 700), () {
+      _confettiController.stop();
+    });
+  }
+
+  @override
+  void dispose() {
+    _confettiController.dispose();
+    super.dispose();
   }
 
   Future<void> _initializeGameData() async {
@@ -67,8 +78,6 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
   GameSource? gameSource;
   double dailyScore = 0;
 
-  // late ConfettiController _confettiController;
-
   int? mistakes;
   Future<void> _loadGame() async {
     game = await HiveService.loadGame();
@@ -91,17 +100,20 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
         }
         break;
       case "Medium":
-        if (elapsedTime < currentStats.mediumBestTime) {
+        if (currentStats.mediumBestTime == 0 ||
+            elapsedTime < currentStats.mediumBestTime) {
           currentStats = currentStats.copyWith(mediumBestTime: elapsedTime);
         }
         break;
       case "Hard":
-        if (elapsedTime < currentStats.hardBestTime) {
+        if (currentStats.hardBestTime == 0 ||
+            elapsedTime < currentStats.hardBestTime) {
           currentStats = currentStats.copyWith(hardBestTime: elapsedTime);
         }
         break;
       case "Nightmare":
-        if (elapsedTime < currentStats.nightmareBestTime) {
+        if (currentStats.nightmareBestTime == 0 ||
+            elapsedTime < currentStats.nightmareBestTime) {
           currentStats = currentStats.copyWith(nightmareBestTime: elapsedTime);
         }
         break;
@@ -344,6 +356,19 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
                 letterSpacing: 1.5,
               ),
             ),
+            ConfettiWidget(
+              emissionFrequency: 1,
+              numberOfParticles: 10,
+              confettiController: _confettiController,
+              blastDirectionality: BlastDirectionality.explosive,
+              shouldLoop: true,
+              colors: [
+                Colors.red,
+                Colors.white,
+                Colors.yellow,
+                Colors.green,
+              ],
+            ),
             SizedBox(
               width: MediaQuery.of(context).size.width,
               child: Row(
@@ -483,6 +508,7 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
               onTap: () {
                 // _updateDailyChallenges();
                 _clearGame();
+                ref.read(timeProvider.notifier).reset();
                 context.go(Routes.homePage);
               },
               child: Container(
