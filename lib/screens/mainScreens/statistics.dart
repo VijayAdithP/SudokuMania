@@ -953,7 +953,10 @@ class _StatisticsPageState extends ConsumerState<StatisticsPage>
                 turns: child.key == const ValueKey('icon1')
                     ? Tween<double>(begin: -1, end: 1).animate(anim)
                     : Tween<double>(begin: 1, end: -1).animate(anim),
-                child: FadeTransition(opacity: anim, child: child),
+                child: FadeTransition(
+                  opacity: anim,
+                  child: child,
+                ),
               ),
               child: _currIndex == 0
                   ? Icon(

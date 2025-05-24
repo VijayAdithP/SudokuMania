@@ -667,189 +667,195 @@ class _HintSheetState extends ConsumerState<HintSheet> {
     final isLightTheme = themePreference == ThemePreference.light;
     final isLoading = ref.watch(hintLoadingProvider);
 
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      decoration: BoxDecoration(
-        color:
-            isLightTheme ? LColor.backgroundPrimary : TColors.backgroundPrimary,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
+    return PopScope(
+      canPop: false,
+      child: Container(
+        width: MediaQuery.of(context).size.width,
+        decoration: BoxDecoration(
+          color: isLightTheme
+              ? LColor.backgroundPrimary
+              : TColors.backgroundPrimary,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
         ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: FutureBuilder<GenContent>(
-          future: widget.genContentFuture,
-          builder: (context, snapshot) {
-            // Handle loading state
-            if (isLoading ||
-                snapshot.connectionState == ConnectionState.waiting) {
-              return const Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(height: 40),
-                  Center(child: CircularProgressIndicator()),
-                  SizedBox(height: 20),
-                  Text("Generating hint..."),
-                  SizedBox(height: 40),
-                ],
-              );
-            }
-            final hintData = ref.watch(hintDataProvider);
-            // Handle error state
-            if (snapshot.hasError) {
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: FutureBuilder<GenContent>(
+            future: widget.genContentFuture,
+            builder: (context, snapshot) {
+              // Handle loading state
+              if (isLoading ||
+                  snapshot.connectionState == ConnectionState.waiting) {
+                return const Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(height: 40),
+                    Center(child: CircularProgressIndicator()),
+                    SizedBox(height: 20),
+                    Text("Generating hint..."),
+                    SizedBox(height: 40),
+                  ],
+                );
+              }
+              final hintData = ref.watch(hintDataProvider);
+              // Handle error state
+              if (snapshot.hasError) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.error_outline,
+                        color: Colors.red, size: 40),
+                    const SizedBox(height: 16),
+                    Text(
+                      "Failed to generate hint",
+                      style: TTextThemes.defaultTextTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      snapshot.error.toString(),
+                      style: TTextThemes.defaultTextTheme.bodySmall,
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () {
+                        ref.read(hintLoadingProvider.notifier).state = true;
+                        widget.fetchHintData();
+                      },
+                      child: const Text("Retry"),
+                    ),
+                  ],
+                );
+              }
+
+              // Get the generated content
+              final genContent = snapshot.data!;
+
               return Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.error_outline, color: Colors.red, size: 40),
-                  const SizedBox(height: 16),
-                  Text(
-                    "Failed to generate hint",
-                    style: TTextThemes.defaultTextTheme.titleMedium,
+                  // Header
+                  Row(
+                    children: [
+                      Text(
+                        "GenHints",
+                        style:
+                            TTextThemes.defaultTextTheme.titleLarge!.copyWith(
+                          fontSize: 25,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      HugeIcon(
+                        icon: HugeIcons.strokeRoundedGoogleGemini,
+                        size: 35,
+                        color: TColors.majorHighlight,
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    snapshot.error.toString(),
-                    style: TTextThemes.defaultTextTheme.bodySmall,
+                  const SizedBox(height: 16),
+
+                  // Content Container
+                  Container(
+                    width: MediaQuery.of(context).size.width,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: isLightTheme
+                          ? LColor.dullBackground
+                          : TColors.dullBackground,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Display cell coordinates if available
+                          if (hintData!.row != null && hintData.column != null)
+                            Text(
+                              "Cell (${hintData.row! + 1}, ${hintData.column! + 1})",
+                              style: TTextThemes.defaultTextTheme.titleMedium!
+                                  .copyWith(fontWeight: FontWeight.bold),
+                            ),
+
+                          // Display possible number if available
+                          if (hintData.possibleNumber != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8),
+                              child: Text(
+                                "Possible number: ${hintData.possibleNumber}",
+                                style: TTextThemes.defaultTextTheme.bodyLarge!
+                                    .copyWith(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+
+                          // Display the explanation
+                          const SizedBox(height: 12),
+                          Text(
+                            hintData.explanation ?? "No explanation available",
+                            style: TTextThemes.defaultTextTheme.bodyMedium,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      ref.read(hintLoadingProvider.notifier).state = true;
-                      widget.fetchHintData();
-                    },
-                    child: const Text("Retry"),
+
+                  // Action Buttons
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Cancel Button
+                      GestureDetector(
+                        onTap: () {
+                          ref.read(hintSheetBooleanProvider.notifier).state =
+                              false;
+                          widget.onCancelPressed();
+                          Navigator.of(context).pop();
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: isLightTheme
+                                ? LColor.dullBackground
+                                : TColors.dullBackground,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(
+                                vertical: 12, horizontal: 24),
+                            child: Center(child: Text("Cancel")),
+                          ),
+                        ),
+                      ),
+
+                      // Finish Button
+                      GestureDetector(
+                        onTap: () {
+                          widget.onFinishPressed();
+                          ref.read(hintSheetBooleanProvider.notifier).state =
+                              false;
+                          Navigator.pop(context);
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: isLightTheme
+                                ? LColor.buttonDefault
+                                : TColors.buttonDefault,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(
+                                vertical: 12, horizontal: 24),
+                            child: Center(child: Text("Finish")),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               );
-            }
-
-            // Get the generated content
-            final genContent = snapshot.data!;
-
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header
-                Row(
-                  children: [
-                    Text(
-                      "GenHints",
-                      style: TTextThemes.defaultTextTheme.titleLarge!.copyWith(
-                        fontSize: 25,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    HugeIcon(
-                      icon: HugeIcons.strokeRoundedGoogleGemini,
-                      size: 35,
-                      color: TColors.majorHighlight,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                // Content Container
-                Container(
-                  width: MediaQuery.of(context).size.width,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: isLightTheme
-                        ? LColor.dullBackground
-                        : TColors.dullBackground,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Display cell coordinates if available
-                        if (hintData!.row != null && hintData.column != null)
-                          Text(
-                            "Cell (${hintData.row! + 1}, ${hintData.column! + 1})",
-                            style: TTextThemes.defaultTextTheme.titleMedium!
-                                .copyWith(fontWeight: FontWeight.bold),
-                          ),
-
-                        // Display possible number if available
-                        if (hintData.possibleNumber != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: Text(
-                              "Possible number: ${hintData.possibleNumber}",
-                              style: TTextThemes.defaultTextTheme.bodyLarge!
-                                  .copyWith(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-
-                        // Display the explanation
-                        const SizedBox(height: 12),
-                        Text(
-                          hintData.explanation ?? "No explanation available",
-                          style: TTextThemes.defaultTextTheme.bodyMedium,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Action Buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Cancel Button
-                    GestureDetector(
-                      onTap: () {
-                        ref.read(hintSheetBooleanProvider.notifier).state =
-                            false;
-                        widget.onCancelPressed();
-                        Navigator.of(context).pop();
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: isLightTheme
-                              ? LColor.dullBackground
-                              : TColors.dullBackground,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(
-                              vertical: 12, horizontal: 24),
-                          child: Center(child: Text("Cancel")),
-                        ),
-                      ),
-                    ),
-
-                    // Finish Button
-                    GestureDetector(
-                      onTap: () {
-                        widget.onFinishPressed();
-                        ref.read(hintSheetBooleanProvider.notifier).state =
-                            false;
-                        Navigator.pop(context);
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: isLightTheme
-                              ? LColor.buttonDefault
-                              : TColors.buttonDefault,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(
-                              vertical: 12, horizontal: 24),
-                          child: Center(child: Text("Finish")),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            );
-          },
+            },
+          ),
         ),
       ),
     );

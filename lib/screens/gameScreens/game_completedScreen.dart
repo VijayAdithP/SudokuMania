@@ -201,12 +201,13 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
         }
         break;
       case "Medium":
-        if (currentElapsedTime < (userDetails.mediumBestTime)) {
+        if (userDetails.mediumBestTime == 0 ||
+            currentElapsedTime < (userDetails.mediumBestTime)) {
           setState(() {
             bestTime = currentElapsedTime;
           });
           userDetails = userDetails.copyWith(
-            mediumBestTime: currentElapsedTime,
+            mediumBestTime: bestTime,
           );
         } else {
           setState(() {
@@ -215,12 +216,13 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
         }
         break;
       case "Hard":
-        if (currentElapsedTime < (userDetails.hardBestTime)) {
+        if (userDetails.hardBestTime == 0 ||
+            currentElapsedTime < (userDetails.hardBestTime)) {
           setState(() {
             bestTime = currentElapsedTime;
           });
           userDetails = userDetails.copyWith(
-            hardBestTime: currentElapsedTime,
+            hardBestTime: bestTime,
           );
         } else {
           setState(() {
@@ -229,12 +231,13 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
         }
         break;
       case "Nightmare":
-        if (currentElapsedTime < (userDetails.nightmareBestTime)) {
+        if (userDetails.nightmareBestTime == 0 ||
+            currentElapsedTime < (userDetails.nightmareBestTime)) {
           setState(() {
             bestTime = currentElapsedTime;
           });
           userDetails = userDetails.copyWith(
-            nightmareBestTime: currentElapsedTime,
+            nightmareBestTime: bestTime,
           );
         } else {
           setState(() {
@@ -246,11 +249,11 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
         setState(() {});
         break;
     }
-    _saveBestTime();
+    _saveBestTime(difficulty);
     // await FirebaseService.updatePlayerStats(userId, username, stats)
   }
 
-  Future<void> _saveBestTime() async {
+  Future<void> _saveBestTime(String difficulty) async {
     // Load the existing user stats
     UserStats? currentStats = await HiveService.loadUserStats();
     UserCred? userCred = await HiveService.getUserCred();
@@ -258,13 +261,47 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
     // If no stats exist, initialize a new UserStats object
     currentStats ??= UserStats();
 
-    // Update the easyBestTime field using copyWith
-    final updatedStats = currentStats.copyWith(
-      easyBestTime: bestTime,
-    );
+    // final updatedStats = currentStats.copyWith(
+    //   easyBestTime: bestTime,
+    //   mediumBestTime: bestTime,
+    // );
+    switch (difficulty) {
+      case 'Easy':
+        final updatedStats = currentStats.copyWith(
+          totalPoints: currentStats.totalPoints + score,
+          easyPoints: currentStats.easyPoints + score,
+          easyGamesWon: currentStats.easyGamesWon + 1,
+        );
+        await HiveService.saveUserStats(updatedStats);
+        break;
+      case 'Medium':
+        final updatedStats = currentStats.copyWith(
+          totalPoints: currentStats.totalPoints + score,
+          mediumPoints: currentStats.mediumPoints + score,
+          mediumGamesWon: currentStats.mediumGamesWon + 1,
+        );
+        await HiveService.saveUserStats(updatedStats);
+        break;
+      case 'Hard':
+        final updatedStats = currentStats.copyWith(
+          totalPoints: currentStats.totalPoints + score,
+          hardPoints: currentStats.hardPoints + score,
+          hardGamesWon: currentStats.hardGamesWon + 1,
+        );
+        await HiveService.saveUserStats(updatedStats);
+        break;
+      case 'Nightmare':
+        final updatedStats = currentStats.copyWith(
+          totalPoints: currentStats.totalPoints + score,
+          nightmarePoints: currentStats.nightmarePoints + score,
+          nightmareGamesWon: currentStats.nightmareGamesWon + 1,
+        );
+        await HiveService.saveUserStats(updatedStats);
+        break;
+    }
 
     // Save the updated stats back to Hive
-    await HiveService.saveUserStats(updatedStats);
+
     if (userCred != null) {
       await FirebaseService.updatePlayerStats(
           userCred.email!, userCred.displayName!, currentStats);
@@ -488,15 +525,15 @@ class _GameCompletedscreenState extends ConsumerState<GameCompletedscreen> {
                             HugeIcons.strokeRoundedCancel01,
                             Colors.orange,
                           ),
-                          seperator(),
-                          tiles(
-                            "GenHints",
-                            mistakes.toString(),
-                            HugeIcons.strokeRoundedGoogleGemini,
-                            isLightTheme
-                                ? LColor.majorHighlight
-                                : TColors.majorHighlight,
-                          ),
+                          // seperator(),
+                          // tiles(
+                          //   "GenHints",
+                          //   mistakes.toString(),
+                          //   HugeIcons.strokeRoundedGoogleGemini,
+                          //   isLightTheme
+                          //       ? LColor.majorHighlight
+                          //       : TColors.majorHighlight,
+                          // ),
                         ],
                       ),
                     ),

@@ -1,0 +1,16 @@
+  flutter_native_splash:
+    color: "#3D9AFD"
+    color_dark: "#6CB4EE"
+    image: "assets/images/sudoku.png"  
+
+    android_12:
+      color: "#3D9AFD"
+      color_dark: "#6CB4EE"
+      image: "assets/images/sudoku.png"
+
+    android: true
+    ios: true
+    web: false
+
+
+ 

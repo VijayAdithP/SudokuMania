@@ -232,6 +232,8 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage>
   int? lockedNumber;
   bool isLongPressMode = false;
   void _onNumberTap(int number) {
+    final maxMistakes = ref.read(maxMistakesProvider);
+
     if (isLongPressMode && lockedNumber == number) {
       setState(() {
         lockedNumber = null;
@@ -264,6 +266,7 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage>
       _board = _board.copyWith(
         grid: _board.updateGrid(selectedRow!, selectedCol!, number),
         invalidCells: newInvalidCells,
+        maxMistakes: maxMistakes,
       );
       _recordMove(selectedRow!, selectedCol!,
           _board.grid[selectedRow!][selectedCol!], isValid);
@@ -355,7 +358,7 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage>
     showDialog(
       barrierDismissible: false,
       context: context,
-      builder: (context) => Wrap(children: [GameOverDialog()]),
+      builder: (context) => GameOverDialog(),
     );
 
     await HiveService.saveUserStats(updatedStats);
@@ -763,7 +766,8 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage>
               "Finally always put all the infomation that i need such as the row and the column index of the cell at the last indes of the json."),
           Part.text(
               "Do not generate an acknowledgement just simply generate the neccessary content"),
-          Part.text("Always follow this format never deviate"),
+          Part.text(
+              "Always follow this format never deviate. Do not ever give me an output that is not in this json format.Plus always be sure that the possible number is the correct number again Do not give me a faulty answer."),
         ],
       );
       setState(() {
@@ -773,7 +777,7 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage>
       ref.read(hintLoadingProvider.notifier).state = false;
       return genContent;
     } catch (e) {
-      ref.read(hintLoadingProvider.notifier).state = false;
+      // ref.read(hintLoadingProvider.notifier).state = false;
       rethrow;
     }
   }
