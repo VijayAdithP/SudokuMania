@@ -74,7 +74,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
 
     final gameSource = ref.read(gameSourceProvider);
     return Scaffold(
-      backgroundColor: backgroundColor, // Set background color dynamically
+      backgroundColor: backgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         leading: GestureDetector(
@@ -82,7 +82,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
             context.push(Routes.settingsPage);
           },
           child: Icon(
-            color: iconColor, // Set icon color dynamically
+            color: iconColor, 
             size: 30,
             HugeIcons.strokeRoundedSetting07,
           ),
@@ -148,9 +148,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                 ),
               ],
             ),
-          ),
-          const SizedBox(
-            height: 20,
           ),
         ],
       ),

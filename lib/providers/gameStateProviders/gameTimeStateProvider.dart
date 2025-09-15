@@ -11,7 +11,7 @@ class TimeState {
 }
 
 class TimeStateNotifier extends StateNotifier<TimeState> {
-  Stopwatch _stopwatch = Stopwatch();
+  final Stopwatch _stopwatch = Stopwatch();
   Timer? _timer;
   int _savedElapsedTime = 0;
 

@@ -123,6 +123,8 @@ class LayoutScaffold extends ConsumerWidget {
     final textColor =
         isLightTheme ? LColor.textSecondary : TColors.textSecondary;
 
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       body: navigationShell,
       bottomNavigationBar: Theme(
@@ -132,59 +134,56 @@ class LayoutScaffold extends ConsumerWidget {
         child: Container(
           decoration: BoxDecoration(
             color: textColor,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(24),
-              topRight: Radius.circular(24),
-            ),
+            // borderRadius: const BorderRadius.only(
+            //   topLeft: Radius.circular(24),
+            //   topRight: Radius.circular(24),
+            // ),
           ),
           child: Padding(
             padding: const EdgeInsets.only(
               top: 2,
             ),
-            child: ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(25),
-                topRight: Radius.circular(25),
+            child: NavigationBarTheme(
+              data: NavigationBarThemeData(
+                backgroundColor: bottomNavBarColor, // Use bottomNavBarColor
+                indicatorColor: Colors.transparent,
+                iconTheme: WidgetStatePropertyAll(
+                  IconThemeData(
+                    color: iconColor, // Use iconColor
+                    size: 24,
+                  ),
+                ),
+                height: MediaQuery.of(context).size.height * 0.08,
               ),
-              child: NavigationBarTheme(
-                data: NavigationBarThemeData(
-                  backgroundColor: bottomNavBarColor, // Use bottomNavBarColor
-                  indicatorColor: Colors.transparent,
-                  iconTheme: WidgetStatePropertyAll(
-                    IconThemeData(
-                      color: iconColor, // Use iconColor
-                      size: 30,
-                    ),
+              child: NavigationBar(
+
+                labelBehavior:
+                    // NavigationDestinationLabelBehavior.alwaysHide,
+                    NavigationDestinationLabelBehavior.onlyShowSelected,
+                labelTextStyle: WidgetStatePropertyAll(
+
+                  TextStyle(
+                    fontSize: screenWidth * 0.030,
+                    fontWeight: FontWeight.bold,
+                    color: selectedIconColor, // Use selectedIconColor
                   ),
-                  height: MediaQuery.of(context).size.height * 0.08,
                 ),
-                child: NavigationBar(
-                  labelBehavior:
-                      NavigationDestinationLabelBehavior.onlyShowSelected,
-                  labelTextStyle: WidgetStatePropertyAll(
-                    TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: selectedIconColor, // Use selectedIconColor
-                    ),
-                  ),
-                  selectedIndex: navigationShell.currentIndex,
-                  onDestinationSelected: navigationShell.goBranch,
-                  destinations: destinations
-                      .map((destination) => NavigationDestination(
-                            icon: Icon(
-                              destination.icon,
-                              color:
-                                  textColor, // Use textColor for unselected icons
-                            ),
-                            label: destination.label,
-                            selectedIcon: Icon(
-                              destination.selectedIcon,
-                              color: selectedIconColor, // Use selectedIconColor
-                            ),
-                          ))
-                      .toList(),
-                ),
+                selectedIndex: navigationShell.currentIndex,
+                onDestinationSelected: navigationShell.goBranch,
+                destinations: destinations
+                    .map((destination) => NavigationDestination(
+                          icon: Icon(
+                            destination.icon,
+                            color:
+                                textColor, // Use textColor for unselected icons
+                          ),
+                          label: destination.label,
+                          selectedIcon: Icon(
+                            destination.selectedIcon,
+                            color: selectedIconColor, // Use selectedIconColor
+                          ),
+                        ))
+                    .toList(),
               ),
             ),
           ),

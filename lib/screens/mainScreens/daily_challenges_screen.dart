@@ -574,28 +574,28 @@ class _DailyChallengesState extends ConsumerState<DailyChallenges> {
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              decoration: BoxDecoration(
-                color: highlightColor, // Use highlightColor dynamically
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text(
-                  "Daily Progress",
-                  textAlign: TextAlign.center,
-                  style: textTheme.bodyLarge!.copyWith(
-                    fontSize: 18,
-                    letterSpacing: 1.5,
-                    color: textColor, // Use textColor dynamically
-                  ),
-                ),
-              ),
-            ),
-          ),
+          // Padding(
+          //   padding: const EdgeInsets.symmetric(horizontal: 16),
+          //   child: Container(
+          //     width: MediaQuery.of(context).size.width,
+          //     decoration: BoxDecoration(
+          //       color: highlightColor, // Use highlightColor dynamically
+          //       borderRadius: BorderRadius.circular(10),
+          //     ),
+          //     child: Padding(
+          //       padding: const EdgeInsets.all(16.0),
+          //       child: Text(
+          //         "Daily Progress",
+          //         textAlign: TextAlign.center,
+          //         style: textTheme.bodyLarge!.copyWith(
+          //           fontSize: 18,
+          //           letterSpacing: 1.5,
+          //           color: textColor, // Use textColor dynamically
+          //         ),
+          //       ),
+          //     ),
+          //   ),
+          // ),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
@@ -629,39 +629,87 @@ class _DailyChallengesState extends ConsumerState<DailyChallenges> {
                   beforeLineStyle: LineStyle(
                     color: isCompleted
                         ? Colors.green
-                        : progressColor, // Use secondaryTextColor dynamically
-                    thickness: 10,
+                        : progressColor.withOpacity(0.5),
+                    thickness: 6, // thinner line for a sleeker look
                   ),
                   afterLineStyle: LineStyle(
                     color: isCompleted
                         ? Colors.green
-                        : progressColor, // Use secondaryTextColor dynamically
-                    thickness: 10,
+                        : progressColor.withOpacity(0.5),
+                    thickness: 6,
                   ),
                   indicatorStyle: IndicatorStyle(
-                    height: 50,
-                    width: 20,
-                    color: isCompleted
-                        ? Colors.green
-                        : progressColor, // Use textColor dynamically
+                    width: 24,
+                    height: 24,
+                    padding: EdgeInsets.all(4),
+                    color: isCompleted ? Colors.green : Colors.white,
                     iconStyle: IconStyle(
-                      fontSize: 25,
-                      iconData: Icons.check,
-                      color: isCompleted
-                          ? textColor // Use textColor dynamically
-                          : progressIconColor, // Use secondaryTextColor dynamically
-                    ),
-                  ),
-                  startChild: Text(
-                    'Day ${index + 1}',
-                    style: textTheme.bodyLarge!.copyWith(
-                      fontSize: 18,
+                      iconData: isCompleted
+                          ? Icons.check_circle
+                          : Icons.radio_button_unchecked,
                       color: isCompleted
                           ? Colors.green
-                          : textColor, // Use textColor dynamically
+                          : progressIconColor.withOpacity(0.7),
+                      fontSize: 20,
+                    ),
+                  ),
+                  startChild: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text(
+                      'Day ${index + 1}',
+                      style: textTheme.bodyLarge!.copyWith(
+                        fontSize: 16,
+                        fontWeight:
+                            isCompleted ? FontWeight.bold : FontWeight.w500,
+                        color: isCompleted
+                            ? Colors.green
+                            : textColor.withOpacity(0.8),
+                      ),
                     ),
                   ),
                 );
+
+                // TimelineTile(
+                //   axis: TimelineAxis.horizontal,
+                //   alignment: TimelineAlign.center,
+                //   isFirst: index == 0,
+                //   isLast: index == daysInMonth - 1,
+                //   beforeLineStyle: LineStyle(
+                //     color: isCompleted
+                //         ? Colors.green
+                //         : progressColor, // Use secondaryTextColor dynamically
+                //     thickness: 10,
+                //   ),
+                //   afterLineStyle: LineStyle(
+                //     color: isCompleted
+                //         ? Colors.green
+                //         : progressColor, // Use secondaryTextColor dynamically
+                //     thickness: 10,
+                //   ),
+                //   indicatorStyle: IndicatorStyle(
+                //     height: 50,
+                //     width: 20,
+                //     color: isCompleted
+                //         ? Colors.green
+                //         : progressColor, // Use textColor dynamically
+                //     iconStyle: IconStyle(
+                //       fontSize: 25,
+                //       iconData: Icons.check,
+                //       color: isCompleted
+                //           ? textColor // Use textColor dynamically
+                //           : progressIconColor, // Use secondaryTextColor dynamically
+                //     ),
+                //   ),
+                //   startChild: Text(
+                //     'Day ${index + 1}',
+                //     style: textTheme.bodyLarge!.copyWith(
+                //       fontSize: 18,
+                //       color: isCompleted
+                //           ? Colors.green
+                //           : textColor, // Use textColor dynamically
+                //     ),
+                //   ),
+                // );
               },
             ),
           ),

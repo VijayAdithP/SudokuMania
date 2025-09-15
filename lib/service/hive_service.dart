@@ -1,6 +1,5 @@
 import 'dart:developer';
 
-import 'package:hive_ce/hive.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:sudokumania/models/dailyChallenges%20Models/daily_challenge_progress.dart';
@@ -222,5 +221,6 @@ class HiveService {
 
   static Future<ThemePreference?> loadTheme() async {
     await Hive.openBox<ThemePreference>('themeBox');
+    return null;
   }
 }

@@ -36,7 +36,7 @@ class GameProgress {
     this.isCompleted = false,
     required this.lastPlayed,
     List<List<bool>>? invalidCells,
-  }) : this.invalidCells =
+  }) : invalidCells =
             invalidCells ?? List.generate(9, (_) => List.filled(9, false));
 
   /// Creates a copy with updated values

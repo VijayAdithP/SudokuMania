@@ -1113,22 +1113,100 @@ class _LeaderboardPageState extends ConsumerState<LeaderboardPage>
     );
   }
 
+  // Widget _buildListPlayer(Map<String, dynamic> player, int rank) {
+  //   final themePreference = ref.watch(themeProvider);
+  //   final isLightTheme = themePreference == ThemePreference.light;
+
+  //   return Padding(
+  //     padding: const EdgeInsets.symmetric(vertical: 16),
+  //     child: Container(
+  //       decoration: BoxDecoration(
+  //         border: Border.all(
+  //           width: 3,
+  //           color: isLightTheme
+  //               ? LColor.iconSecondary
+  //               : TColors.iconSecondary,
+  //         ),
+  //         // color:
+  //         //     isLightTheme ? LColor.backgroundAccent : TColors.backgroundAccent,
+  //         borderRadius: BorderRadius.circular(8),
+  //       ),
+  //       child: ListTile(
+  //         leading: Text("#$rank"),
+  //         title: Text(player['username']),
+  //         trailing: Text("${player['points']} pts"),
+  //       ),
+  //     ),
+  //   );
+  // }
   Widget _buildListPlayer(Map<String, dynamic> player, int rank) {
     final themePreference = ref.watch(themeProvider);
     final isLightTheme = themePreference == ThemePreference.light;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Container(
         decoration: BoxDecoration(
-          color:
-              isLightTheme ? LColor.backgroundAccent : TColors.backgroundAccent,
-          borderRadius: BorderRadius.circular(10),
+          color: isLightTheme
+              ? LColor.primaryDefault.withValues(alpha: 0.7)
+              : TColors.primaryDefault.withValues(alpha: 0.7),
+          border: Border.all(
+            width: 2,
+            color: isLightTheme
+                ? LColor.iconSecondary.withValues(alpha: 0.5)
+                : TColors.iconSecondary.withValues(alpha: 0.5),
+          ),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 5,
+              offset: Offset(0, 2),
+            ),
+          ],
         ),
         child: ListTile(
-          leading: Text("#$rank"),
-          title: Text(player['username']),
-          trailing: Text("${player['points']} pts"),
+          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          leading: CircleAvatar(
+            radius: 20,
+            backgroundColor: isLightTheme
+                ? LColor.iconSecondary.withValues(alpha: 0.2)
+                : TColors.iconSecondary.withValues(alpha: 0.2),
+            child: Text(
+              "$rank",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color:
+                    isLightTheme ? LColor.iconSecondary : TColors.iconSecondary,
+              ),
+            ),
+          ),
+          title: Text(
+            player['username'],
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 16,
+              color: isLightTheme ? Colors.black87 : Colors.white70,
+            ),
+          ),
+          trailing: Container(
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: isLightTheme
+                  ? LColor.primaryDefault
+                  : TColors.primaryDefault,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              "${player['points']} pts",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: isLightTheme
+                    ? LColor.textDefault
+                    : TColors.textDefault,
+              ),
+            ),
+          ),
         ),
       ),
     );

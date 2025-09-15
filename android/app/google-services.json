@@ -14,11 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "893158041520-f6lu8p142ee0bhbbkerr9r4beq86d6bg.apps.googleusercontent.com",
+          "client_id": "893158041520-sb18uifn1b3g2oipr5l1dehfchni6op3.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.sudokumania",
-            "certificate_hash": "7dfcc33ace4b3987a28cd25257a72b62682ec93f"
+            "certificate_hash": "4657f48abd8b4703263d2c6ebd8903dbb33de551"
           }
         },
         {

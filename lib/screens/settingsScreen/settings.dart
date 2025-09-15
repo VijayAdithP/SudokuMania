@@ -312,101 +312,99 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final textTheme = isLightTheme
         ? TTextThemes.lightTextTheme
         : TTextThemes.defaultTextTheme;
+
+
+    final size = MediaQuery.of(context).size;
+    final screenWidth = size.width;
+    final dialogPadding = screenWidth * 0.05;
+    final spacing = screenWidth * 0.03;
     showDialog(
       context: context,
       builder: (context) {
         return Dialog(
+          backgroundColor:
+              isLightTheme ? LColor.dullBackground : TColors.dullBackground,
           elevation: 1,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          child: Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height / 4.8,
-            decoration: BoxDecoration(
-              color:
-                  isLightTheme ? LColor.dullBackground : TColors.dullBackground,
-              borderRadius: BorderRadius.circular(15.0),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "Reset Data",
-                    style: textTheme.headlineMedium!.copyWith(
+          child: Padding(
+            padding: EdgeInsets.all(dialogPadding),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "Reset Data",
+                  style: textTheme.headlineMedium!.copyWith(
+                    color: isLightTheme
+                        ? LColor.majorHighlight
+                        : TColors.textDefault,
+                  ),
+                ),
+                SizedBox(height: spacing),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Text(
+                    "This clears all the data in you account\nAre you sure to clear all data?",
+                    textAlign: TextAlign.center,
+                    style: textTheme.bodyMedium!.copyWith(),
+                  ),
+                ),
+                SizedBox(height: spacing * 2),
+                GestureDetector(
+                  onTap: () async {
+                    String? userId = await HiveService.getUserId();
+                    String? userName = await HiveService.getUsername();
+                    dev.log(userName.toString());
+
+                    FirebaseService.clearUserStatData(
+                      userId.toString(),
+                      userName.toString(),
+                    );
+                    ref.invalidate(dailyChallengeProvider);
+                    ref.invalidate(maxMistakesProvider);
+                    ref.invalidate(switchStateProvider);
+                    await Hive.initFlutter(); // Re-initialize Hive
+                    await Hive.openBox<GameProgress>(gameBox);
+                    await Hive.openBox<GameProgress>(historyBox);
+                    await Hive.openBox<UserStats>(statsBox);
+                    await Hive.openBox<String>(userBox);
+                    // await Hive.openBox<UserCred>(userCredBox);
+                    await Hive.openBox<UserStats>(offlineSyncBox);
+                    await Hive.openBox<DailyChallengeProgress>(
+                        dailyChallengeBox);
+                    await Hive.deleteBoxFromDisk(gameBox);
+                    await Hive.deleteBoxFromDisk(historyBox);
+                    await Hive.deleteBoxFromDisk(statsBox);
+                    await Hive.deleteBoxFromDisk(offlineSyncBox);
+                    await Hive.deleteBoxFromDisk(dailyChallengeBox);
+
+                    // Hive.deleteFromDisk();
+                    Navigator.pop(context);
+                  },
+                  child: Container(
+                    width: MediaQuery.of(context).size.width,
+                    decoration: BoxDecoration(
                       color: isLightTheme
-                          ? LColor.majorHighlight
-                          : TColors.textDefault,
+                          ? const Color.fromARGB(255, 250, 132, 126)
+                          : const Color.fromARGB(255, 127, 74, 70),
+                      borderRadius: BorderRadius.circular(16),
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text(
-                      "This clears all the data in you account\nAre you sure to clear all data?",
-                      textAlign: TextAlign.center,
-                      style: textTheme.bodyMedium!.copyWith(),
-                    ),
-                  ),
-                  Expanded(
-                    child: const SizedBox(height: 15),
-                  ),
-                  GestureDetector(
-                    onTap: () async {
-                      String? userId = await HiveService.getUserId();
-                      String? userName = await HiveService.getUsername();
-                      dev.log(userName.toString());
-
-                      FirebaseService.clearUserStatData(
-                        userId.toString(),
-                        userName.toString(),
-                      );
-                      ref.invalidate(dailyChallengeProvider);
-                      ref.invalidate(maxMistakesProvider);
-                      ref.invalidate(switchStateProvider);
-                      await Hive.initFlutter(); // Re-initialize Hive
-                      await Hive.openBox<GameProgress>(gameBox);
-                      await Hive.openBox<GameProgress>(historyBox);
-                      await Hive.openBox<UserStats>(statsBox);
-                      await Hive.openBox<String>(userBox);
-                      // await Hive.openBox<UserCred>(userCredBox);
-                      await Hive.openBox<UserStats>(offlineSyncBox);
-                      await Hive.openBox<DailyChallengeProgress>(
-                          dailyChallengeBox);
-                      await Hive.deleteBoxFromDisk(gameBox);
-                      await Hive.deleteBoxFromDisk(historyBox);
-                      await Hive.deleteBoxFromDisk(statsBox);
-                      await Hive.deleteBoxFromDisk(offlineSyncBox);
-                      await Hive.deleteBoxFromDisk(dailyChallengeBox);
-
-                      // Hive.deleteFromDisk();
-                      Navigator.pop(context);
-                    },
-                    child: Container(
-                      width: MediaQuery.of(context).size.width,
-                      decoration: BoxDecoration(
-                        color: isLightTheme
-                            ? const Color.fromARGB(255, 250, 132, 126)
-                            : const Color.fromARGB(255, 127, 74, 70),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Center(
-                          child: Text(
-                            "Reset",
-                            style: textTheme.headlineSmall!.copyWith(
-                              color: Colors.red,
-                              fontSize: 20,
-                            ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Center(
+                        child: Text(
+                          "Reset",
+                          style: textTheme.headlineSmall!.copyWith(
+                            color: Colors.red,
+                            fontSize: 20,
                           ),
                         ),
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         );

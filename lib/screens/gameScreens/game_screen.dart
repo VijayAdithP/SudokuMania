@@ -952,6 +952,14 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage>
     final maxMistakes = ref.read(maxMistakesProvider);
     final gameSource = ref.read(gameSourceProvider);
     final geminiHint = ref.watch(hintSheetBooleanProvider);
+
+    final size = MediaQuery.of(context).size;
+    final screenWidth = size.width;
+    final screenHeight = size.height;
+
+    final itemSize = screenWidth * 0.15;
+    final spacing = screenWidth * 0.03;
+
     return PopScope(
       canPop: false,
       child: Scaffold(
@@ -1016,7 +1024,7 @@ class _SudokuGamePageState extends ConsumerState<SudokuGamePage>
         body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            spacing: 30,
+            spacing: spacing,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -9,7 +9,6 @@ import 'package:sudokumania/screens/settingsScreen/max_mistakes_screen.dart';
 import 'package:sudokumania/screens/settingsScreen/theme_selection.dart';
 import '../../screens/const_test.dart';
 import '../../screens/mainScreens/leaderboard.dart';
-import '../../screens/history.dart';
 import '../../screens/mainScreens/home_screen.dart';
 import '../../screens/settingsScreen/settings.dart';
 import '../../screens/mainScreens/statistics.dart';
