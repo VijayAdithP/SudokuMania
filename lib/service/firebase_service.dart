@@ -82,7 +82,7 @@ class FirebaseService {
         return (snapshot.data() as Map<String, dynamic>)['username'];
       }
     } catch (e) {
-      log("❌ Error fetching username: $e");
+      log("Error fetching username: $e");
     }
     return null;
   }
@@ -160,7 +160,7 @@ class FirebaseService {
     return [];
   }
 
-  /// ✅ Fetch user stats from Firebase efficiently
+  // Fetch user stats from Firebase efficiently
   static Future<UserStats?> fetchUserStats(String userId) async {
     try {
       DocumentSnapshot snapshot =
@@ -204,7 +204,7 @@ class FirebaseService {
         );
       }
     } catch (e) {
-      log("❌ Error fetching user stats: $e");
+      log("Error fetching user stats: $e");
     }
     return null;
   }

@@ -629,7 +629,7 @@ class _DailyChallengesState extends ConsumerState<DailyChallenges> {
                   beforeLineStyle: LineStyle(
                     color: isCompleted
                         ? Colors.green
-                        : progressColor.withOpacity(0.5),
+                        : progressColor.withValues(alpha: 0.5),
                     thickness: 6, // thinner line for a sleeker look
                   ),
                   afterLineStyle: LineStyle(
@@ -649,7 +649,7 @@ class _DailyChallengesState extends ConsumerState<DailyChallenges> {
                           : Icons.radio_button_unchecked,
                       color: isCompleted
                           ? Colors.green
-                          : progressIconColor.withOpacity(0.7),
+                          : progressIconColor.withValues(alpha: 0.7),
                       fontSize: 20,
                     ),
                   ),
@@ -663,7 +663,7 @@ class _DailyChallengesState extends ConsumerState<DailyChallenges> {
                             isCompleted ? FontWeight.bold : FontWeight.w500,
                         color: isCompleted
                             ? Colors.green
-                            : textColor.withOpacity(0.8),
+                            : textColor.withValues(alpha: 0.8),
                       ),
                     ),
                   ),
